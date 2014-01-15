@@ -1,0 +1,11 @@
+year : NaN
+stormnumber : NaN
+stormname : NaN
+advisory : NaN
+ADCIRCgrid : NaN
+Model : NaN
+instance : NaN
+RunStartTime : 0 
+RunEndTime : 0
+InitialHotStartTime : 0
+ColdStartTime : 0
