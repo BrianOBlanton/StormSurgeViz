@@ -10,6 +10,7 @@ ThreddsList={
             'http://thredds.crc.nd.edu/thredds'
             'http://coastalmodeldev.data.noaa.gov/thredds'
             };
+        
 InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/ASGS/InstanceDefaults.m';
 
 %if ~exist('varargin','var')
@@ -34,7 +35,7 @@ LocalTimeOffset=0;
 
 TempDataLocation=[HOME '/TempData']; 
 VariablesTable='Reduced';    % or 'Full'
-Mode='Network';              % or 'Local', 'Network' by default
+Mode='Network';              % or 'Local', 'Url', 'Network' by default
 LocalDirectory='./';
 
 Units='Feet';          % 'Metric' | 'Meters' | 'English' | 'Feet'
@@ -254,38 +255,41 @@ else
     cpcom='copy';
 end
 
-if strcmp(Mode,'Local')
+switch Mode
     
-    fprintf('* Mode is Local.\n')
-    fprintf('* Local Mode not yet fully supported. Best of Luck... \n')
-    
-    [status,result]=system([cpcom ' private/run.properties.fake ' TempDataLocation '/run.properties']);
-    DefaultBoundingBox=NaN;
-    
-else
-    Mode='Network';
-    fprintf('* Mode is Network.\n')
-
-    % get InstanceDefaults.m file from thredds server
-    try
-        fprintf('* Retrieving remote InstanceDefaults.m file ...\n')
-        urlwrite(InstanceDefaultsFileLocation,'temp.m');
-        if exist('InstanceDefaults.m','file')
-            [status,result]=system([mvcom ' InstanceDefaults.m InstanceDefaults.m.backup']);
-        end
-        [status,result]=system([mvcom ' temp.m InstanceDefaults.m']);
-    catch ME1
-        fprintf('** Failed to get InstanceDefaults.m.  Looking for previous version ...\n')
+    case {'Local','Url'}
+        
+        fprintf('* Mode is Local/Url.\n')
+        fprintf('* Local/Url Mode not yet fully supported. Best of Luck... \n')
+        
+        [status,result]=system([cpcom ' private/run.properties.fake ' TempDataLocation '/run.properties']);
+        DefaultBoundingBox=NaN;
+        
+        
+    otherwise
+        
+        Mode='Network';
+        fprintf('* Mode is Network.\n')
+        
+        % get InstanceDefaults.m file from thredds server
         try
+            fprintf('* Retrieving remote InstanceDefaults.m file ...\n')
+            urlwrite(InstanceDefaultsFileLocation,'temp.m');
             if exist('InstanceDefaults.m','file')
-                fprintf('* Found it.\n')
+                [status,result]=system([mvcom ' InstanceDefaults.m InstanceDefaults.m.backup']);
             end
-        catch ME2
-            error('\nNo local InstanceDefaults.m found. This is Terminal.\n')
+            [status,result]=system([mvcom ' temp.m InstanceDefaults.m']);
+        catch ME1
+            fprintf('** Failed to get InstanceDefaults.m.  Looking for previous version ...\n')
+            try
+                if exist('InstanceDefaults.m','file')
+                    fprintf('* Found it.\n')
+                end
+            catch ME2
+                error('\nNo local InstanceDefaults.m found. This is Terminal.\n')
+            end
         end
-    end
-    InstanceDefaults;
-
+        InstanceDefaults;
 end
 
 if exist('MyAdcircViz_Init.m','file')

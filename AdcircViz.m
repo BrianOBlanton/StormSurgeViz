@@ -97,7 +97,7 @@ function varargout=AdcircViz(varargin)
 
 if nargin==1
     if strcmp(varargin{1},'help')
-        disp('Call as: close all; AdcircViz(''Instance'',''gomex'',''Units'',''feet'')')
+        fprintf('Call as: close all; AdcircViz(''Instance'',''gomex'',''Units'',''feet'')\n')
         return
     end
 end
@@ -105,9 +105,16 @@ end
 % check to see if another instance of AdcircViz is already running
 tags=findobj(0,'Tag','MainVizAppFigure');
 if ~isempty(tags)
-    %error('Only one instance of AdcircViz can run simultaneously.')
-    disp('Only one instance of AdcircViz can run simultaneously.')
-    close(tags)
+    str={'Only one instance of AdcircViz can run simultaneously.'
+        'Press Continue to close other AdcircViz instances and start this one, or Cancel to abort the current instance.'};
+    ButtonName=questdlg(str,'Other AdcircViz Instances Found!!!','Continue','Cancel','Cancel');
+    switch ButtonName,
+        case 'Continue'
+            close(tags)
+        otherwise
+            fprintf('Aborting this instance of AdcircViz.\n')
+            return
+    end
 end
 
 % check java heap space size;  needs to be big for grids > ~1M nodes
@@ -140,50 +147,54 @@ AdcircViz_Init;  % this sets defaults and processes vars
 % Grid
 % Instance
 % CatalogName
-
-if strcmpi(Mode,'Network')
-    UrlBase=ThreddsList{end}; %#ok<USENS>
-    
-    %% Test for the catalog existence
-    err=TestForCatalogServer(UrlBase,true,CatalogName);
-    if err
-        error('catalog file could not be found.')
-    end
-    
-    %% Get the catalog
-    %global TheCatalog
-    fprintf('\nGetting Catalog.\n')
-    TheCatalog=GetCatalogFromServer(UrlBase,CatalogName);
-    %catalog=TheCatalog.Catalog;
-    %CatalogHash=TheCatalog.CatalogHash;
-    
-    %% Determine starting URL based on Instance
-    Url=GetUrl2(Storm,Advisory,Grid,Machine,Instance,UrlBase,TheCatalog);
-    Url.UseShapeFiles=UseShapeFiles;
-    Url.Units=Units;
-
-else
-    %% Set up for Local Disk Space
-    UrlBase='file://';
-    Url.ThisInstance='Local';
-    Url.ThisStorm=NaN;
-    Url.ThisAdv=NaN;
-    Url.ThisGrid=NaN;
-    Url.Basin=NaN;
-    Url.StormType='other';
-    Url.ThisStormNumber=NaN;
-    Url.FullDodsC= UrlBase;
-    Url.FullFileServer= UrlBase;
-    Url.Ens={LocalDirectory};
-    Url.CurrentSelection=NaN;
-    Url.Base=UrlBase;
-    Url.UseShapeFiles=UseShapeFiles;
-    Url.Units=Units;
-    
-    TheCatalog.Catalog='Local'; 
-    TheCatalog.CatalogHash=NaN;
-    TheCatalog.CurrentSelection=[];
-    
+switch Mode
+    case 'Network'
+        UrlBase=ThreddsList{1}; %#ok<USENS>
+        
+        %% Test for the catalog existence
+        err=TestForCatalogServer(UrlBase,CatalogName,true);
+        if err
+            error('catalog file could not be found.')
+        end
+        
+        %% Get the catalog
+        %global TheCatalog
+        fprintf('\nGetting Catalog.\n')
+        TheCatalog=GetCatalogFromServer(UrlBase,CatalogName);
+        %catalog=TheCatalog.Catalog;
+        %CatalogHash=TheCatalog.CatalogHash;
+        
+        %% Determine starting URL based on Instance
+        Url=GetUrl2(Storm,Advisory,Grid,Machine,Instance,UrlBase,TheCatalog);
+        Url.UseShapeFiles=UseShapeFiles;
+        Url.Units=Units;
+        
+    case 'Url' 
+        str={'Direct Url file access is not yet supported.'};
+        errordlg(str)
+        return
+    otherwise
+        %% Set up for Local Files
+        UrlBase='file://';
+        Url.ThisInstance='Local';
+        Url.ThisStorm=NaN;
+        Url.ThisAdv=NaN;
+        Url.ThisGrid=NaN;
+        Url.Basin=NaN;
+        Url.StormType='other';
+        Url.ThisStormNumber=NaN;
+        Url.FullDodsC= UrlBase;
+        Url.FullFileServer= UrlBase;
+        Url.Ens={LocalDirectory};
+        Url.CurrentSelection=NaN;
+        Url.Base=UrlBase;
+        Url.UseShapeFiles=UseShapeFiles;
+        Url.Units=Units;
+        
+        TheCatalog.Catalog='Local';
+        TheCatalog.CatalogHash=NaN;
+        TheCatalog.CurrentSelection=[];
+        
 end
 
 %% InitializeUI

@@ -1,4 +1,4 @@
-function err=TestForCatalogServer(UrlBase,verbose,CatalogName)
+function err=TestForCatalogServer(UrlBase,CatalogName,verbose)
 %%  TestForCatalogServer
 %%% TestForCatalogServer
 %%% TestForCatalogServer
