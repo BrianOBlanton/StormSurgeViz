@@ -19,7 +19,7 @@ InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/A
 
 %global Verbose
 
-set(0,'DefaultUICOntrolFontName','Courier')
+set(0,'DefaultUIControlFontName','Courier')
 
 % Default PN/PVs
 Storm=[];
@@ -112,6 +112,14 @@ m2f    =3.2808;
 mps2mph=2.236;
 ElevationFactor=1;
 SpeedFactor=1;
+
+if exist('MyAdcircViz_Init.m','file')
+    if Verbose
+        fprintf('* Found MyAdcircViz_Init ...\n')
+    end
+    MyAdcircViz_Init;
+end
+
 
 fprintf('* Processing Input Parameter/Value Pairs...\n')
 
@@ -292,12 +300,6 @@ switch Mode
         InstanceDefaults;
 end
 
-if exist('MyAdcircViz_Init.m','file')
-    if Verbose
-        fprintf('* Found MyAdcircViz_Init ...\n')
-    end
-    MyAdcircViz_Init;
-end
 
 if ~isempty(BoundingBox),DefaultBoundingBox=BoundingBox;end
 

@@ -2,7 +2,7 @@ function varargout=AdcircViz(varargin)
 %
 % ADCIRCVIZ - Visualization Application for ASGS Forecast Output
 % 
-% Call as: [Handles,Connections,Url]=AdcircViz(P1,V1,P2,V2,...);
+% Call as: [Handles,Url,Connections]=AdcircViz(P1,V1,P2,V2,...);
 %
 % Allowed Parameter/Value pairs (default value listed first):
 %
@@ -623,7 +623,13 @@ function Connections=OpenDataConnections(Url)
     vars=C(1,:)';
     for i=1:n
         for j=2:m
-            com=sprintf('%s{j-1}=''%s'';',vars{i},C{j,i});
+            thisvar=vars{i};
+            switch thisvar
+                case {'VariableUnitsFac.mks','VariableUnitsFac.eng'}
+                    com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i}));
+                otherwise
+                    com=sprintf('%s{j-1}=''%s'';',thisvar,C{j,i});
+            end
             eval(com)
         end
     end
