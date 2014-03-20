@@ -52,6 +52,10 @@ opts=parseargs(opts,varargin{:});
 AdcVizOpts=opts;
 
 
+scc=get(0,'ScreenSize');
+DisplayWidth=scc(3);
+%clear scc;
+
 AdcVizOpts.AppName=blank(fileread('ThisVersion'));
 fprintf('* %s\n',AdcVizOpts.AppName')
 
