@@ -3,6 +3,11 @@
 global Debug
 
 HOME=fileparts(which(mfilename));
+addpath([HOME '/extern'])
+if isempty(which('detbndy'))
+    cd([HOME '/adcirc_util'])
+    adcircinit
+end
 
 ThreddsList={
             'http://opendap.renci.org:1935/thredds'
@@ -45,20 +50,26 @@ if exist('MyAdcircViz_Init.m','file')
     
 end
 
-% now process varargins, whcih will override any parameters set in
-% MyAdcirc_init.m
+% now process varargins, which will override any parameters set in
+% MyAdcirc_Init.m
 opts=parseargs(opts,varargin{:});
 
 AdcVizOpts=opts;
 
+<<<<<<< HEAD
+=======
 
+scc=get(0,'ScreenSize');
+DisplayWidth=scc(3);
+%clear scc;
+
+>>>>>>> FETCH_HEAD
 AdcVizOpts.AppName=blank(fileread('ThisVersion'));
 fprintf('* %s\n',AdcVizOpts.AppName')
 
-AdcVizOpts.HOME = fileparts(which(mfilename));
+AdcVizOpts.HOME = HOME;
 cd(AdcVizOpts.HOME)
 
-addpath([AdcVizOpts.HOME '/extern'])
 
 if isempty(which('detbndy'))
     cd([AdcVizOpts.HOME '/adcirc_util'])

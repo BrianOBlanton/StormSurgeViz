@@ -32,6 +32,7 @@ p.ColorBarLocation={'NorthOutside','SouthOutside','EastOutside','WestOutside','N
 
 % GUI options
 %ScreenTake=100; % percent of screen width to take up
+p.AppWidthPercent=90;
 p.FontOffset=2;
 p.UseGoogleMaps=true;
 p.UseShapeFiles=true;
