@@ -2,7 +2,7 @@ function varargout=AdcircViz(varargin)
 %
 % ADCIRCVIZ - Visualization Application for ASGS Forecast Output
 % 
-% Call as: [Handles,Connections,Url]=AdcircViz(P1,V1,P2,V2,...);
+% Call as: AdcircViz(P1,V1,P2,V2,...)
 %
 % Allowed Parameter/Value pairs (default value listed first):
 %
@@ -53,6 +53,8 @@ function varargout=AdcircViz(varargin)
 % Rick Luettich, Institute of Marine SCiences,    UNC-CH, Rick_Luettich@Unc.Edu
 %
 
+% Call as: [Handles,Url,Connections,Options]=AdcircViz(P1,V1,P2,V2,...);
+
 
 %{list major revisions and bug fixes, latest first, as:
 %  R.SvnRevisionNumner - DD Mmm YYYY - AuthorInitials
@@ -97,7 +99,7 @@ function varargout=AdcircViz(varargin)
 
 if nargin==1
     if strcmp(varargin{1},'help')
-        disp('Call as: close all; AdcircViz(''Instance'',''gomex'',''Units'',''feet'')')
+        fprintf('Call as: close all; AdcircViz(''Instance'',''gomex'',''Units'',''feet'')\n')
         return
     end
 end
@@ -105,9 +107,16 @@ end
 % check to see if another instance of AdcircViz is already running
 tags=findobj(0,'Tag','MainVizAppFigure');
 if ~isempty(tags)
-    %error('Only one instance of AdcircViz can run simultaneously.')
-    disp('Only one instance of AdcircViz can run simultaneously.')
-    close(tags)
+    str={'Only one instance of AdcircViz can run simultaneously.'
+        'Press Continue to close other AdcircViz instances and start this one, or Cancel to abort the current instance.'};
+    ButtonName=questdlg(str,'Other AdcircViz Instances Found!!!','Continue','Cancel','Cancel');
+    switch ButtonName,
+        case 'Continue'
+            close(tags)
+        otherwise
+            fprintf('Aborting this instance of AdcircViz.\n')
+            return
+    end
 end
 
 % check java heap space size;  needs to be big for grids > ~1M nodes
@@ -140,99 +149,105 @@ AdcircViz_Init;  % this sets defaults and processes vars
 % Grid
 % Instance
 % CatalogName
-
-if strcmpi(Mode,'Network')
-    UrlBase=ThreddsList{end}; %#ok<USENS>
-    
-    %% Test for the catalog existence
-    err=TestForCatalogServer(UrlBase,true,CatalogName);
-    if err
-        error('catalog file could not be found.')
-    end
-    
-    %% Get the catalog
-    %global TheCatalog
-    fprintf('\nGetting Catalog.\n')
-    TheCatalog=GetCatalogFromServer(UrlBase,CatalogName);
-    %catalog=TheCatalog.Catalog;
-    %CatalogHash=TheCatalog.CatalogHash;
-    
-    %% Determine starting URL based on Instance
-    Url=GetUrl2(Storm,Advisory,Grid,Machine,Instance,UrlBase,TheCatalog);
-    Url.UseShapeFiles=UseShapeFiles;
-    Url.Units=Units;
-
-else
-    %% Set up for Local Disk Space
-    UrlBase='file://';
-    Url.ThisInstance='Local';
-    Url.ThisStorm=NaN;
-    Url.ThisAdv=NaN;
-    Url.ThisGrid=NaN;
-    Url.Basin=NaN;
-    Url.StormType='other';
-    Url.ThisStormNumber=NaN;
-    Url.FullDodsC= UrlBase;
-    Url.FullFileServer= UrlBase;
-    Url.Ens={LocalDirectory};
-    Url.CurrentSelection=NaN;
-    Url.Base=UrlBase;
-    Url.UseShapeFiles=UseShapeFiles;
-    Url.Units=Units;
-    
-    TheCatalog.Catalog='Local'; 
-    TheCatalog.CatalogHash=NaN;
-    TheCatalog.CurrentSelection=[];
-    
+switch AdcVizOpts.Mode
+    case 'Network'
+        UrlBase=ThreddsList{1}; %#ok<USENS>
+        
+        %% Test for the catalog existence
+        err=TestForCatalogServer(UrlBase,AdcVizOpts.CatalogName,true);
+        if err
+            error('catalog file could not be found.')
+        end
+        
+        %% Get the catalog
+        %global TheCatalog
+        fprintf('\nGetting Catalog.\n')
+        TheCatalog=GetCatalogFromServer(UrlBase,AdcVizOpts.CatalogName);
+        %catalog=TheCatalog.Catalog;
+        %CatalogHash=TheCatalog.CatalogHash;
+        
+        %% Determine starting URL based on Instance
+        Url=GetUrl2(AdcVizOpts.Storm,AdcVizOpts.Advisory,AdcVizOpts.Grid,...
+            AdcVizOpts.Machine,AdcVizOpts.Instance,UrlBase,TheCatalog);
+        Url.UseShapeFiles=AdcVizOpts.UseShapeFiles;
+        Url.Units=AdcVizOpts.Units;
+        
+    case 'Url' 
+        str={'Direct Url file access is not yet supported.'};
+        errordlg(str)
+        return
+    otherwise
+        %% Set up for Local Files
+        UrlBase='file://';
+        Url.ThisInstance='Local';
+        Url.ThisStorm=NaN;
+        Url.ThisAdv=NaN;
+        Url.ThisGrid=NaN;
+        Url.Basin=NaN;
+        Url.StormType='other';
+        Url.ThisStormNumber=NaN;
+        Url.FullDodsC= UrlBase;
+        Url.FullFileServer= UrlBase;
+        Url.Ens={LocalDirectory};
+        Url.CurrentSelection=NaN;
+        Url.Base=UrlBase;
+        Url.UseShapeFiles=UseShapeFiles;
+        Url.Units=Units;
+        
+        TheCatalog.Catalog='Local';
+        TheCatalog.CatalogHash=NaN;
+        TheCatalog.CurrentSelection=[];
+        
 end
 
 %% InitializeUI
-Handles=InitializeUI(FontOffset,AppName,DefaultBoundingBox,...
-    DepthContours,ColorMap,UseGoogleMaps,ForkAxes,HOME,Mode);
+Handles=InitializeUI(AdcVizOpts.FontOffset,AdcVizOpts.AppName,...
+    AdcVizOpts.DefaultBoundingBox,...
+    AdcVizOpts.DepthContours,AdcVizOpts.ColorMap,...
+    AdcVizOpts.UseGoogleMaps,AdcVizOpts.ForkAxes,AdcVizOpts.HOME,...
+    AdcVizOpts.Mode);
 
-    setappdata(Handles.MainFigure,'HOME',HOME);
+    setappdata(Handles.MainFigure,'AdcVizOpts',AdcVizOpts);
     setappdata(Handles.MainFigure,'Catalog',TheCatalog);  
-    setappdata(Handles.MainFigure,'CatalogName',CatalogName);  
     setappdata(Handles.MainFigure,'Url',Url);
     setappdata(Handles.MainFigure,'CurrentSelection',Url.CurrentSelection);
 
-    setappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow',SendDiagnosticsToCommandWindow);
-    setappdata(Handles.MainFigure,'Verbose',Verbose);
-    
-    setappdata(Handles.MainFigure,'ColorIncrement',ColorIncrement);
-    setappdata(Handles.MainFigure,'ColorMap',ColorMap);
-    setappdata(Handles.MainFigure,'NumberOfColors',NumberOfColors);
-    
-    setappdata(Handles.MainFigure,'Units',Units);
-    setappdata(Handles.MainFigure,'UnitsScaleFactorElevation',ElevationFactor);
-    setappdata(Handles.MainFigure,'UnitsScaleFactorSpeed',SpeedFactor);
-    
-    setappdata(Handles.MainFigure,'DefaultBoundingBox',DefaultBoundingBox);
-    setappdata(Handles.MainFigure,'BoundingBox',DefaultBoundingBox);
-    setappdata(Handles.MainFigure,'HasMapToolBox',HasMapToolBox);
-    setappdata(Handles.MainFigure,'UseShapeFiles',UseShapeFiles);
-    setappdata(Handles.MainFigure,'CanOutputShapeFiles',CanOutputShapeFiles);
-    setappdata(Handles.MainFigure,'UseGoogleMaps',UseGoogleMaps);
-    setappdata(Handles.MainFigure,'GoogleMapsApiKey',GoogleMapsApiKey);
-    setappdata(Handles.MainFigure,'LocalTimeOffset',LocalTimeOffset);
     setappdata(Handles.MainFigure,'Instance',Url.ThisInstance);
     setappdata(Handles.MainFigure,'VectorOptions',VectorOptions);
     setappdata(Handles.MainFigure,'DateStringFormatInput',DateStringFormatInput);
     setappdata(Handles.MainFigure,'DateStringFormatOutput',DateStringFormatOutput);
-    setappdata(Handles.MainFigure,'DisableContouring',DisableContouring);       
-    setappdata(Handles.MainFigure,'VariablesTable',VariablesTable);       
-    setappdata(Handles.MainFigure,'TempDataLocation',TempDataLocation);       
+    setappdata(Handles.MainFigure,'TempDataLocation',TempDataLocation); 
+    
+%    setappdata(Handles.MainFigure,'HOME',HOME);
+%    setappdata(Handles.MainFigure,'CatalogName',CatalogName);  
+%    setappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow',SendDiagnosticsToCommandWindow);
+%    setappdata(Handles.MainFigure,'Verbose',Verbose);
+    
+%    setappdata(Handles.MainFigure,'ColorIncrement',ColorIncrement);
+%    setappdata(Handles.MainFigure,'ColorMap',ColorMap);
+%    setappdata(Handles.MainFigure,'ColorBarLocation',ColorBarLocation);
+%    setappdata(Handles.MainFigure,'NumberOfColors',NumberOfColors);
+%    setappdata(Handles.MainFigure,'Units',Units);
+%    setappdata(Handles.MainFigure,'DefaultBoundingBox',DefaultBoundingBox);
+%    setappdata(Handles.MainFigure,'BoundingBox',DefaultBoundingBox);
+%    setappdata(Handles.MainFigure,'HasMapToolBox',HasMapToolBox);
+%    setappdata(Handles.MainFigure,'UseShapeFiles',UseShapeFiles);
+%    setappdata(Handles.MainFigure,'CanOutputShapeFiles',CanOutputShapeFiles);
+%    setappdata(Handles.MainFigure,'UseGoogleMaps',UseGoogleMaps);
+%    setappdata(Handles.MainFigure,'GoogleMapsApiKey',GoogleMapsApiKey);
+%    setappdata(Handles.MainFigure,'LocalTimeOffset',LocalTimeOffset);
+%    setappdata(Handles.MainFigure,'DisableContouring',DisableContouring);       
+%    setappdata(Handles.MainFigure,'VariablesTable',VariablesTable);       
 
-    % eventually need to put Handles in appdata!!!
     set(Handles.MainFigure,'UserData',Handles);
     
 % temporary fix for Jesse Feyen's contmex5 dll problem
-if DisableContouring
+if AdcVizOpts.DisableContouring
     set(Handles.DepthContours,'Enable','off','String','Disabled: no contmex5 binary')
     set(Handles.HydrographButton,'Enable','off','String','Hydrographs Disabled: no findelem binary')
 end
     
-if UITest, return,end   
+if AdcVizOpts.UITest, return,end   
 
 global EnableRendererKludge
 EnableRendererKludge=false;
@@ -240,9 +255,10 @@ EnableRendererKludge=false;
 CurrentPointer=get(Handles.MainFigure,'Pointer');
 set(Handles.MainFigure,'Pointer','watch');
 
+
 %% OpenDataConnections 
 global Connections
-if strcmp(Mode,'Local')
+if any(strcmpi(AdcVizOpts.Mode,{'Local','Url'}))
     set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
     Connections=OpenDataConnectionsLocal(Url);
 else
@@ -299,15 +315,15 @@ RendererKludge;  %% dont ask...
 temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
 if ~isreal(temp),temp=abs(temp);end
 [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
-Max=min([MaxTemp ColorMax]);
-Min=max([MinTemp ColorMin]);
-SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
+Max=min([MaxTemp AdcVizOpts.ColorMax]);
+Min=max([MinTemp AdcVizOpts.ColorMin]);
+SetColors(Handles,Min,Max,AdcVizOpts.NumberOfColors,AdcVizOpts.ColorIncrement);
 
 SetUIStatusMessage('* Done.\n\n');
 
 %% Finalize Initializations
-set(Handles.UnitsString,'String',Units);
-set(Handles.TimeOffsetString,'String',LocalTimeOffset)
+set(Handles.UnitsString,'String',AdcVizOpts.Units);
+set(Handles.TimeOffsetString,'String',AdcVizOpts.LocalTimeOffset)
 set(Handles.MainFigure,'UserData',Handles);
 
 UpdateUI(Handles.MainFigure);
@@ -324,11 +340,11 @@ axes(Handles.MainAxes);
 % Last thing
 % Set a timer to check for catalog updates
 if exist('timer','file')
-    if isfinite(PollInterval)
+    if isfinite(AdcVizOpts.PollInterval)
         SetUIStatusMessage('Setting Timer Function to check for updates.\n')
         Handles.Timer=timer('ExecutionMode','fixedRate','TimerFcn',@CheckForUpdateFromTimer,...
-            'Period',PollInterval,...
-            'StartDelay',PollInterval,...
+            'Period',AdcVizOpts.PollInterval,...
+            'StartDelay',AdcVizOpts.PollInterval,...
             'Name','AdcircVizTimer');
         start(Handles.Timer);
         set(Handles.MainFigure,'UserData',Handles);
@@ -341,6 +357,7 @@ set(Handles.MainFigure,'Pointer',CurrentPointer);
 if nargout>0, varargout{1}=Handles; end
 if nargout>1, varargout{2}=Url; end
 if nargout>2, varargout{3}=Connections; end
+if nargout>3, varargout{4}=AdcVizOpts; end
 
 % ff=figure('Position',[31 82 816 902],'Color','w','Toolbar','none','MenuBar','none');
 % axes('color','w','Position',[0 0 1 1])
@@ -396,13 +413,17 @@ end
 %%% CheckForUpdate
 function [update,CatalogHash]=CheckForUpdate(Url,TheCatalog)
 
+    global Debug 
+    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    
     SetUIStatusMessage('Checking for Updates...')
 
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
 
+    AdcVizOpts=getappdata(Handles.MainFigure,'AdcVizOpts');
     OldCatalogHash=TheCatalog.CatalogHash;
-    OldCatalogName=getappdata(Handles.MainFigure,'CatalogName');
+    OldCatalogName=AdcVizOpts.CatalogName;
 
     % Get the current catalog...
     tempCatalog=GetCatalogFromServer(Url.Base,OldCatalogName);
@@ -418,9 +439,9 @@ function [update,CatalogHash]=CheckForUpdate(Url,TheCatalog)
     
 end
 
-%%  DisplayCatalog
-%%% DisplayCatalog
-%%% DisplayCatalog
+%%  BrowseFileSystem
+%%% BrowseFileSystem
+%%% BrowseFileSystem
 function BrowseFileSystem(~,~)
     global Debug 
     if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
@@ -438,10 +459,9 @@ function BrowseFileSystem(~,~)
     if directoryname==0 % cancel was pressed
        return
     end
-    disp('here')
-
-       set(Handles.ServerInfoString,'String',['file://' directoryname]);
-        ClearUI(FigThatCalledThisFxn);
+    
+    set(Handles.ServerInfoString,'String',['file://' directoryname]);
+    ClearUI(FigThatCalledThisFxn);
     
 end
 
@@ -594,6 +614,8 @@ function Connections=OpenDataConnections(Url)
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
     
+    AdcVizOpts=getappdata(fig,'AdcVizOpts');
+
     FileNetcdfVariableNames={}; 
     FilesToOpen={};              
     VariableDisplayNames={};     
@@ -603,16 +625,25 @@ function Connections=OpenDataConnections(Url)
     VariableUnitsFac={};
 
     % read the variable list, which is actually an excel spreadsheet
-    % to make it easier to edit.  The first row are the variable names
+    % to make it easier to edit.  The first row is the variable names
     % in this function, declared above as empty cells.
     ff='AdcircVizVariableList.xls';
-    sheet=getappdata(fig,'VariablesTable');
+    %sheet=getappdata(fig,'VariablesTable');
+    sheet=AdcVizOpts.VariablesTable;
     [~,~,C] = xlsread(ff,sheet);
     [m,n]=size(C);
     vars=C(1,:)';
     for i=1:n
         for j=2:m
-            com=sprintf('%s{j-1}=''%s'';',vars{i},C{j,i});
+            thisvar=vars{i};
+            %disp(C{j,i})
+            switch thisvar
+                case {'VariableUnitsFac.mks','VariableUnitsFac.eng'}
+                    com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i}));
+                otherwise
+                    com=sprintf('%s{j-1}=''%s'';',thisvar,C{j,i});
+            end
+            %disp(com)
             eval(com)
         end
     end
@@ -1255,12 +1286,13 @@ function Handles=MakeTheAxesMap(Handles)
 
     axes(Handles.MainAxes);
     
-    FontSizes=getappdata(Handles.MainFigure,'FontSizes');
-    HOME=getappdata(Handles.MainFigure,'HOME');
-    DisableContouring=getappdata(Handles.MainFigure,'DisableContouring');
+    FontSizes=getappdata(Handles.MainFigure,'FontSizes');    
+    AdcVizOpts=getappdata(Handles.MainFigure,'AdcVizOpts');              
+        ColorBarLocation=AdcVizOpts.ColorBarLocation;
+        HOME=AdcVizOpts.HOME;
+        DisableContouring=AdcVizOpts.DisableContouring;
 
-%    axx=getappdata(Handles.MainFigure,'DefaultBoundingBox');
-    axx=getappdata(Handles.MainFigure,'BoundingBox');
+    axx=AdcVizOpts.BoundingBox;
     if isnan(axx),axx=[min(TheGrid.x) max(TheGrid.x) min(TheGrid.y) max(TheGrid.y)];end
     cla
     
@@ -1302,7 +1334,7 @@ function Handles=MakeTheAxesMap(Handles)
     end
     
     % add colorbar
-    Handles.ColorBar=colorbar;
+    Handles.ColorBar=colorbar('Location',ColorBarLocation);
     set(Handles.ColorBar,'FontSize',FontSizes(2))
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
     set(Handles.AxisLimits,'String',num2str(axx))
@@ -3181,7 +3213,7 @@ function Handles=SetVariableControls(varargin)
     for i=1:length(Handles.ScalarVarButtonHandles)
         if isempty(Connections.members{1,Scalars(i)}.NcTBHandle)
             set(Handles.ScalarVarButtonHandles(i),'Value',0)
-            set(Handles.ScalarVarButtonHandles(i),'Value','off')
+            %set(Handles.ScalarVarButtonHandles(i),'Value','off')
         end
     end
     for i=1:length(Handles.ScalarVarButtonHandles)
@@ -3884,7 +3916,7 @@ function ShowMinimum(hObj,~)
         line(TheGrid.x(idx),TheGrid.y(idx),1,'Marker','x','Color',[0 1 1],...
             'MarkerSize',20,'Tag','MinMarker','Clipping','on');
         
-        SetUIStatusMessage(sprintf('Minimum in view = %.2f',Min))
+        SetUIStatusMessage(sprintf('Minimum in view = %.2f\n',Min))
         
         set(hObj,'String','Hide Minimum')
     else
@@ -3917,7 +3949,7 @@ function ShowMaximum(hObj,~)
         line(TheGrid.x(idx),TheGrid.y(idx),1,'Marker','x','Color',[1 1 0],...
             'MarkerSize',20,'Tag','MaxMarker','Clipping','on');
         
-        SetUIStatusMessage(sprintf('Maximum in view = %.2f',Max))
+        SetUIStatusMessage(sprintf('Maximum in view = %.2f\n',Max))
 
         set(hObj,'String','Hide Maximum')
     else

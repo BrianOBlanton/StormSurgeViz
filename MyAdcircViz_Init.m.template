@@ -1,0 +1,28 @@
+function p=MyAdcircViz_Init
+
+%% Catalog Parameters
+%p.DefaultBoundingBox=[-100 -58 7 48];
+%p.Instance='nodcorps';
+%p.Storm=[];
+%p.Advisory=[];
+%p.Grid=[];
+
+%% Solution Display Parameters
+%p.LocalTimeOffset=4;  % hours offset for date/time display; default is 0 for UTC
+%p.Units='Feet';       % default is meters
+%p.NumberOfColors=16;  % default is 32 colors
+%p.ColorMax=32;        % default is NaN for max of field
+%p.ColorMin=0;         % default is NaN for min of field
+%p.ColorMap='jet';     % default is noaa_cmap
+%p.DepthContours='10 20 30 40 50'  % depths must be enclused in single quotes
+
+%% GUI Parameters
+%p.DisableContouring=true;  % default is false
+%p.FontOffset=4;            % default is 2
+%p.PollInterval=Inf;        % disable polling by setting this to Inf; default is 900 secs 
+%p.UseGoogleMaps=false;     % default is true
+%p.UseShapeFiles=false;     % default is true
+%p.GoogleMapsApiKey='AIzagyBD6HgJIZcTiGvB44BSu2PZ63IpzY_KYQR';  % default is empty ''
+%p.Verbose=true;            % default is false
+%p.ForkAxes=true;           % default is false
+
