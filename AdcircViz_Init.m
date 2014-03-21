@@ -65,7 +65,6 @@ fprintf('* %s\n',AdcVizOpts.AppName')
 AdcVizOpts.HOME = HOME;
 cd(AdcVizOpts.HOME)
 
-
 if isempty(which('detbndy'))
     cd([AdcVizOpts.HOME '/adcirc_util'])
     adcircinit
@@ -76,7 +75,6 @@ if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
     setup_nctoolbox;
 end
 cd(AdcVizOpts.HOME)
-
 
 AdcVizOpts.HasMapToolBox=false;
 if ~isempty(which('almanac'))

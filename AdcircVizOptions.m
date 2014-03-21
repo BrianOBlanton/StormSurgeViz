@@ -27,7 +27,7 @@ p.NumberOfColors=32;
 p.ColorMax=NaN;
 p.ColorMin=NaN;
 p.ColorMap='noaa_cmap';
-p.ColorBarLocation={'NorthOutside','SouthOutside','EastOutside','WestOutside','North','South','East','West'};
+p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
 
 
 % GUI options

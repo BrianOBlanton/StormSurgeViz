@@ -127,7 +127,7 @@ if ~usejava('jvm')
     return
 end
 
-if java.lang.Runtime.getRuntime.maxMemory/1e9  < 1
+if java.lang.Runtime.getRuntime.maxMemory/1e9  < 0.5
     str={'Java Heap Space is < 1Gb.  For big model grids, this may '
         'be too small.  Increase Java Heap Memory through the MATLAB '
         'preferences.  This message is non-fatal, but if strange '
@@ -201,45 +201,19 @@ switch AdcVizOpts.Mode
 end
 
 %% InitializeUI
-Handles=InitializeUI(AdcVizOpts.FontOffset,AdcVizOpts.AppName,...
-    AdcVizOpts.DefaultBoundingBox,...
-    AdcVizOpts.DepthContours,AdcVizOpts.ColorMap,...
-    AdcVizOpts.UseGoogleMaps,AdcVizOpts.ForkAxes,AdcVizOpts.HOME,...
-    AdcVizOpts.Mode);
+Handles=InitializeUI(AdcVizOpts);
 
-    setappdata(Handles.MainFigure,'AdcVizOpts',AdcVizOpts);
-    setappdata(Handles.MainFigure,'Catalog',TheCatalog);  
-    setappdata(Handles.MainFigure,'Url',Url);
-    setappdata(Handles.MainFigure,'CurrentSelection',Url.CurrentSelection);
+setappdata(Handles.MainFigure,'AdcVizOpts',AdcVizOpts);
+setappdata(Handles.MainFigure,'Catalog',TheCatalog);
+setappdata(Handles.MainFigure,'Url',Url);
+setappdata(Handles.MainFigure,'CurrentSelection',Url.CurrentSelection);
+setappdata(Handles.MainFigure,'Instance',Url.ThisInstance);
+setappdata(Handles.MainFigure,'VectorOptions',VectorOptions);
+setappdata(Handles.MainFigure,'DateStringFormatInput',DateStringFormatInput);
+setappdata(Handles.MainFigure,'DateStringFormatOutput',DateStringFormatOutput);
+setappdata(Handles.MainFigure,'TempDataLocation',TempDataLocation);
 
-    setappdata(Handles.MainFigure,'Instance',Url.ThisInstance);
-    setappdata(Handles.MainFigure,'VectorOptions',VectorOptions);
-    setappdata(Handles.MainFigure,'DateStringFormatInput',DateStringFormatInput);
-    setappdata(Handles.MainFigure,'DateStringFormatOutput',DateStringFormatOutput);
-    setappdata(Handles.MainFigure,'TempDataLocation',TempDataLocation); 
-    
-%    setappdata(Handles.MainFigure,'HOME',HOME);
-%    setappdata(Handles.MainFigure,'CatalogName',CatalogName);  
-%    setappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow',SendDiagnosticsToCommandWindow);
-%    setappdata(Handles.MainFigure,'Verbose',Verbose);
-    
-%    setappdata(Handles.MainFigure,'ColorIncrement',ColorIncrement);
-%    setappdata(Handles.MainFigure,'ColorMap',ColorMap);
-%    setappdata(Handles.MainFigure,'ColorBarLocation',ColorBarLocation);
-%    setappdata(Handles.MainFigure,'NumberOfColors',NumberOfColors);
-%    setappdata(Handles.MainFigure,'Units',Units);
-%    setappdata(Handles.MainFigure,'DefaultBoundingBox',DefaultBoundingBox);
-%    setappdata(Handles.MainFigure,'BoundingBox',DefaultBoundingBox);
-%    setappdata(Handles.MainFigure,'HasMapToolBox',HasMapToolBox);
-%    setappdata(Handles.MainFigure,'UseShapeFiles',UseShapeFiles);
-%    setappdata(Handles.MainFigure,'CanOutputShapeFiles',CanOutputShapeFiles);
-%    setappdata(Handles.MainFigure,'UseGoogleMaps',UseGoogleMaps);
-%    setappdata(Handles.MainFigure,'GoogleMapsApiKey',GoogleMapsApiKey);
-%    setappdata(Handles.MainFigure,'LocalTimeOffset',LocalTimeOffset);
-%    setappdata(Handles.MainFigure,'DisableContouring',DisableContouring);       
-%    setappdata(Handles.MainFigure,'VariablesTable',VariablesTable);       
-
-    set(Handles.MainFigure,'UserData',Handles);
+set(Handles.MainFigure,'UserData',Handles);
     
 % temporary fix for Jesse Feyen's contmex5 dll problem
 if AdcVizOpts.DisableContouring
@@ -247,14 +221,13 @@ if AdcVizOpts.DisableContouring
     set(Handles.HydrographButton,'Enable','off','String','Hydrographs Disabled: no findelem binary')
 end
     
-if AdcVizOpts.UITest, return,end   
+if AdcVizOpts.UITest, return, end   
 
 global EnableRendererKludge
 EnableRendererKludge=false;
 
 CurrentPointer=get(Handles.MainFigure,'Pointer');
 set(Handles.MainFigure,'Pointer','watch');
-
 
 %% OpenDataConnections 
 global Connections
@@ -1557,8 +1530,8 @@ end
 %%  InitializeUI
 %%% InitializeUI
 %%% InitializeUI
-function Handles=InitializeUI(FontOffset,AppName,BoundingBox,...
-    DepthContours,ColorMap,UseGoogleMaps,ForkAxes,HOME,Mode)
+function Handles=InitializeUI(AdcVizOpts)
+
 %%% This function sets up the gui and populates several UserData and
 %%% ApplicationData properties with data needed by other functions and ui
 %%% callbacks, some of which is set in other functions
@@ -1569,6 +1542,17 @@ function Handles=InitializeUI(FontOffset,AppName,BoundingBox,...
 %%% MainAxes   : ApplicationData 
 
 fprintf('* Setting up GUI ... \n')
+
+FontOffset=AdcVizOpts.FontOffset;
+AppName=AdcVizOpts.AppName;
+BoundingBox=AdcVizOpts.BoundingBox;
+DepthContours=AdcVizOpts.DepthContours;
+ColorMap=AdcVizOpts.ColorMap;
+UseGoogleMaps=AdcVizOpts.UseGoogleMaps;
+ForkAxes=AdcVizOpts.ForkAxes;
+HOME=AdcVizOpts.HOME;
+Mode=AdcVizOpts.Mode;
+
 
 global Debug
 if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
@@ -1592,7 +1576,7 @@ if ~ForkAxes
     Handles.MainFigure=figure(...
         'Units','normalized',...
         'Color',panelColor,...
-        'OuterPosition',[0.05 .3 .9 .7],...
+        'OuterPosition',[0.05 .3 AdcVizOpts.AppWidthPercent/100 .777* AdcVizOpts.AppWidthPercent/100],...
         'ToolBar','figure',...
         'DeleteFcn',@ShutDownUI,...
         'Tag','MainVizAppFigure',...
