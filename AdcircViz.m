@@ -1,6 +1,6 @@
 function varargout=AdcircViz(varargin)
 %
-% ADCIRCVIZ - Visualization Application for ASGS Forecast Output
+% AdcircViz - Visualization Application for ASGS Forecast Output
 % 
 % Call as: AdcircViz(P1,V1,P2,V2,...)
 %
@@ -28,11 +28,11 @@ function varargout=AdcircViz(varargin)
 % These parameters can be set in the MyAdcircViz_Init.m file.  This
 % file can be put anywhere on the MATLAB path EXCEPT in the AdcircViz 
 % directory.  A convenient place is in the user "matlab" directory, which
-% is in <USERHOME>/matlab by default in Unix/OSX. Parameters defined in 
-% MyAdcircViz_Init.m will override any passed in via the command line, as 
+% is in <USERHOME>/matlab by default in Unix/OSX. Parameters passed in via  
+% the command line will override any settings in MyAdcircViz_Init.m, as
 % well as any loaded in from the remotely maintained InstanceDefaults.m.  
-% MyAdcircViz_Init is called last in the initialization phase of the 
-% application.  Do not put AdcircViz parameters in startup.m since this 
+%
+% Do not put AdcircViz parameters in startup.m since this 
 % is called first by MATLAB at startup.
 %
 % Only one instance of AdcircViz is allowed concurrently.  Close existing
@@ -141,7 +141,7 @@ if java.lang.Runtime.getRuntime.maxMemory/1e9  < 0.5
 end
     
 %% Initialize AdcircViz
-fprintf('\nInitializing application.\n')
+fprintf('\nAdcViz++ Initializing application.\n')
 AdcircViz_Init;  % this sets defaults and processes vars
 
 % Storm
@@ -161,7 +161,7 @@ switch AdcVizOpts.Mode
         
         %% Get the catalog
         %global TheCatalog
-        fprintf('\nGetting Catalog.\n')
+        fprintf('\nAdcViz++ Getting Catalog.\n')
         TheCatalog=GetCatalogFromServer(UrlBase,AdcVizOpts.CatalogName);
         %catalog=TheCatalog.Catalog;
         %CatalogHash=TheCatalog.CatalogHash;
@@ -172,10 +172,11 @@ switch AdcVizOpts.Mode
         Url.UseShapeFiles=AdcVizOpts.UseShapeFiles;
         Url.Units=AdcVizOpts.Units;
         
-    case 'Url' 
+    case 'Url'
         str={'Direct Url file access is not yet supported.'};
         errordlg(str)
         return
+        
     otherwise
         %% Set up for Local Files
         UrlBase='file://';
@@ -387,7 +388,7 @@ end
 function [update,CatalogHash]=CheckForUpdate(Url,TheCatalog)
 
     global Debug 
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
     
     SetUIStatusMessage('Checking for Updates...')
 
@@ -417,7 +418,7 @@ end
 %%% BrowseFileSystem
 function BrowseFileSystem(~,~)
     global Debug 
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     if exist('hObj','var')
         FigThatCalledThisFxn=gcbf;
@@ -444,7 +445,7 @@ end
 function DisplayCatalog(~,~)
 
     global Debug 
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     if exist('hObj','var')
         FigThatCalledThisFxn=gcbf;
@@ -579,10 +580,8 @@ end
 %%% OpenDataConnections
 function Connections=OpenDataConnections(Url)
   
-    global Debug 
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
-
-    global TheGrids
+    global TheGrids Debug 
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
@@ -601,7 +600,6 @@ function Connections=OpenDataConnections(Url)
     % to make it easier to edit.  The first row is the variable names
     % in this function, declared above as empty cells.
     ff='AdcircVizVariableList.xls';
-    %sheet=getappdata(fig,'VariablesTable');
     sheet=AdcVizOpts.VariablesTable;
     [~,~,C] = xlsread(ff,sheet);
     [m,n]=size(C);
@@ -609,14 +607,12 @@ function Connections=OpenDataConnections(Url)
     for i=1:n
         for j=2:m
             thisvar=vars{i};
-            %disp(C{j,i})
             switch thisvar
                 case {'VariableUnitsFac.mks','VariableUnitsFac.eng'}
-                    com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i}));
+                    com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i})); %#ok<ST2NM>
                 otherwise
                     com=sprintf('%s{j-1}=''%s'';',thisvar,C{j,i});
             end
-            %disp(com)
             eval(com)
         end
     end
@@ -838,8 +834,7 @@ end
 function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex) 
 
    global Debug 
-   %SetUIStatusMessage(sprintf('* Getting data object %d,%d,%d ...\n',EnsIndex,VarIndex,TimIndex))
-   if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+   if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
    v=Connections.members{EnsIndex,VarIndex}.FileNetcdfVariableName;
    if ~iscell(v)
@@ -928,9 +923,9 @@ end
 function InstanceUrl(varargin)
 
    global TheGrids Connections Debug
-   if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+   if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
    
-   %SetUIStatusMessage('Getting data objects from opendap server ...')
+   SetUIStatusMessage('Getting data objects from opendap server ...')
    
    if nargin==0
        FigThatCalledThisFxn=findobj(0,'Tag','MainVizAppFigure');
@@ -944,6 +939,8 @@ function InstanceUrl(varargin)
        Handles=get(FigThatCalledThisFxn,'UserData');
    end
 
+   AdcVizOpts=getappdata(FigThatCalledThisFxn,'AdcVizOpts');
+   
    url=get(hObj,'String');
    
    temp = textscan(url, '%s','Delimiter','/','MultipleDelimsAsOne',1);
@@ -955,7 +952,8 @@ function InstanceUrl(varargin)
    ThisGrid=urlparts{8};
    ThisMachine=urlparts{9};
    ThisInstance=urlparts{10};
-   CatalogName=getappdata(Handles.MainFigure,'CatalogName');
+   
+   CatalogName=AdcVizOpts.CatalogName;
    
    TheCatalog=GetCatalogFromServer(Url.Base,CatalogName);
       
@@ -995,12 +993,11 @@ function InstanceUrl(varargin)
    Url.catalog=TheCatalog.Catalog;
    Url.CatalogHash=TheCatalog.CatalogHash;
    
-   UseShapeFiles=getappdata(Handles.MainFigure,'UseShapeFiles');
+   UseShapeFiles=AdcVizOpts.UseShapeFiles;
    Url.UseShapeFiles=UseShapeFiles;
    
-   Units=getappdata(Handles.MainFigure,'Units');
-   Url.Units=Units;    
-   
+   Url.Units=AdcVizOpts.Units;
+      
    if str2double(ThisAdv)<1000
        
        % need to skip "Q" since there are no storm names starting with Q
@@ -1016,7 +1013,7 @@ function InstanceUrl(varargin)
 
    Instance=ThisInstance;
    InstanceDefaults;
-   setappdata(Handles.MainFigure,'DefaultBoundingBox',DefaultBoundingBox);
+   setappdata(Handles.MainFigure,'DefaultBoundingBox',AdcVizOpts.DefaultBoundingBox);
 
    % new data connections
    Connections=OpenDataConnections(Url);
@@ -1049,9 +1046,8 @@ function InstanceUrl(varargin)
       
    [Min,Max]=GetMinMaxInView(TheGrid,Connections.members{EnsIndex,VarIndex}.TheData{1});
    NumberOfColors=str2double(get(Handles.NCol,'String'));
-   ColorIncrement=getappdata(Handles.MainFigure,'ColorIncrement');
+   ColorIncrement=AdcVizOpts.ColorIncrement;
    SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
-   %SetColors(Handles,cax(1),cax(2),NumberOfColors,ColorIncrement);
   
    set(Handles.MainFigure,'UserData',Handles);
    SetTitle(Connections.RunProperties);
@@ -1076,14 +1072,15 @@ end
 function SetNewField(varargin)
 
     global TheGrids Connections Debug
-    if Debug,ThisFunctionName;end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
     
     hObj=varargin{1};
     event=varargin{2};
 
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
-    
+    AdcVizOpts=getappdata(FigHandle,'AdcVizOpts');
+
     CurrentPointer=get(FigHandle,'Pointer');
     set(FigHandle,'Pointer','watch');
     
@@ -1145,7 +1142,7 @@ function SetNewField(varargin)
     if strcmp(ButtonGroupThatCalled,'ScalarVariableMemberRadioButtonGroup')
         
         NumberOfColors=str2double(get(Handles.NCol,'String'));
-        ColorIncrement=getappdata(Handles.MainFigure,'ColorIncrement');
+        ColorIncrement=AdcVizOpts.ColorIncrement;
         [Min,Max]=GetMinMaxInView(TheGrid,ThisData);
         SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
         
@@ -1175,6 +1172,15 @@ function SetNewField(varargin)
         set(Handles.ScalarSnapshotSliderHandle,'Enable','off')
     end
    
+    if ~isempty(VectorVarIndex) && (Connections.members{EnsIndex,VectorVarIndex}.NTimes>1)
+        set(Handles.VectorSnapshotButtonHandles,'Enable','on')
+        set(Handles.VectorSnapshotSliderHandle,'Enable','on')
+    else
+        set(Handles.VectorSnapshotButtonHandles,'Enable','off')
+        set(Handles.VectorSnapshotSliderHandle,'Enable','off')
+    end
+
+    
     set(Handles.MainFigure,'UserData',Handles);
     UpdateUI(Handles.MainFigure);
     % doesnt matter which Connection is passed in.
@@ -1195,7 +1201,7 @@ end
 function SetBaseMap(~,~,~)
 
     global Debug
-    if Debug,ThisFunctionName;end
+   if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
@@ -1218,7 +1224,7 @@ end
 function DrawDepthContours(hObj,~)
     
     global TheGrids Debug
-    if Debug,ThisFunctionName;end
+   if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     TheGrid=TheGrids{1};
 
@@ -1253,7 +1259,7 @@ end
 function Handles=MakeTheAxesMap(Handles)
 
     global TheGrids Debug
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
    
     TheGrid=TheGrids{1};
 
@@ -1320,7 +1326,7 @@ end
 function Handles=DrawTriSurf(Handles,Member,Field)
 
     global TheGrids Debug
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     TheGrid=TheGrids{Member.GridId};
 
@@ -1377,7 +1383,7 @@ end
 function h=DrawTrack(track)
     
     global Debug
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
@@ -1420,7 +1426,7 @@ end
 function Handles=DrawVectors(Handles,Member,Field)
 
     global TheGrids Debug
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end 
     
     TheGrid=TheGrids{Member.GridId};
     
@@ -1463,8 +1469,9 @@ end
 %%% RedrawVectors
 function RedrawVectors(varargin)
 
-    global Connections
-
+    global Connections Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+   
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
     
@@ -1482,8 +1489,8 @@ function RedrawVectors(varargin)
 
     Member=Connections.members{EnsIndex,VectorVarIndex}; %#ok<FNDSB>
     
-    if ~isfield(Handles,'Vectors'),return,end
-    if ~ishandle(Handles.Vectors(1)),return,end
+    %if ~isfield(Handles,'Vectors'),return,end
+    %if ~ishandle(Handles.Vectors(1)),return,end
     
     Field=getappdata(Handles.Vectors(1),'Field');
 
@@ -1541,7 +1548,10 @@ function Handles=InitializeUI(AdcVizOpts)
 %%% MainAxes   : UserData 
 %%% MainAxes   : ApplicationData 
 
-fprintf('* Setting up GUI ... \n')
+global Debug
+
+fprintf('AdcViz++ Setting up GUI ... \n')
+if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
 FontOffset=AdcVizOpts.FontOffset;
 AppName=AdcVizOpts.AppName;
@@ -1552,10 +1562,6 @@ UseGoogleMaps=AdcVizOpts.UseGoogleMaps;
 ForkAxes=AdcVizOpts.ForkAxes;
 HOME=AdcVizOpts.HOME;
 Mode=AdcVizOpts.Mode;
-
-
-global Debug
-if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
 
 panelColor = get(0,'DefaultUicontrolBackgroundColor');
 
@@ -2026,7 +2032,7 @@ BackgroundMapsContainerContents;
         %     'Callback', @UpdateUI);
         
         
-        if ~(UseGoogleMaps),return,end
+        if ~UseGoogleMaps,return,end
         
         NVar=5;
         % dy=NVar*.08;
@@ -2845,7 +2851,7 @@ BackgroundMapsContainerContents;
         
         
     end
-    fprintf('* Done.\n\n')
+    fprintf('AdcViz++ Done.\n\n')
 
 end
 
@@ -2855,8 +2861,9 @@ end
 function UpdateUI(varargin)
 
     global Connections Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+
     SetUIStatusMessage('Updating GUI ... \n')
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
 
     if nargin==1
         %disp('UpdateUI called as a function')
@@ -2869,7 +2876,10 @@ function UpdateUI(varargin)
     end
 
     Handles=get(FigHandle,'UserData');
-    LocalTimeOffset=getappdata(Handles.MainFigure,'LocalTimeOffset');
+
+    AdcVizOpts=getappdata(FigHandle,'AdcVizOpts');
+
+    LocalTimeOffset=AdcVizOpts.LocalTimeOffset;
 
     VariableNames=Connections.VariableNames; 
     VariableTypes=Connections.VariableTypes; 
@@ -3021,7 +3031,10 @@ end
 %%% ShutDownUI
 function ShutDownUI(~,~)
 
-    fprintf('Shutting Down AdcircViz GUI.\n');
+    global Debug
+    if Debug,fprintf('AdcViz++  Function = %s\n',ThisFunctionName);end
+    
+    fprintf('\nAdcViz++ Shutting Down AdcircViz GUI.\n');
    
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
@@ -3079,8 +3092,9 @@ end
 function Handles=SetEnsembleControls(varargin)
 
     global Connections Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+
     SetUIStatusMessage('Setting up Ensemble controls ...\n')
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
 
     FigHandle=varargin{1};     
     Handles=get(FigHandle,'UserData');  
@@ -3138,9 +3152,10 @@ end
 function Handles=SetVariableControls(varargin)
     
     global Connections Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+
     SetUIStatusMessage('Setting up Variable controls ...\n')
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
-    
+
     FigHandle=varargin{1};     
     AxesHandle=varargin{2};  
     Handles=get(FigHandle,'UserData');
@@ -3241,7 +3256,7 @@ function Handles=SetVariableControls(varargin)
     end
     for i=1:length(Handles.VectorVarButtonHandles)
         if ~isempty(Connections.members{1,Vectors(i)}.NcTBHandle)
-            set(Handles.VectorVarButtonHandles(i),'Value',1)
+            %set(Handles.VectorVarButtonHandles(i),'Value',1)
             break
         end
     end
@@ -3277,14 +3292,18 @@ end
 function Handles=SetSnapshotControls(varargin)
 
     global Connections Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+
     SetUIStatusMessage('Setting up Snapshot Controls ... \n')
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
 
     FigHandle=varargin{1};     
     AxesHandle=varargin{2};  
     Handles=get(FigHandle,'UserData');
+    AdcVizOpts=getappdata(FigHandle,'AdcVizOpts');
+    LocalTimeOffset=AdcVizOpts.LocalTimeOffset;
+
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
-    LocalTimeOffset=getappdata(Handles.MainFigure,'LocalTimeOffset');
+        
     panelColor = get(0,'DefaultUicontrolBackgroundColor');
     DateStringFormatInput=getappdata(Handles.MainFigure,'DateStringFormatInput');
     DateStringFormatOutput=getappdata(Handles.MainFigure,'DateStringFormatOutput');
@@ -3410,17 +3429,17 @@ function Handles=SetSnapshotControls(varargin)
             
         end
         
-        if ~ThreeDvarsattached
+%        if ~ThreeDvarsattached
             set(Handles.ScalarSnapshotButtonHandles,'Enable','off');
             set(Handles.ScalarSnapshotSliderHandle,'Enable','off');
             set(Handles.VectorSnapshotButtonHandles,'Enable','off');
             set(Handles.VectorSnapshotSliderHandle,'Enable','off');
-        else
-            set(Handles.ScalarSnapshotButtonHandles,'Enable','on');
-            set(Handles.ScalarSnapshotSliderHandle,'Enable','on');
-            set(Handles.VectorSnapshotButtonHandles,'Enable','off');
-            set(Handles.VectorSnapshotSliderHandle,'Enable','off');
-        end     
+%        else
+%            set(Handles.ScalarSnapshotButtonHandles,'Enable','on');
+%            set(Handles.ScalarSnapshotSliderHandle,'Enable','on');
+%            set(Handles.VectorSnapshotButtonHandles,'Enable','on');
+%            set(Handles.VectorSnapshotSliderHandle,'Enable','on');
+%        end     
         
     end
     
@@ -3435,7 +3454,7 @@ end
 function ViewSnapshot(hObj,~)  
 
     global TheGrids Connections Debug
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
     
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
@@ -3515,12 +3534,12 @@ function ViewSnapshot(hObj,~)
         end
         
         [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
-        if ScalarSnapshotClicked>n
-            Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,ScalarSnapshotClicked);
+        if VectorSnapshotClicked>n
+            Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
         else
             % test value at EnsIndex,VectorVarIndex,TimIndex
-            if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{ScalarSnapshotClicked})
-                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,ScalarSnapshotClicked);
+            if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotClicked})
+                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
             end
         end
         
@@ -3579,7 +3598,7 @@ function ExportShapeFile(~,~)
 
     global TheGrids Connections Debug 
 
-    if Debug,ThisFunctionName;end
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
     
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
@@ -3780,6 +3799,8 @@ end
 %%% ResetAxes
 %%% ResetAxes
 function ResetAxes(~,~)
+    global Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
@@ -3796,7 +3817,9 @@ end
 %%% ShowTrack
 function ShowTrack(hObj,~) 
 
-    global Connections
+    global Connections Debug 
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+    
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
@@ -3882,7 +3905,9 @@ end
 %%% ShowMinimum
 function ShowMinimum(hObj,~) 
 
-    global TheGrids
+    global TheGrids Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+    
     TheGrid=TheGrids{1};
 
     FigThatCalledThisFxn=gcbf;
@@ -3915,7 +3940,9 @@ end
 %%% ShowMaximum
 function ShowMaximum(hObj,~) 
 
-    global TheGrids
+    global TheGrids Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+
     TheGrid=TheGrids{1};
 
     FigThatCalledThisFxn=gcbf;
@@ -3977,7 +4004,9 @@ end
 %%% InterpField
 function InterpField(hObj,~) 
 
-    global TheGrids
+    global TheGrids Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+
     TheGrid=TheGrids{1};
 
     FigThatCalledThisFxn=gcbf;
@@ -4261,7 +4290,6 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
 
     global Connections
 
-    
     SetUIStatusMessage('Getting nodal timeseries ...')
 
     q=cell(length(Connections.EnsembleNames),1);
@@ -4475,6 +4503,7 @@ function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement
      cmap=eval(sprintf('%s(%d)',CurrentMap,NumberOfColors));
      CLim([FieldMin FieldMax])
      colormap(cmap)
+     
 end
 
 %%  GetColors
@@ -4493,7 +4522,10 @@ function SetTitle(RunProperties)
     
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
-    LocalTimeOffset=getappdata(Handles.MainFigure,'LocalTimeOffset');
+    AdcVizOpts=getappdata(Handles.MainFigure,'AdcVizOpts');              
+
+        
+    LocalTimeOffset=AdcVizOpts.LocalTimeOffset;
     DateStringFormat=getappdata(Handles.MainFigure,'DateStringFormatOutput');
     
     advisory=GetRunProperty(RunProperties,'advisory');
@@ -4515,6 +4547,7 @@ function SetTitle(RunProperties)
         tcs=datenum(tcs,'yyyymmddHH');
         t=tcs+ths/86400;
         t=t+LocalTimeOffset/24;
+        
     else
     
         t=get(Handles.TriSurf,'UserData');

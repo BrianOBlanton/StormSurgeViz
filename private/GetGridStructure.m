@@ -4,9 +4,10 @@
 function TheGrid=GetGridStructure(Member,id)
 
     global Debug
+    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+    
     SetUIStatusMessage(['* Getting Grid Structure for ' Member.VariableDisplayName ' ... \n']);
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
-
+    
     HOME=fileparts(which(mfilename));
 
     %Instance=getappdata(Handles.MainFigure,'Instance');
