@@ -10,12 +10,17 @@ p.Machine=[];
 p.Instance='';
 p.CatalogName='catalog.tree';
 p.VariablesTable={'Full','Reduced'};
+p.PollInterval=900;        % update check interval in seconds; Inf for no polling
 
+% feature options
 p.Verbose=true;
 p.Debug=true;
 p.DisableContouring=false;
-p.PollInterval=900;  % update check interval in seconds; Inf for no polling
 p.LocalTimeOffset=0;
+p.UseStrTree=false;
+p.UseGoogleMaps=true;
+p.UseShapeFiles=true;
+
 
 p.Mode={'Network','Local', 'Url'}; 
 p.Units={'Meters','Metric','Feet','English'};
@@ -34,12 +39,9 @@ p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','N
 %ScreenTake=100; % percent of screen width to take up
 p.AppWidthPercent=90;
 p.FontOffset=2;
-p.UseGoogleMaps=true;
-p.UseShapeFiles=true;
 p.CanOutputShapeFiles=true;
 p.DefaultShapeBinWidth=.5;  
 p.GoogleMapsApiKey='';
-p.DisableContouring=false;
 p.SendDiagnosticsToCommandWindow=true;
 p.ForkAxes=false;
 p.UITest=false;

@@ -1,7 +1,5 @@
 %function AdcircViz_Init
 
-global Debug
-
 HOME=fileparts(which(mfilename));
 addpath([HOME '/extern'])
 if isempty(which('detbndy'))
@@ -31,13 +29,13 @@ TempDataLocation=[HOME '/TempData'];
 DateStringFormatInput='yyyy-mm-dd HH:MM:SS';
 DateStringFormatOutput='ddd, dd mmm, HH:MM PM';
 
+% name of Java Topology Suite file
+jts='jts-1.9.jar';
 
 %% Default PN/PVs
 fprintf('AdcViz++ Processing Input Parameter/Value Pairs...\n')
 opts=AdcircVizOptions;
 opts=parseargs(opts);
-
-Debug=opts.Debug;
 
 if exist('MyAdcircViz_Init.m','file')
     if opts.Verbose
@@ -58,14 +56,24 @@ opts=parseargs(opts,varargin{:});
 
 AdcVizOpts=opts;
 
-scc=get(0,'ScreenSize');
-DisplayWidth=scc(3);
+%scc=get(0,'ScreenSize');
+%DisplayWidth=scc(3);
 
 AdcVizOpts.AppName=blank(fileread('ThisVersion'));
 fprintf('AdcViz++ %s\n',AdcVizOpts.AppName')
 
 AdcVizOpts.HOME = HOME;
 cd(AdcVizOpts.HOME)
+
+if AdcVizOpts.UseStrTree
+    f=[AdcVizOpts.HOME '/extern/' jts];
+    if exist(f,'file')
+        javaaddpath(f);
+    else
+        disp('Can''t add jts file to javaclasspath.   Disabling strtree searching.')
+        AdcVizOpts.UseStrTree=false;
+    end
+end
 
 if isempty(which('detbndy'))
     cd([AdcVizOpts.HOME '/adcirc_util'])
@@ -120,7 +128,7 @@ switch AdcVizOpts.Mode
     otherwise
         
         AdcVizOpts.Mode='Network';
-        fprintf('Adcviz++ Mode is Network.\n')
+        fprintf('AdcViz++ Mode is Network.\n')
         
         % get InstanceDefaults.m file from thredds server
         try
@@ -149,3 +157,12 @@ if ~isempty(AdcVizOpts.BoundingBox),AdcVizOpts.DefaultBoundingBox=AdcVizOpts.Bou
 VectorOptions.Stride=100;
 VectorOptions.ScaleFac=25;
 VectorOptions.Color='k';
+
+
+
+
+%%% clean up after initialization
+clear jts
+global Debug
+
+Debug=AdcVizOpts.Debug;

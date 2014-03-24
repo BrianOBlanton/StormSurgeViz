@@ -1,6 +1,5 @@
 function TheCatalog=GetCatalogFromServer(UrlBase,CatalogName)
 
-
 % catalog=GetCatalogFromServer(url)
 % catalog=GetCatalogFromServer('http://opendap.renci.org:1935/thredds/')
 
@@ -16,16 +15,28 @@ try
     urlread(catUrl);
 catch ME
     disp(' ')
-    disp(['Could not get ' CatalogName ' on remote OpenDAP server ' Url.Base])
+    disp(['Could not get ' CatalogName ' on remote OpenDAP server ' UrlBase])
     disp(' ')
     throw(ME);
 end
-%disp('Got it.')
 
-urlwrite(catUrl,'TempData/cat.tree');
-fid=fopen('TempData/cat.tree','r');
-
-fgetl(fid);  % get the dashed line
+notFound=true;
+c=0;
+while notFound
+    c=c+1;
+    urlwrite(catUrl,'TempData/cat.tree');
+    fid=fopen('TempData/cat.tree','r');
+    l=fgetl(fid);  % get the dashed line
+    if l == -1
+        fclose(fid);
+        fprintf('cat file is empty on try #%d. Trying again... \n',c);
+        if c > 3
+            error('Tried and failed three times to get catalog file.  This is terminal.')
+        end
+        break
+    end
+    notFound=false;
+end
 
 l=fgetl(fid);  % get the line with the field names
 fields=deblank(strread(l,'%s','delimiter','$'));
@@ -47,6 +58,7 @@ end
 catalog=cell2struct(data,fields,2);
 CatalogHash=DataHash(catalog);
 
+TheCatalog=struct;
 TheCatalog.Catalog=catalog;
 TheCatalog.CatalogHash=CatalogHash;
 TheCatalog.CurrentSelection=[];

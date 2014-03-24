@@ -1062,7 +1062,6 @@ function InstanceUrl(varargin)
    SetUIStatusMessage('Done.\n')
 
    RendererKludge;
-
    
 end
 
@@ -1128,7 +1127,7 @@ function SetNewField(varargin)
        ThisData=abs(ThisData);
     end
             
-    if InundationClicked && ismember(Connections.VariableNames{ScalarVarIndex},{'WaterLevel','MaxWaterLevel'});
+    if InundationClicked && ismember(Connections.VariableNames{ScalarVarIndex},{'Water Level','Max Water Level'})
        z=TheGrid.z;
        idx=z<0;
        temp=ThisData(idx)+z(idx);
@@ -1150,7 +1149,6 @@ function SetNewField(varargin)
     set(get(Handles.ColorBar,'ylabel'),'String',Connections.members{EnsIndex,ScalarVarIndex}.Units,'FontSize',FontSizes(1));
     drawnow
     
-    
     % redraw track if already present in axes
     temp=strcmp(get(Handles.ShowTrackButton,'String'),'Hide Track');
     temp2=strcmp(get(Handles.ShowTrackButton,'Enable'),'on');
@@ -1167,6 +1165,12 @@ function SetNewField(varargin)
     if  Connections.members{EnsIndex,ScalarVarIndex}.NTimes>1
         set(Handles.ScalarSnapshotButtonHandles,'Enable','on')
         set(Handles.ScalarSnapshotSliderHandle,'Enable','on')
+        % set trisurf userdata to datenum time
+        t=get(Handles.ScalarSnapshotSliderHandle,'UserData');
+            ScalarVariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
+        timesetting=get(Handles.ScalarSnapshotSliderHandle,'Value');
+        set(Handles.TriSurf,'UserData',t(timesetting));
+        
     else
         set(Handles.ScalarSnapshotButtonHandles,'Enable','off')
         set(Handles.ScalarSnapshotSliderHandle,'Enable','off')
@@ -1179,7 +1183,6 @@ function SetNewField(varargin)
         set(Handles.VectorSnapshotButtonHandles,'Enable','off')
         set(Handles.VectorSnapshotSliderHandle,'Enable','off')
     end
-
     
     set(Handles.MainFigure,'UserData',Handles);
     UpdateUI(Handles.MainFigure);
@@ -1570,6 +1573,8 @@ fs3=floor(get(0,'DefaultAxesFontSize')/ratio_x)+FontOffset;
 fs2=fs3+2;
 fs1=fs3+4;
 fs0=fs3+6;
+global Vecs
+Vecs='off';
 
 %LeftEdge=.01;
 
@@ -1940,7 +1945,6 @@ BackgroundMapsContainerContents;
         %%% Shape Files
         %%% Shape Files
         %%% Shape Files
-        
         Handles.ExportShapeFilesHandlesGroup = uibuttongroup(...
             'Parent',Handles.CenterContainerLowerRight,...
             'BorderType','etchedin',...
@@ -2697,10 +2701,10 @@ BackgroundMapsContainerContents;
         Width=.33;
         Width2=.17;
         Height=.09;
-       
+        
         tbh = findall(Handles.MainFigure,'Type','uitoolbar');
         a=imread('private/vo.png');
-        tth = uitoggletool(tbh,'CData',a, 'Separator','on', 'HandleVisibility','off');
+        tth = uitoggletool(tbh,'CData',a, 'Separator','on', 'HandleVisibility','off','Enable',Vecs);
         set(tth,'ClickedCallback',@RevealVecOpts)
         set(tth,'TooltipString','Reveal Vector Options')
         
@@ -2851,7 +2855,7 @@ BackgroundMapsContainerContents;
         
         
     end
-    fprintf('AdcViz++ Done.\n\n')
+    fprintf('AdcViz++    Done.\n\n')
 
 end
 
@@ -3151,7 +3155,8 @@ end
 %%% SetVariableControls
 function Handles=SetVariableControls(varargin)
     
-    global Connections Debug
+
+    global Connections Debug Vecs
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     SetUIStatusMessage('Setting up Variable controls ...\n')
@@ -3244,9 +3249,8 @@ function Handles=SetVariableControls(varargin)
             'Position', [.1 .975-dy2*i .9 dy2],...
             'Tag','VectorsVariableMemberRadioButton');
   
-            set(Handles.VectorVarButtonHandles(i),'Enable','on');
+            set(Handles.VectorVarButtonHandles(i),'Enable',Vecs);
     end
-    
     
     for i=1:length(Handles.VectorVarButtonHandles)
         if isempty(Connections.members{1,Vectors(i)}.NcTBHandle)
@@ -3269,6 +3273,7 @@ function Handles=SetVariableControls(varargin)
         'Tag','OverlayVectorsButton',...
         'FontSize',FontSizes(2),...
         'String','Overlay Vectors',...
+        'Enable',Vecs,...
         'CallBack','');
     
     Handles.VectorAsScalarButton=uicontrol(...
@@ -3279,6 +3284,7 @@ function Handles=SetVariableControls(varargin)
         'Tag','VectorAsScalarButton',...
         'FontSize',FontSizes(2),...
         'String','Display as Speed',...
+        'Enable',Vecs,...
         'CallBack','');
     
     set(Handles.MainFigure,'UserData',Handles);
@@ -3291,7 +3297,7 @@ end
 %%% SetSnapshotControls
 function Handles=SetSnapshotControls(varargin)
 
-    global Connections Debug
+    global Connections Debug Vecs
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     SetUIStatusMessage('Setting up Snapshot Controls ... \n')
@@ -3356,6 +3362,7 @@ function Handles=SetSnapshotControls(varargin)
         timebase_datenum=datenum(basedate,DateStringFormatInput);
         t=cast(time.data(:),'double');
         snapshotlist=cell(length(t),1);
+        time_datenum=time.data(:)/86400+timebase_datenum;
         for i=1:length(t)
             snapshotlist{i}=datestr(t(i)/86400+timebase_datenum+LocalTimeOffset/24,DateStringFormatOutput);
         end
@@ -3391,7 +3398,7 @@ function Handles=SetSnapshotControls(varargin)
                 'FontSize',FontSizes(3),...
                 'Position', [.05 .75 .9 .1],...
                 'Tag','ScalarSnapshotButton',...
-                'callback',@ViewSnapshot);
+                'Callback',@ViewSnapshot);
             
             Handles.ScalarSnapshotSliderHandle=uicontrol(...
                 Handles.ScalarSnapshotButtonHandlesPanel,...
@@ -3403,7 +3410,8 @@ function Handles=SetSnapshotControls(varargin)
                 'Max',m,...
                 'SliderStep',[1/(m-1) 1/(m-1)],...
                 'Tag','ScalarSnapshotSlider',...
-                'callback',@ViewSnapshot);
+                'UserData',time_datenum,...
+                'Callback',@ViewSnapshot);
             
             Handles.VectorSnapshotButtonHandles=uicontrol(...
                 Handles.VectorSnapshotButtonHandlesPanel,...
@@ -3413,7 +3421,7 @@ function Handles=SetSnapshotControls(varargin)
                 'FontSize',FontSizes(3),...
                 'Position', [.05 .75 .9 .1],...
                 'Tag','VectorSnapshotButton',...
-                'callback',@ViewSnapshot);
+                'Callback',@ViewSnapshot);
             
             Handles.VectorSnapshotSliderHandle=uicontrol(...
                 Handles.VectorSnapshotButtonHandlesPanel,...
@@ -3425,7 +3433,8 @@ function Handles=SetSnapshotControls(varargin)
                 'Max',m,...
                 'SliderStep',[1/(m-1) 1/(m-1)],...
                 'Tag','VectorSnapshotSlider',...
-                'callback',@ViewSnapshot); 
+                'UserData',time_datenum,...
+                'Callback',@ViewSnapshot); 
             
         end
         
@@ -3473,9 +3482,10 @@ function ViewSnapshot(hObj,~)
     OverlayVectors=get(Handles.VectorOptionsOverlayButton,'Value');
     VectorAsScalar=get(Handles.VectorAsScalarButton,'Value');
 
-    s=get(Handles.ScalarSnapshotButtonHandles,'string');
+    %s=get(Handles.ScalarSnapshotButtonHandles,'string');
+    time_datenum=get(Handles.ScalarSnapshotSliderHandle,'UserData');
 
-    SetUIStatusMessage(sprintf('date=%s',s{ScalarSnapshotClicked}),false) 
+    SetUIStatusMessage(sprintf('date=%s',datestr(time_datenum(ScalarSnapshotClicked)),false)) 
 
     axes(Handles.MainAxes);
      
@@ -3483,6 +3493,7 @@ function ViewSnapshot(hObj,~)
         error('TheData field should have been loaded by now.  Terminal.')
     end
     
+    % scalar 
     [~,n]=size(Connections.members{EnsIndex,ScalarVarIndex}.TheData);
     if ScalarSnapshotClicked>n
         Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotClicked); 
@@ -3494,13 +3505,16 @@ function ViewSnapshot(hObj,~)
         end
     end
     
-    [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
-    if ScalarSnapshotClicked>n
-        Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,ScalarSnapshotClicked); 
-    else
-        % test value at EnsIndex,VarIndex,TimIndex        
-        if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{ScalarSnapshotClicked})
-            Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,ScalarSnapshotClicked);
+    %vector
+    if ~isempty(VectorVarIndex)
+        [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
+        if VectorSnapshotClicked>n
+            Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
+        else
+            % test value at EnsIndex,VarIndex,TimIndex
+            if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotClicked})
+                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
+            end
         end
     end
     
@@ -3511,7 +3525,7 @@ function ViewSnapshot(hObj,~)
     else
         ThisData=Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotClicked};
     end
-
+    
     GridId=Connections.members{EnsIndex,ScalarVarIndex}.GridId;
     TheGrid=TheGrids{GridId};
     
@@ -3524,7 +3538,7 @@ function ViewSnapshot(hObj,~)
     end  
      
     Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,ScalarVarIndex},ThisData);
-    set(Handles.TriSurf,'UserData',s{ScalarSnapshotClicked})
+    set(Handles.TriSurf,'UserData',time_datenum(ScalarSnapshotClicked))
     
     % overlay wind vectors
     if ~isempty(VectorVarIndex) && OverlayVectors  && ~VectorAsScalar
@@ -3758,8 +3772,7 @@ function GraphicOutputPrint(~,~)
         end
     else
         %disp('User Cancelled...')
-    end
-    
+    end  
       
 end
 
@@ -3804,9 +3817,13 @@ function ResetAxes(~,~)
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
+    AdcVizOpts=getappdata(FigThatCalledThisFxn,'AdcVizOpts');
+
     axes(Handles.MainAxes);
-    axx=getappdata(Handles.MainFigure,'DefaultBoundingBox');
-    axis(axx);
+    
+    axx=AdcVizOpts.DefaultBoundingBox;
+    
+    axis(axx)
     set(Handles.AxisLimits,'String',sprintf('%.2f  ',axx));
     setappdata(Handles.MainFigure,'BoundingBox',axx);
 
@@ -4010,7 +4027,8 @@ function InterpField(hObj,~)
     TheGrid=TheGrids{1};
 
     FigThatCalledThisFxn=gcbf;
-    MainVizAppFigure=findobj(0,'Tag','MainVizAppFigure');
+    MainVizAppFigure=findobj(FigThatCalledThisFxn,'Tag','MainVizAppFigure');
+    AdcVizOpts=getappdata(FigThatCalledThisFxn,'AdcVizOpts');
     
     Handles=get(MainVizAppFigure,'UserData');
     cax=Handles.MainAxes; 
@@ -4034,7 +4052,11 @@ function InterpField(hObj,~)
         if InView
             %line(x,y,'Marker','o','Color','k','MarkerFaceColor','k','MarkerSize',5,'Tag','NodeMarker');
             % find element & interpolate scalar
-            j=findelem(TheGrid,x,y);
+            if AdcVizOpts.UseStrTree && isfield(TheGrid,'strtree') && ~isempty(TheGrid.strtree)
+                j=FindElementsInStrTree(TheGrid,x,y);
+            else
+                j=findelem(TheGrid,x,y);
+            end
             if ~isnan(j)
                 InterpTemp=interp_scalar(TheGrid,Field,x,y,j);
             else
@@ -4046,7 +4068,7 @@ function InterpField(hObj,~)
             elseif strcmp(InterpTemp,'OutsideofDomain')
                 %text(x+dx,y-dy,'NaN','Color','k','Tag','NodeText','FontWeight','bold')
                 %SetUIStatusMessage(['Selected Location (',num2str(x, '% 10.2f'),' , ',num2str(y, '% 10.2f'),') is outside of grid domain'])
-                %SetUIStatusMessage(['Selected Location is outside of grid.'])
+                SetUIStatusMessage(['Selected Location is outside of grid.'])
             else
                 line(x,y,2,'Marker','o','Color','k','MarkerFaceColor','k','MarkerSize',5,'Tag','NodeMarker','Clipping','on');
                 text(x+dx,y-dy,2,num2str(InterpTemp,'%5.2f'),'Color','k','Tag','NodeText','FontWeight','bold','Clipping','on')
@@ -4523,7 +4545,6 @@ function SetTitle(RunProperties)
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
     AdcVizOpts=getappdata(Handles.MainFigure,'AdcVizOpts');              
-
         
     LocalTimeOffset=AdcVizOpts.LocalTimeOffset;
     DateStringFormat=getappdata(Handles.MainFigure,'DateStringFormatOutput');
@@ -4547,7 +4568,8 @@ function SetTitle(RunProperties)
         tcs=datenum(tcs,'yyyymmddHH');
         t=tcs+ths/86400;
         t=t+LocalTimeOffset/24;
-        
+        t=t+NowcastForecastOffset/24;
+
     else
     
         t=get(Handles.TriSurf,'UserData');
@@ -4555,7 +4577,6 @@ function SetTitle(RunProperties)
     
     end
     
-    t=t+NowcastForecastOffset/24;
     
 %    LowerString=datestr((datenum(currentdate,'yymmdd')+...
 %        (NowcastForecastOffset)/24+LocalTimeOffset/24),'ddd, dd mmm, HH PM');
