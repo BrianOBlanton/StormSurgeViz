@@ -154,7 +154,7 @@ switch AdcVizOpts.Mode
         UrlBase=ThreddsList{1}; %#ok<USENS>
         
         %% Test for the catalog existence
-        err=TestForCatalogServer(UrlBase,AdcVizOpts.CatalogName,true);
+        err=TestForCatalogServer(UrlBase,AdcVizOpts.CatalogName);
         if err
             error('catalog file could not be found.')
         end
@@ -1390,7 +1390,8 @@ function h=DrawTrack(track)
 
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
-    LocalTimeOffset=getappdata(Handles.MainFigure,'LocalTimeOffset');
+    AdcVizOpts=getappdata(Handles.MainFigure,'AdcVizOpts');              
+        LocalTimeOffset=AdcVizOpts.LocalTimeOffset;
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
 
     %fmtstr=' mmmdd@HH PM';
@@ -1401,24 +1402,33 @@ function h=DrawTrack(track)
     
     [~,ii,~]=unique(track.hr);
 
-    lon=track.lon(ii);
-    lat=track.lat(ii);
+    lon=track.lon2(ii);
+    lat=track.lat2(ii);
     time=track.time(ii);
     
-    h1=line(lon,lat,2*ones(size(lat)),'Marker','o','MarkerSize',6,'Color',lincol,...
-        'LineWidth',2,'Tag','Storm_Track','Clipping','on');
-    
-    h2=NaN*ones(length(lon),1);
-    for i=1:length(lon)-1
-        heading=atan2((lat(i+1)-lat(i)),(lon(i+1)-lon(i)))*180/pi;
-        h2(i)=text(lon(i),lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
+    try 
+        
+        h1=line(lon,lat,2*ones(size(lat)),'Marker','o','MarkerSize',6,'Color',lincol,...
+            'LineWidth',2,'Tag','Storm_Track','Clipping','on');
+        
+        h2=NaN*ones(length(lon),1);
+        for i=1:length(lon)-1
+            heading=atan2((lat(i+1)-lat(i)),(lon(i+1)-lon(i)))*180/pi;
+            h2(i)=text(lon(i),lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
+                'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
+                'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
+        end
+        
+        h2(i+1)=text(lon(i+1),lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
             'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
             'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
+        h=[h1;h2(:)];
+        
+    catch ME
+
+        fprintf('Could not draw the track.\n')
+    
     end
-    h2(i+1)=text(lon(i+1),lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
-        'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
-        'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
-    h=[h1;h2(:)];
     
     drawnow
 end
@@ -4088,8 +4098,10 @@ function FindHydrograph(hObj,~)
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
-
-    LocalTimeOffset=getappdata(Handles.MainFigure,'LocalTimeOffset');
+    
+    AdcVizOpts=getappdata(FigThatCalledThisFxn,'AdcVizOpts');
+    LocalTimeOffset=AdcVizOpts.LocalTimeOffset;
+    
     MarkerHandles=findobj(Handles.MainAxes,'Tag','HydroNodeMarker');
     HydrographTextHandles=findobj(Handles.MainAxes,'Tag','HydrographText');
     button_state=get(hObj,'Value');
