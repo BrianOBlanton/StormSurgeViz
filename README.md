@@ -5,7 +5,7 @@ MATLAB GUI for accessing and visualizing UGRID-compliant ADCIRC model results
 
 GH Website:
 
-http://brianoblanton.github.io/AdcircViz
+http://renci-unc.github.io/AdcircViz
 
 Documentation:
 
