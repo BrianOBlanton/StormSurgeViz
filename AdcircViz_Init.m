@@ -138,17 +138,21 @@ switch AdcVizOpts.Mode
                 [status,result]=system([mvcom ' InstanceDefaults.m InstanceDefaults.m.backup']);
             end
             [status,result]=system([mvcom ' temp.m InstanceDefaults.m']);
+            InstanceDefaults;
         catch ME1
             fprintf('*AdcViz++ Failed to get InstanceDefaults.m.  Looking for previous version ...\n')
             try
                 if exist('InstanceDefaults.m','file')
                     fprintf('* Found it.\n')
+                    InstanceDefaults;
                 end
             catch ME2
-                error('\nNo local InstanceDefaults.m found. This is Terminal.\n')
+                % set a big default view
+                fprintf('AdcViz++   No local InstanceDefaults.m found. Setting a wide default view.\n')
+                AdcVizOpts.DefaultBoundingBox=[-100 -78 17 33];
+                %error('\nNo local InstanceDefaults.m found. This is Terminal.\n')
             end
         end
-        InstanceDefaults;
 end
 
 if ~isempty(AdcVizOpts.BoundingBox),AdcVizOpts.DefaultBoundingBox=AdcVizOpts.BoundingBox;end
