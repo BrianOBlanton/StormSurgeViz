@@ -62,17 +62,31 @@ or contact <a href="mailto:Brian_Blanton@Renci.Org">Brian_Blanton@Renci.Org</a>.
 <p>All needed MATLAB code is included in the application’s distribution package.  Other than having MATLAB, no other MATLAB or external dependencies exist.</p>
 
 <h1>
+<a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>QuickStart</h1>
+
+<p>Download: To download the most recent version of AdcircViz, go to this URL and click on View in GitHub and then Clone in Desktop. </p>
+
+<p><a href="http://renci-unc.github.io/AdcircViz/">http://renci-unc.github.io/AdcircViz/</a></p>
+
+<p>MATLAB PATH: Put AdcircViz in the MATLAB path</p>
+
+<p>The cloned repository will be put into a directory called AdcircViz, in a location specified by the user.  Put this path  into the MATLAB path, perhaps in the user’s or system startup.m file. For example:</p>
+
+<p><code>
+AdcVizHome=’/home/myusername/GitHubRepos/AdcircViz’;
+addpath(AdcVizHome)
+</code></p>
+
+<h1>
 <a name="running-adcircviz" class="anchor" href="#running-adcircviz"><span class="octicon octicon-link"></span></a>Running AdcircViz</h1>
 
-<p>Start MATLAB on your computer. In MATLAB, navigate the Current Folder to adcircviz\trunk, where AdcircViz.m and a few other m-files are stored. The current path will be referred to as the HOME path in this manual. To open the GUI window of the AdcircViz Tool, type AdcircViz in the Command Window to get a default view. Note: Only one instance of AdcircViz GUI is allowed to run at a time. Close the previous one before open another. </p>
+<p>Start MATLAB on your computer.  To open the GUI window of the AdcircViz Tool, type AdcircViz in the Command Window to get a default view. Note: Only one instance of AdcircViz GUI is allowed to run at a time. Close the previous one before open another. </p>
 
-<p>To change the fontsize of the GUI window, use the FontOffset parameter to adjust, e.g., type </p>
+<p>If the fonts and GUI layout is cramped, change the fontsize of the GUI window by setting the FontOffset parameter to adjust, e.g., type </p>
 
 <p><code>
 close all;  AdcircViz('FontOffset',-2)
 </code></p>
-
-<p>in the Command Window to get a new GUI window with fontsize reduced by 2.</p>
 
 <p>To change the units of the map (default “Meters” ) to “Feet”, use the “Units” parameter to adjust, e.g., type </p>
 
@@ -80,7 +94,11 @@ close all;  AdcircViz('FontOffset',-2)
 close all; AdcircViz(‘Units’,’Feet’).
 </code></p>
 
-<p>To change other settings of the map, see Section 5: Changing the Catalog Parameters.</p>
+<h1>
+<a name="complete-documentation" class="anchor" href="#complete-documentation"><span class="octicon octicon-link"></span></a>Complete Documentation</h1>
+
+<p>Detailed documentation for AdcircViz is maintained on Google Docs, at this URL:
+<a href="https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub">https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub</a></p>
         </section>
 
         <footer>
