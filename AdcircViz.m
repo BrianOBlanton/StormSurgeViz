@@ -21,6 +21,7 @@ function varargout=AdcircViz(varargin)
 % DisableContouring - {false,true} logical disabling mex compiled code calls
 % GoogleMapsApiKey  - Api Key from Google for extended map accessing
 % PollingInterval   - (900) interval in seconds to poll for catalog updates.
+% ThreddsServer     - specify alternative THREDDS server
 % Help              - Opens a help window with parameter/value details.
 %                     Must be the first and only argument to AdcircViz.
 % SendDiagnosticsToCommandWindow - {false,true}
@@ -42,7 +43,7 @@ function varargout=AdcircViz(varargin)
 %
 % >> AdcircViz;
 % or
-% >> close all; AdcircViz('Instance','gomex','Units','feet')
+% >> close all; AdcircViz('Instance','rencidaily','Units','feet')
 %
 % Copyright (c) 2012  Renaissance Computing Institute. All rights reserved.
 % Licensed under the RENCI Open Source Software License v. 1.0.
@@ -151,7 +152,7 @@ AdcircViz_Init;  % this sets defaults and processes vars
 % CatalogName
 switch AdcVizOpts.Mode
     case 'Network'
-        UrlBase=ThreddsList{1}; %#ok<USENS>
+        UrlBase=AdcVizOpts.ThreddsServer;  %  ThreddsList{1}; %#ok<USENS>
         
         %% Test for the catalog existence
         err=TestForCatalogServer(UrlBase,AdcVizOpts.CatalogName);
@@ -1250,6 +1251,8 @@ function DrawDepthContours(hObj,~)
             end
             set(Handles.BathyContours,'Tag','BathyContours');
         end
+        SetUIStatusMessage('Done. \n')
+
     else
         SetUIStatusMessage(sprintf('Contouring routine contmex5 not found for arch=%s.  Skipping depth contours.\n',computer))
     end
@@ -2249,13 +2252,24 @@ BackgroundMapsContainerContents;
             'Tag','AdcircGridName',...
             'String','N/A');
         
+       Handles.AdcircGridNums=...
+            uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'Position',[.50 .32 Width Height*1.9],...
+            'BackGroundColor','w',...
+            'FontSize',fs2,...
+            'HorizontalAlignment','left',...
+            'Tag','AdcircGridNums',...
+            'String','N/A');
+        
         % UnitsString
         % UnitsString
         % UnitsString
         uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.01 .4 Width Height],...
+            'Position',[.01 .21 Width Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','right',...
@@ -2264,7 +2278,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .4 Width Height],...
+            'Position',[.50 .21 Width Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -2277,7 +2291,7 @@ BackgroundMapsContainerContents;
         uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.01 .3 Width Height],...
+            'Position',[.01 .11 Width Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','right',...
@@ -2286,7 +2300,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .3 Width Height],...
+            'Position',[.50 .11 Width Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -2298,7 +2312,7 @@ BackgroundMapsContainerContents;
                 'Parent',Handles.InformationPanel,...
                 'Style','pushbutton',...
                 'Units','normalized',...
-                'Position',[.25 .11 .50 .1],...
+                'Position',[.25 .01 .50 .1],...
                 'Tag','ShowCatalogToggleButton',...
                 'FontSize',fs1,...
                 'String','Show Catalog',...
@@ -2308,7 +2322,7 @@ BackgroundMapsContainerContents;
                 'Parent',Handles.InformationPanel,...
                 'Style','pushbutton',...
                 'Units','normalized',...
-                'Position',[.25 .11 .50 .1],...
+                'Position',[.25 .01 .50 .1],...
                 'Tag','ShowCatalogToggleButton',...
                 'FontSize',fs1,...
                 'Enable','on',...
@@ -2874,7 +2888,7 @@ end
 %%% UpdateUI
 function UpdateUI(varargin)
 
-    global Connections Debug
+    global Connections Debug TheGrids
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     SetUIStatusMessage('Updating GUI ... \n')
@@ -2950,6 +2964,9 @@ function UpdateUI(varargin)
 %     set(Handles.NCol,'String',sprintf('%d',ncol))
 %     setappdata(FigHandle,'NumberOfColors',ncol);
 
+    str=sprintf('# Elements = %d\n# Nodes    = %d',size(TheGrids{1}.e,1), size(TheGrids{1}.x,1));
+
+
     if isfield(Connections,'RunProperties')
        rp=Connections.RunProperties;
        stormnumber=GetRunProperty(rp,'stormnumber');
@@ -2968,6 +2985,7 @@ function UpdateUI(varargin)
        set(Handles.StormNumberName,'String',sprintf('%s/%s',stormnumber,stormname));
        set(Handles.AdvisoryNumber, 'String',advnumber)
        set(Handles.AdcircGridName, 'String',ADCIRCgrid)
+       set(Handles.AdcircGridNums, 'String',str)
        set(Handles.ModelName,      'String',ModelName)
        set(Handles.InstanceName,   'String',Instance)
 
@@ -3539,7 +3557,7 @@ function ViewSnapshot(hObj,~)
     GridId=Connections.members{EnsIndex,ScalarVarIndex}.GridId;
     TheGrid=TheGrids{GridId};
     
-    if InundationClicked && ismember(Connections.VariableNames{ScalarVarIndex},{'WaterLevel','MaxWaterLevel'});
+    if InundationClicked && ismember(Connections.VariableNames{ScalarVarIndex},{'Water Level','Max Water Level'});
        z=TheGrid.z;
        idx=z<0;
        temp=ThisData(idx)+z(idx);
@@ -3909,10 +3927,10 @@ function ShowMapThings(hObj,~)
         Shapes=LoadShapes;
         setappdata(Handles.MainAxes,'Shapes',Shapes);
         %SetUIStatusMessage('Done.')
-        h=plotroads(Shapes.major_roads,'Color',[1 1 1]*.4,'Tag','AdcVizShapesRoadways','LineWidth',2); %#ok<NASGU>
-        h=plotcities(Shapes.cities,'Tag','AdcVizShapesCities'); %#ok<NASGU>
-        h=plotroads(Shapes.counties,'Tag','AdcVizShapesCounties'); %#ok<NASGU>
-        h=plotstates(Shapes.states,'Color','b','LineWidth',1,'Tag','AdcVizShapesStateLines'); %#ok<NASGU>
+        h=plotroads(Shapes.major_roads,'Color',[1 1 1]*.4,'Tag','AdcVizShapesRoadways','LineWidth',2);
+        h=plotcities(Shapes.cities,'Tag','AdcVizShapesCities'); 
+        h=plotroads(Shapes.counties,'Tag','AdcVizShapesCounties'); 
+        h=plotstates(Shapes.states,'Color','b','LineWidth',1,'Tag','AdcVizShapesStateLines'); 
         %Shapes=getappdata(Handles.MainAxes,'Shapes');
         set(hObj,'String','Hide Roads/Counties')
     else
@@ -4078,7 +4096,7 @@ function InterpField(hObj,~)
             elseif strcmp(InterpTemp,'OutsideofDomain')
                 %text(x+dx,y-dy,'NaN','Color','k','Tag','NodeText','FontWeight','bold')
                 %SetUIStatusMessage(['Selected Location (',num2str(x, '% 10.2f'),' , ',num2str(y, '% 10.2f'),') is outside of grid domain'])
-                SetUIStatusMessage(['Selected Location is outside of grid.'])
+                SetUIStatusMessage('Selected Location is outside of grid.')
             else
                 line(x,y,2,'Marker','o','Color','k','MarkerFaceColor','k','MarkerSize',5,'Tag','NodeMarker','Clipping','on');
                 text(x+dx,y-dy,2,num2str(InterpTemp,'%5.2f'),'Color','k','Tag','NodeText','FontWeight','bold','Clipping','on')
@@ -4115,7 +4133,7 @@ function FindHydrograph(hObj,~)
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     
     HyAvail=false;
-        if ismember('WaterLevel',Connections.VariableNames)
+        if ismember('Water Level',Connections.VariableNames)
             HyAvail=true;
         end
     if ~HyAvail
@@ -4180,10 +4198,10 @@ function FindHydrograph(hObj,~)
         EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames));
         VarIndex=find(strcmp(VariableClicked,VariableNames));
         
-        if ismember(VariableClicked,{'MaxWaterLevel','WaterLevel'})
-            VarIndexTimeDep=find(strcmp(VariableNames,'WaterLevel'));
-        elseif ismember(VariableClicked,{'MaxSigWaveHeight','SigWaveHeight'})
-            VarIndexTimeDep=find(strcmp(VariableNames,'SigWaveHeight'));
+        if ismember(VariableClicked,{'Max Water Level','Water Level'})
+            VarIndexTimeDep=find(strcmp(VariableNames,'Water Level'));
+        elseif ismember(VariableClicked,{'Max Sig Wave Height','Sig Wave Height'})
+            VarIndexTimeDep=find(strcmp(VariableNames,'Sig Wave Height'));
         else
            VarIndexTimeDep=[];
         end
@@ -4193,11 +4211,11 @@ function FindHydrograph(hObj,~)
         cax=Handles.MainAxes;
         xli=xlim(cax);
         yli=ylim(cax);
-        dx=(xli(2)-xli(1))*0.012;
-        dy=(yli(2)-yli(1))*0.02;
+        dx=(xli(2)-xli(1))*0.005;
+        dy=(yli(2)-yli(1))*0.005;
         
         MarkerHandles=findobj(Handles.MainAxes,'Tag','FindLocation');
-        
+
         if strcmp(get(hObj,'Tag'),'UserEnteredText')
             NodeNumber=get(Handles.UserEnteredText,'String');
             if strcmp(NodeNumber,'<Enter Node>') || isempty(NodeNumber)
@@ -4219,6 +4237,8 @@ function FindHydrograph(hObj,~)
             InView=IsInView(x,y);
             
             if InView
+                SetUIStatusMessage('Getting element number...')
+ 
                 j=findelem(TheGrid,x,y);
                 if ~isnan(j)
                     diffx=TheGrid.x(TheGrid.e(j,:))-x;
@@ -4233,9 +4253,11 @@ function FindHydrograph(hObj,~)
             else
                 SetUIStatusMessage('Location is not in view.')
                 return
-            end     
-           
+            end
+            SetUIStatusMessage(sprintf('Location found in element %d ...',j))
+
         else
+            disp('No grid object found.')
             return
         end
 
@@ -4255,7 +4277,7 @@ function FindHydrograph(hObj,~)
             xwin=.35;ywin=.07;
             titlename=titlenamebase;
             figurename=['Hydrograph of ',titlenamebase];
-            SetUIStatusMessage(['\nHydrograph at ( ',num2str(xx,'% 10.2f'),', ',num2str(yy,'% 10.2f'),' ), Node: ',num2str(NodeNumber,'%10d')])
+            SetUIStatusMessage(['\nDrawing hydrograph at ( ',num2str(xx,'% 10.2f'),', ',num2str(yy,'% 10.2f'),' ), Node: ',num2str(NodeNumber,'%10d')])
             
             if isempty(findobj(0,'Tag','HydrographFigure'))
                 HyFig=figure('Units','normalized',...
@@ -4298,11 +4320,14 @@ function FindHydrograph(hObj,~)
             set(objh(idx),'FontWeight','bold','FontSize',Vizfs(4))
             
             linecount=length(findobj(HyAxes,'Type','line'))/length(Connections.EnsembleNames)+1;
-            text('units','normalized','position',[1.05 1-0.1*linecount],'FontSize',10,'backgroundcolor','w','Color',c,...
-                'String',sprintf('Node: %d',NodeNumber),'fontsize',Vizfs(4),'FontWeight','bold','EdgeColor',c)
+            text('units','normalized','position',[1.05 1-0.1*linecount],...
+                'FontSize',10,'backgroundcolor','w','Color',c,...
+                'String',sprintf('Node: %d',NodeNumber),'fontsize',Vizfs(4),...
+                'FontWeight','bold','EdgeColor',c)
         end
         dt=toc;
         SetUIStatusMessage(sprintf('\nTook %.1f secs.  Click on another location or enter another node number ...\n',dt))
+        axes(cax)
     end
 
     function deletemarkatclose(~,~) %#ok<DEFNU>
@@ -4333,7 +4358,7 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
     
     for i=1:length(Connections.EnsembleNames)
 
-        SetUIStatusMessage(sprintf('Getting nodal timeseries at node %d for ens=%s',NodeNumber,Connections.EnsembleNames{i}))
+        SetUIStatusMessage(sprintf('Getting nodal timeseries at node %d for ens=%s ...',NodeNumber,Connections.EnsembleNames{i}))
         
         varnameinfile=Connections.members{i,VarIndex}.FileNetcdfVariableName;
         

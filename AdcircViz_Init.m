@@ -8,11 +8,11 @@ if isempty(which('detbndy'))
 end
 
 ThreddsList={
-            'http://opendap.renci.org:1935/thredds'
-            'http://workhorse.europa.renci.org:8080/thredds'
-            'http://thredds.crc.nd.edu/thredds'
-            'http://coastalmodeldev.data.noaa.gov/thredds'
+             'http://opendap.renci.org:1935/thredds'
+             'http://coastalmodeldev.data.noaa.gov/thredds'
             };
+%            'http://workhorse.europa.renci.org:8080/thredds'
+%            'http://thredds.crc.nd.edu/thredds'
         
 InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/ASGS/InstanceDefaults.m';
 
@@ -47,7 +47,7 @@ if exist('MyAdcircViz_Init.m','file')
     for i=1:size(snames,1)
         opts=parseargs(opts,snames{i},svals{i});
     end
-    
+   
 end
 
 % now process varargins, which will override any parameters set in
@@ -55,6 +55,10 @@ end
 opts=parseargs(opts,varargin{:});
 
 AdcVizOpts=opts;
+
+if isempty(AdcVizOpts.ThreddsServer)
+    AdcVizOpts.ThreddsServer=ThreddsList{1};
+end
 
 %scc=get(0,'ScreenSize');
 %DisplayWidth=scc(3);
@@ -161,9 +165,6 @@ if ~isempty(AdcVizOpts.BoundingBox),AdcVizOpts.DefaultBoundingBox=AdcVizOpts.Bou
 VectorOptions.Stride=100;
 VectorOptions.ScaleFac=25;
 VectorOptions.Color='k';
-
-
-
 
 %%% clean up after initialization
 clear jts

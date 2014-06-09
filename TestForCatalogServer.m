@@ -14,7 +14,7 @@ try
     fprintf(['AdcViz++ Trying to reach ' UrlBase '/catalog.html\n'])
     urlread([UrlBase '/catalog.html']);
 catch ME
-    fprintf('AdcViz++** Could not reach primary OpenDAP server.\n')
+    fprintf('\n\nAdcViz++** Could not reach OpenDAP server %s.\n\n',UrlBase)
     throw(ME);
 end
 fprintf('AdcViz++ Connected.\n')

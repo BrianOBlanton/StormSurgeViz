@@ -59,7 +59,7 @@ function TheGrid=GetGridStructure(Member,id)
     else
         SetUIStatusMessage('** Loading cached copy of grid structure ...\n')
         load([TempDataLocation '/' Member.GridHash '_FGS.mat']);
-     end
+    end
 
 %    set(Handles.MainFigure,'Pointer',CurrentPointer);
      SetUIStatusMessage('** Got it. \n')

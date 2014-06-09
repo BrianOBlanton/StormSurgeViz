@@ -6,6 +6,8 @@ function p=MyAdcircViz_Init
 %p.Storm=[];
 %p.Advisory=[];
 %p.Grid=[];
+%p.ThreddsServer='';
+
 
 %% Solution Display Parameters
 %p.LocalTimeOffset=4;  % hours offset for date/time display; default is 0 for UTC

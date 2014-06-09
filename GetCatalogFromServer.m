@@ -22,20 +22,43 @@ end
 
 notFound=true;
 c=0;
-while notFound
-    c=c+1;
-    urlwrite(catUrl,'TempData/cat.tree');
-    fid=fopen('TempData/cat.tree','r');
-    l=fgetl(fid);  % get the dashed line
-    if l == -1
-        fclose(fid);
-        fprintf('cat file is empty on try #%d. Trying again... \n',c);
-        if c > 3
-            error('Tried and failed three times to get catalog file.  This is terminal.')
+%catUrl=[catUrl 'x'];
+tlimit=4;
+try
+    while notFound
+        c=c+1;
+        [fpath,status]=urlwrite(catUrl,'TempData/cat.tree');
+        if ~status
+            fprintf('Couldnt retrieve catalog file on try #%d. Trying again... \n',c);
+            if c >= tlimit
+                error('Tried and failed %d times to get catalog file.  This is terminal.',tlimit)
+            end
+            continue
+        else
+            fid=fopen(fpath,'r');
+            l=fgetl(fid);  % get the dashed line
+            if l == -1
+                fprintf('cat file is empty on try #%d. Trying again... \n',c);
+                if c >= tlimit
+                    error('Tried and failed %d times to get catalog file.  This is terminal.',tlimit)
+                end
+                continue
+            end
+            notFound=false;
         end
-        break
     end
-    notFound=false;
+catch ME
+     
+    str={ME.message
+         ' '
+         'This is most likely due to a network connection issue with the primary'
+         ' '
+         'THREDDS server, or the unlucky situation where the catalog file was in the'
+         'middle of updating.  Try running AdcircViz again.  If this same error occurs,'
+         'contact Brian_Blanton@Renci.Org for connection debugging.'};
+    str=sprintf('%s\n',str{:});
+    error(str)
+    
 end
 
 l=fgetl(fid);  % get the line with the field names
