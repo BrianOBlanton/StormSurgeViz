@@ -50,20 +50,16 @@
 <p>Check out the documentation at <a href="https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub">https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub</a>
 or contact <a href="mailto:Brian_Blanton@Renci.Org">Brian_Blanton@Renci.Org</a>.</p>
 
-<h1></h1>
-
-<h2>
+<hr><h2>
 <a name="basic-implementation-of-adcircviz" class="anchor" href="#basic-implementation-of-adcircviz"><span class="octicon octicon-link"></span></a>Basic Implementation of AdcircViz</h2>
 
 <p>AdcircViz relies on making connections to the OPeNDAP server using the MATLAB toolbox nctoolbox.  This toolbox (<a href="http://nctoolbox.github.com/nctoolbox">http://nctoolbox.github.com/nctoolbox</a>) is used extensively to open netCDF data files, without accessing the data components until they are needed.  Each graphic is generated using MATLAB functions and tools “on the fly”;  the color map, color limits and color increment are specified by the user with default values appropriate to the scalar field being rendered.  The default colormap is one similar to the NOAA colormap currently used for NHC surge maps:</p>
 
-<p><img src="http://workhorse.europa.renci.org/%7Ebblanton/AdcircViz/noaa_cmap.png" alt="Image of noaa_cmap"></p>
+<p><img src="/private/noaa_cmap.png" alt="Image of noaa_cmap"></p>
 
 <p>All needed MATLAB code is included in the application’s distribution package.  Other than having MATLAB, no other MATLAB or external dependencies exist.</p>
 
-<h1></h1>
-
-<h2>
+<hr><h2>
 <a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>QuickStart</h2>
 
 <p>Download: To download the most recent version of AdcircViz, go to the top of this page (<a href="http://renci-unc.github.io/AdcircViz/">http://renci-unc.github.io/AdcircViz/</a>) and click on View in GitHub and then Clone in Desktop. </p>
@@ -77,12 +73,21 @@ AdcVizHome=’/home/myusername/GitHubRepos/AdcircViz’;
 addpath(AdcVizHome)
 </code></p>
 
-<h1></h1>
-
-<h2>
+<hr><h2>
 <a name="running-adcircviz" class="anchor" href="#running-adcircviz"><span class="octicon octicon-link"></span></a>Running AdcircViz</h2>
 
-<p>Start MATLAB on your computer.  To open the GUI window of the AdcircViz Tool, type AdcircViz in the Command Window to get a default view. Note: Only one instance of AdcircViz GUI is allowed to run at a time. Close the previous one before open another. </p>
+<p>Start MATLAB on your computer.  To open the GUI window of the AdcircViz Tool, type AdcircViz in the Command Window to get a default view. </p>
+
+<p><code>
+AdcircViz
+</code></p>
+
+<p>This should result in a large GUI that looks like the following:
+<img src="/private/AdcircViz_StartingView.png" alt="Starting View"></p>
+
+<p>The default catalog is RENCI's OPeNDAP server, and the most recent ADCIRC simulation entry is retrieved and displayed.  Depending on when the user starts AdcircViz, the actual solution and details in the above figure will vary, but the format and layout of the GUI should like that shown. </p>
+
+<p>Note: Only one instance of AdcircViz GUI is allowed to run at a time. Close the previous one before open another. </p>
 
 <p>If the fonts and GUI layout is cramped, change the fontsize of the GUI window by setting the FontOffset parameter to adjust, e.g., type </p>
 
@@ -96,9 +101,7 @@ close all;  AdcircViz('FontOffset',-2)
 close all; AdcircViz(‘Units’,’Feet’).
 </code></p>
 
-<h1></h1>
-
-<h2>
+<hr><h2>
 <a name="complete-documentation" class="anchor" href="#complete-documentation"><span class="octicon octicon-link"></span></a>Complete Documentation</h2>
 
 <p>Detailed documentation for AdcircViz is maintained on Google Docs, at this URL:
