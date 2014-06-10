@@ -143,6 +143,9 @@ end
     
 %% Initialize AdcircViz
 fprintf('\nAdcViz++ Initializing application.\n')
+
+global AdcVizOpts
+
 AdcircViz_Init;  % this sets defaults and processes vars
 
 % Storm
@@ -1087,7 +1090,7 @@ function SetNewField(varargin)
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
     
     ButtonGroupThatCalled=get(hObj,'Tag');
-    set(Handles.ScalarSnapshotButtonHandles,'Value',1);
+    set(Handles.ScalarSnapshotButtonHandle,'Value',1);
     set(Handles.ScalarSnapshotSliderHandle,'Value',1);
     
     InundationClicked=get(Handles.WaterLevelAsInundation,'Value');
@@ -1164,24 +1167,24 @@ function SetNewField(varargin)
     
     % if this is a time-dependent var, enable snapshot controls
     if  Connections.members{EnsIndex,ScalarVarIndex}.NTimes>1
-        set(Handles.ScalarSnapshotButtonHandles,'Enable','on')
+        set(Handles.ScalarSnapshotButtonHandle,'Enable','on')
         set(Handles.ScalarSnapshotSliderHandle,'Enable','on')
         % set trisurf userdata to datenum time
         t=get(Handles.ScalarSnapshotSliderHandle,'UserData');
-            ScalarVariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
+        ScalarVariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
         timesetting=get(Handles.ScalarSnapshotSliderHandle,'Value');
         set(Handles.TriSurf,'UserData',t(timesetting));
         
     else
-        set(Handles.ScalarSnapshotButtonHandles,'Enable','off')
+        set(Handles.ScalarSnapshotButtonHandle,'Enable','off')
         set(Handles.ScalarSnapshotSliderHandle,'Enable','off')
     end
    
     if ~isempty(VectorVarIndex) && (Connections.members{EnsIndex,VectorVarIndex}.NTimes>1)
-        set(Handles.VectorSnapshotButtonHandles,'Enable','on')
+        set(Handles.VectorSnapshotButtonHandle,'Enable','on')
         set(Handles.VectorSnapshotSliderHandle,'Enable','on')
     else
-        set(Handles.VectorSnapshotButtonHandles,'Enable','off')
+        set(Handles.VectorSnapshotButtonHandle,'Enable','off')
         set(Handles.VectorSnapshotSliderHandle,'Enable','off')
     end
     
@@ -1503,16 +1506,11 @@ function RedrawVectors(varargin)
     ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableNames));
     VectorVarIndex=find(strcmp(VectorVariableClicked,VariableNames));
 
-    Member=Connections.members{EnsIndex,VectorVarIndex}; %#ok<FNDSB>
-    
-    %if ~isfield(Handles,'Vectors'),return,end
-    %if ~ishandle(Handles.Vectors(1)),return,end
-    
-    Field=getappdata(Handles.Vectors(1),'Field');
-
     % Delete the current vector set
     if isfield(Handles,'Vectors')
         if ishandle(Handles.Vectors)
+            % get data to redraw before deleting the vector object
+            Field=getappdata(Handles.Vectors(1),'Field');
             delete(Handles.Vectors);
         else
             SetUIStatusMessage('No vectors to redraw.\n')
@@ -1522,6 +1520,11 @@ function RedrawVectors(varargin)
         SetUIStatusMessage('No vectors to redraw.\n')
         return
     end
+    
+    Member=Connections.members{EnsIndex,VectorVarIndex}; %#ok<FNDSB>
+    
+    %if ~isfield(Handles,'Vectors'),return,end
+    %if ~ishandle(Handles.Vectors(1)),return,end
     
     Handles=DrawVectors(Handles,Member,Field);
     set(Handles.MainFigure,'UserData',Handles);
@@ -1578,6 +1581,7 @@ UseGoogleMaps=AdcVizOpts.UseGoogleMaps;
 ForkAxes=AdcVizOpts.ForkAxes;
 HOME=AdcVizOpts.HOME;
 Mode=AdcVizOpts.Mode;
+KeepInSync=AdcVizOpts.KeepScalarsAndVectorsInSync;
 
 panelColor = get(0,'DefaultUicontrolBackgroundColor');
 
@@ -1587,7 +1591,7 @@ fs2=fs3+2;
 fs1=fs3+4;
 fs0=fs3+6;
 global Vecs
-Vecs='off';
+Vecs='on';
 
 %LeftEdge=.01;
 
@@ -3184,7 +3188,7 @@ end
 function Handles=SetVariableControls(varargin)
     
 
-    global Connections Debug Vecs
+    global Connections Debug Vecs AdcVizOpts
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     SetUIStatusMessage('Setting up Variable controls ...\n')
@@ -3194,6 +3198,7 @@ function Handles=SetVariableControls(varargin)
     Handles=get(FigHandle,'UserData');
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
     panelColor = get(0,'DefaultUicontrolBackgroundColor');
+    KeepInSync=AdcVizOpts.KeepScalarsAndVectorsInSync;
 
     VariableNames=Connections.VariableNames; 
     VariableTypes=Connections.VariableTypes; 
@@ -3293,6 +3298,18 @@ function Handles=SetVariableControls(varargin)
         end
     end
    
+    Handles.VectorKeepInSyncButton=uicontrol(...
+        'Parent',Handles.VectorVarButtonHandlesGroup,...
+        'Style','checkbox',...
+        'Units','normalized',...
+        'Position',[.1 .24 .8 .1],...
+        'Tag','OverlayVectorsButton',...
+        'FontSize',FontSizes(2),...
+        'String','Keep in Sync',...
+        'Enable','off',...
+        'Callback', @ToggleSync,...
+        'Value',KeepInSync);
+    
     Handles.VectorOptionsOverlayButton=uicontrol(...
         'Parent',Handles.VectorVarButtonHandlesGroup,...
         'Style','checkbox',...
@@ -3302,8 +3319,10 @@ function Handles=SetVariableControls(varargin)
         'FontSize',FontSizes(2),...
         'String','Overlay Vectors',...
         'Enable',Vecs,...
-        'CallBack','');
+        'CallBack','',...
+        'Value',1);
     
+
     Handles.VectorAsScalarButton=uicontrol(...
         'Parent',Handles.VectorVarButtonHandlesGroup,...
         'Style','checkbox',...
@@ -3325,7 +3344,7 @@ end
 %%% SetSnapshotControls
 function Handles=SetSnapshotControls(varargin)
 
-    global Connections Debug Vecs
+    global Connections Debug
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
     SetUIStatusMessage('Setting up Snapshot Controls ... \n')
@@ -3342,7 +3361,7 @@ function Handles=SetSnapshotControls(varargin)
     DateStringFormatInput=getappdata(Handles.MainFigure,'DateStringFormatInput');
     DateStringFormatOutput=getappdata(Handles.MainFigure,'DateStringFormatOutput');
 
-    ThreeDVars={'Water Level', 'Wind Velocity' };
+    ThreeDVars={'Water Level', 'Wind Velocity'};
     
     EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
@@ -3360,12 +3379,12 @@ function Handles=SetSnapshotControls(varargin)
     end
  
     % delete previously instanced controls, if they exist
-    if isfield(Handles,'ScalarSnapshotButtonHandlesPanel')
-        if ishandle(Handles.ScalarSnapshotButtonHandlesPanel)
-            delete(Handles.ScalarSnapshotButtonHandlesPanel);
+    if isfield(Handles,'ScalarSnapshotButtonHandlePanel')
+        if ishandle(Handles.ScalarSnapshotButtonHandlePanel)
+            delete(Handles.ScalarSnapshotButtonHandlePanel);
         end
-        Handles=rmfield(Handles,'ScalarSnapshotButtonHandles');
-        Handles=rmfield(Handles,'ScalarSnapshotButtonHandlesPanel');
+        Handles=rmfield(Handles,'ScalarSnapshotButtonHandle');
+        Handles=rmfield(Handles,'ScalarSnapshotButtonHandlePanel');
         Handles=rmfield(Handles,'ScalarSnapshotSliderHandle');
     end
     
@@ -3398,7 +3417,7 @@ function Handles=SetSnapshotControls(varargin)
         
         % build out snapshot list controls
         
-        Handles.ScalarSnapshotButtonHandlesPanel = uipanel(...
+        Handles.ScalarSnapshotButtonHandlePanel = uipanel(...
             'Parent',Handles.CenterContainerUpper,...
             'Title','Scalar Snapshot List ',...
             'BorderType','etchedin',...
@@ -3407,7 +3426,7 @@ function Handles=SetSnapshotControls(varargin)
             'Position',[.01 0.2 .49 .15],...
             'Tag','ScalarSnapshotButtonGroup');
               
-        Handles.VectorSnapshotButtonHandlesPanel = uipanel(...
+        Handles.VectorSnapshotButtonHandlePanel = uipanel(...
             'Parent',Handles.CenterContainerUpper,...
             'Title','Vector Snapshot List ',...
             'BorderType','etchedin',...
@@ -3418,8 +3437,8 @@ function Handles=SetSnapshotControls(varargin)
         
         
         if m>0
-            Handles.ScalarSnapshotButtonHandles=uicontrol(...
-                Handles.ScalarSnapshotButtonHandlesPanel,...
+            Handles.ScalarSnapshotButtonHandle=uicontrol(...
+                Handles.ScalarSnapshotButtonHandlePanel,...
                 'Style','popupmenu',...
                 'String',snapshotlist,...
                 'Units','normalized',...
@@ -3429,7 +3448,7 @@ function Handles=SetSnapshotControls(varargin)
                 'Callback',@ViewSnapshot);
             
             Handles.ScalarSnapshotSliderHandle=uicontrol(...
-                Handles.ScalarSnapshotButtonHandlesPanel,...
+                Handles.ScalarSnapshotButtonHandlePanel,...
                 'Style','slider',...
                 'Units','normalized',...
                 'FontSize',FontSizes(1),...
@@ -3441,8 +3460,8 @@ function Handles=SetSnapshotControls(varargin)
                 'UserData',time_datenum,...
                 'Callback',@ViewSnapshot);
             
-            Handles.VectorSnapshotButtonHandles=uicontrol(...
-                Handles.VectorSnapshotButtonHandlesPanel,...
+            Handles.VectorSnapshotButtonHandle=uicontrol(...
+                Handles.VectorSnapshotButtonHandlePanel,...
                 'Style','popupmenu',...
                 'String',snapshotlist,...
                 'Units','normalized',...
@@ -3452,7 +3471,7 @@ function Handles=SetSnapshotControls(varargin)
                 'Callback',@ViewSnapshot);
             
             Handles.VectorSnapshotSliderHandle=uicontrol(...
-                Handles.VectorSnapshotButtonHandlesPanel,...
+                Handles.VectorSnapshotButtonHandlePanel,...
                 'Style','slider',...
                 'Units','normalized',...
                 'FontSize',FontSizes(1),...
@@ -3467,14 +3486,14 @@ function Handles=SetSnapshotControls(varargin)
         end
         
 %        if ~ThreeDvarsattached
-            set(Handles.ScalarSnapshotButtonHandles,'Enable','off');
+            set(Handles.ScalarSnapshotButtonHandle,'Enable','off');
             set(Handles.ScalarSnapshotSliderHandle,'Enable','off');
-            set(Handles.VectorSnapshotButtonHandles,'Enable','off');
+            set(Handles.VectorSnapshotButtonHandle,'Enable','off');
             set(Handles.VectorSnapshotSliderHandle,'Enable','off');
 %        else
-%            set(Handles.ScalarSnapshotButtonHandles,'Enable','on');
+%            set(Handles.ScalarSnapshotButtonHandle,'Enable','on');
 %            set(Handles.ScalarSnapshotSliderHandle,'Enable','on');
-%            set(Handles.VectorSnapshotButtonHandles,'Enable','on');
+%            set(Handles.VectorSnapshotButtonHandle,'Enable','on');
 %            set(Handles.VectorSnapshotSliderHandle,'Enable','on');
 %        end     
         
@@ -3490,18 +3509,60 @@ end
 %%% ViewSnapshot
 function ViewSnapshot(hObj,~)  
 
-    global TheGrids Connections Debug
+    global TheGrids Connections Debug AdcVizOpts
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
     
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
-    
-    ScalarSnapshotClicked=floor(get(hObj,'Value'));
+    DateStringFormatOutput=getappdata(Handles.MainFigure,'DateStringFormatOutput');
+
     EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     ScalarVariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
+    
+    % figure out what button/slider was pushed
+    tag=get(hObj,'Tag');
+    ScalarClicked=~isempty(strfind(tag,'Scalar'));
+    VectorClicked=~isempty(strfind(tag,'Vector'));
+    SliderClicked=~isempty(strfind(tag,'Slider'));
+    ButtonClicked=~isempty(strfind(tag,'Button'));
+    SnapshotClicked=floor(get(hObj,'Value'));
+
+    ScalarSnapshotSliderValue=floor(get(Handles.ScalarSnapshotSliderHandle,'Value'));
+    VectorSnapshotSliderValue=floor(get(Handles.VectorSnapshotSliderHandle,'Value'));
+    ScalarSnapshotButtonValue=floor(get(Handles.ScalarSnapshotButtonHandle,'Value'));
+    VectorSnapshotButtonValue=floor(get(Handles.VectorSnapshotButtonHandle,'Value'));
+    
+    if VectorClicked
+        VectorSnapshotSliderValue=SnapshotClicked;
+        VectorSnapshotButtonValue=SnapshotClicked;
+    end
+    
+    if ScalarClicked
+        ScalarSnapshotSliderValue=SnapshotClicked;
+        ScalarSnapshotButtonValue=SnapshotClicked;
+    end
+    
+    if AdcVizOpts.KeepScalarsAndVectorsInSync
+        ScalarSnapshotSliderValue=SnapshotClicked;
+        VectorSnapshotSliderValue=SnapshotClicked;
+        ScalarSnapshotButtonValue=SnapshotClicked;
+        VectorSnapshotButtonValue=SnapshotClicked;
+        ScalarClicked=true;
+        VectorClicked=true;
+    end
+    
+    ScalarClicked=ScalarClicked && strcmp(get(Handles.ScalarSnapshotButtonHandle,'Enable'),'on');
+    VectorClicked=VectorClicked && strcmp(get(Handles.VectorSnapshotButtonHandle,'Enable'),'on');
+
+    if isempty(VectorVariableClicked)
+        VectorClicked=false;
+        VectorSnapshotClicked=[];
+    end
+    
     EnsembleNames=Connections.EnsembleNames; 
     VariableNames=Connections.VariableNames; 
+    
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableNames));
     VectorVarIndex=find(strcmp(VectorVariableClicked,VariableNames));
@@ -3510,91 +3571,94 @@ function ViewSnapshot(hObj,~)
     OverlayVectors=get(Handles.VectorOptionsOverlayButton,'Value');
     VectorAsScalar=get(Handles.VectorAsScalarButton,'Value');
 
-    %s=get(Handles.ScalarSnapshotButtonHandles,'string');
+    %s=get(Handles.ScalarSnapshotButtonHandle,'string');
     time_datenum=get(Handles.ScalarSnapshotSliderHandle,'UserData');
 
-    SetUIStatusMessage(sprintf('date=%s',datestr(time_datenum(ScalarSnapshotClicked)),false)) 
+    SetUIStatusMessage(sprintf('date=%s',datestr(time_datenum(SnapshotClicked),DateStringFormatOutput)),false) 
 
     axes(Handles.MainAxes);
-     
-    if ~isfield(Connections.members{EnsIndex,ScalarVarIndex},'TheData') 
-        error('TheData field should have been loaded by now.  Terminal.')
-    end
-    
-    % scalar 
-    [~,n]=size(Connections.members{EnsIndex,ScalarVarIndex}.TheData);
-    if ScalarSnapshotClicked>n
-        Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotClicked); 
-     
-    else
-        % test value at EnsIndex,VarIndex,TimIndex        
-        if isempty(Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotClicked})
-            Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotClicked);
+
+    % scalar
+    ScalarData=[];
+    if ScalarClicked
+        [~,n]=size(Connections.members{EnsIndex,ScalarVarIndex}.TheData);
+        if ScalarSnapshotSliderValue>n
+            Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue); 
+        else
+            % test value at EnsIndex,VarIndex,TimIndex; fill if empty        
+            if isempty(Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotSliderValue})
+                Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue);
+            end
+        end
+        ScalarData=Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotSliderValue};
+        if InundationClicked && ismember(Connections.VariableNames{ScalarVarIndex},{'Water Level','Max Water Level'});
+            z=TheGrid.z;
+            idx=z<0;
+            temp=ScalarData(idx)+z(idx);
+            ScalarData=NaN*ones(size(ScalarData));
+            ScalarData(idx)=temp;
         end
     end
     
     %vector
-    if ~isempty(VectorVarIndex)
-        [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
-        if VectorSnapshotClicked>n
-            Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
-        else
-            % test value at EnsIndex,VarIndex,TimIndex
-            if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotClicked})
-                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
+    VectorData=[];
+    if VectorClicked
+        if ~isempty(VectorVarIndex)
+            [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
+            if VectorSnapshotSliderValue>n
+                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+            else
+                % test value at EnsIndex,VarIndex,TimIndex; fill if empty 
+                if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotSliderValue})
+                    Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+                end
             end
         end
-    end
-    
-    if VectorAsScalar
-        ScalarVarIndex=VectorVarIndex;        
-        ThisData=Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotClicked};
-        ThisData=abs(ThisData);
-    else
-        ThisData=Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotClicked};
+        VectorData=Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotSliderValue};
+        if VectorAsScalar
+            VectorData=abs(VectorData);
+            ScalarData=VectorData;
+            VectorData=[];
+        end
     end
     
     GridId=Connections.members{EnsIndex,ScalarVarIndex}.GridId;
     TheGrid=TheGrids{GridId};
+      
+    if ~isempty(ScalarData)
+        Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,ScalarVarIndex},ScalarData);
+        set(Handles.TriSurf,'UserData',time_datenum(ScalarSnapshotSliderValue))
+    end
     
-    if InundationClicked && ismember(Connections.VariableNames{ScalarVarIndex},{'Water Level','Max Water Level'});
-       z=TheGrid.z;
-       idx=z<0;
-       temp=ThisData(idx)+z(idx);
-       ThisData=NaN*ones(size(ThisData));
-       ThisData(idx)=temp;
-    end  
-     
-    Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,ScalarVarIndex},ThisData);
-    set(Handles.TriSurf,'UserData',time_datenum(ScalarSnapshotClicked))
+    if ~isempty(VectorData)
     
     % overlay wind vectors
-    if ~isempty(VectorVarIndex) && OverlayVectors  && ~VectorAsScalar
+%    if ~isempty(VectorVarIndex) && OverlayVectors  && ~VectorAsScalar
+%    if ~isempty(VectorVarIndex) && ~VectorAsScalar
         
-        if ~isfield(Connections.members{EnsIndex,VectorVarIndex},'TheData')
-            error('WindVelocity TheData field should have been loaded by now.  Terminal.')
-        end
+%        if ~isfield(Connections.members{EnsIndex,VectorVarIndex},'TheData')
+%            error('Wind Velocity TheData field should have been loaded by now.  Terminal.')
+%        end
         
-        [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
-        if VectorSnapshotClicked>n
-            Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
-        else
-            % test value at EnsIndex,VectorVarIndex,TimIndex
-            if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotClicked})
-                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
-            end
-        end
-        
+%         [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
+%         if VectorSnapshotClicked>n
+%             Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
+%         else
+%             % test value at EnsIndex,VectorVarIndex,TimIndex
+%             if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotClicked})
+%                 Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotClicked);
+%             end
+%         end
+        DeleteThisHandle=[];
         if isfield(Handles,'Vectors')
             if ishandle(Handles.Vectors)
-                delete(Handles.Vectors);
+                DeleteThisHandle=Handles.Vectors;
             end
         end
         
         Member=Connections.members{EnsIndex,VectorVarIndex};
-        ThisData=Member.TheData{ScalarSnapshotClicked};
-        Handles=DrawVectors(Handles,Member,ThisData);
-          
+        delete(DeleteThisHandle)  
+        Handles=DrawVectors(Handles,Member,VectorData);
     end
     
     set(Handles.MainFigure,'UserData',Handles);
@@ -3603,14 +3667,31 @@ function ViewSnapshot(hObj,~)
     SetTitle(Connections.RunProperties);
 
     %SetUIStatusMessage('Done.')
-    if strfind(get(hObj,'Tag'),'Slider')
-        set(Handles.ScalarSnapshotButtonHandles,'value',ScalarSnapshotClicked)
-    elseif strfind(get(hObj,'Tag'),'Button')
-        set(Handles.ScalarSnapshotSliderHandle,'value',ScalarSnapshotClicked)
+    if ScalarClicked
+        set(Handles.ScalarSnapshotButtonHandle,'value',ScalarSnapshotButtonValue)
+        set(Handles.ScalarSnapshotSliderHandle,'value',ScalarSnapshotSliderValue)
+    end
+    if VectorClicked
+        set(Handles.VectorSnapshotButtonHandle,'value',VectorSnapshotButtonValue)
+        set(Handles.VectorSnapshotSliderHandle,'value',VectorSnapshotSliderValue)
     end
     
     RendererKludge;
    
+end
+
+%%  ToggleSync
+%%% ToggleSync
+%%% ToggleSync
+function ToggleSync(~,~)
+    global AdcVizOpts
+    AdcVizOpts.KeepScalarsAndVectorsInSync=~AdcVizOpts.KeepScalarsAndVectorsInSync;
+%     if AdcVizOpts.KeepScalarsAndVectorsInSync
+%         disp('Vec/Scal Syncing on...')
+%     else
+%         disp('Vec/Scal Syncing off...')
+%     end
+    
 end
 
 %%  RendererKludge

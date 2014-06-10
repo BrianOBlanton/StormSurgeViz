@@ -12,19 +12,6 @@ function p=AdcircVizOptions
 %
 % https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub
 
-% catalog parameters
-p.Storm=[];
-p.Advisory=[];
-p.Grid=[];
-p.Machine=[];
-p.Instance='';
-p.CatalogName='catalog.tree';
-p.VariablesTable={'Full','Reduced'};
-p.PollInterval=900;        % update check interval in seconds; Inf for no polling
-p.ThreddsServer='';
-
-
-
 p=struct;
 
 % catalog parameters
@@ -46,6 +33,7 @@ p.LocalTimeOffset=0;
 p.UseStrTree=false;
 p.UseGoogleMaps=true;
 p.UseShapeFiles=true;
+p.KeepScalarsAndVectorsInSync=true;
 
 p.Mode={'Network','Local', 'Url'}; 
 p.Units={'Meters','Metric','Feet','English'};

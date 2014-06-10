@@ -50,6 +50,8 @@ if exist('MyAdcircViz_Init.m','file')
    
 end
 
+opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
+
 % now process varargins, which will override any parameters set in
 % MyAdcirc_Init.m
 opts=parseargs(opts,varargin{:});
