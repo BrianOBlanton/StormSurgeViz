@@ -1,37 +1,37 @@
 <!DOCTYPE html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="AdcircViz : A MATLAB-based tool for visualization and analysis of UGRID-compliant ADCIRC model output" />
-
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>AdcircViz</title>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <title>AdcircViz by renci-unc</title>
   </head>
 
   <body>
+    <div id="container">
+      <div class="inner">
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/renci-unc/AdcircViz">View on GitHub</a>
-
-          <h1 id="project_title">AdcircViz</h1>
-          <h2 id="project_tagline">A MATLAB-based tool for visualization and analysis of UGRID-compliant ADCIRC model output</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/renci-unc/AdcircViz/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/renci-unc/AdcircViz/tarball/master">Download this project as a tar.gz file</a>
-            </section>
+        <header>
+          <h1>AdcircViz</h1>
+          <h2>A MATLAB-based tool for visualization and analysis of UGRID-compliant ADCIRC model output</h2>
         </header>
-    </div>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h2>
+        <section id="downloads" class="clearfix">
+          <a href="https://github.com/renci-unc/AdcircViz/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
+          <a href="https://github.com/renci-unc/AdcircViz/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
+          <a href="https://github.com/renci-unc/AdcircViz" id="view-on-github" class="button"><span>View on GitHub</span></a>
+        </section>
+
+        <hr>
+
+        <section id="main_content">
+          <h2>
 <a name="welcome-to-the-adcircviz-home-page" class="anchor" href="#welcome-to-the-adcircviz-home-page"><span class="octicon octicon-link"></span></a>Welcome to the AdcircViz Home Page</h2>
 
 <p>AdcircViz is a MATLAB-based tool for visualization and analysis of CF/UGRID-compliant model output funded by NOAA's Joint Hurricane Testbed (2013) Program (<a href="http://www.nhc.noaa.gov/jht/">http://www.nhc.noaa.gov/jht/</a>).</p>
@@ -65,16 +65,22 @@ or contact <a href="mailto:Brian_Blanton@Renci.Org">Brian_Blanton@Renci.Org</a>.
 <hr><h2>
 <a name="quickstart" class="anchor" href="#quickstart"><span class="octicon octicon-link"></span></a>QuickStart</h2>
 
-<p><strong>Download AdcircViz:</strong> To download the most recent version of AdcircViz, go to the top of this page (<a href="http://renci-unc.github.io/AdcircViz/">http://renci-unc.github.io/AdcircViz/</a>) and click on View in GitHub and then Clone in Desktop. You may need to install a GitHub client for your OS.  You can also download a zip file of the code, but each time the code is updated, you will need to get a new zip file and delete the old downloaded directory/folder. Using the GitHub client will allow for easy updating of the code.</p>
+<h4>
+<a name="download-adcircviz" class="anchor" href="#download-adcircviz"><span class="octicon octicon-link"></span></a>Download AdcircViz</h4>
 
-<p><strong>Add AdcircViz to the MATLAB PATH:</strong>  The cloned repository will be put into a directory called AdcircViz, in a location specified by the user.  Put this path  into the MATLAB path, perhaps in the user’s or system startup.m file. For example:</p>
+<p>To download the most recent version of AdcircViz, go to the top of this page (<a href="http://renci-unc.github.io/AdcircViz/">http://renci-unc.github.io/AdcircViz/</a>) and click on View in GitHub and then Clone in Desktop. You may need to install a GitHub client for your OS.  You can also download a zip file of the code, but each time the code is updated, you will need to get a new zip file and delete the old downloaded directory/folder. Using the GitHub client will allow for easy updating of the code.</p>
+
+<h4>
+<a name="add-adcircviz-to-the-matlab-path" class="anchor" href="#add-adcircviz-to-the-matlab-path"><span class="octicon octicon-link"></span></a>Add AdcircViz to the MATLAB PATH</h4>
+
+<p>The cloned repository will be put into a directory called AdcircViz, in a location specified by the user.  Put this path  into the MATLAB path, perhaps in the user’s or system startup.m file. For example:</p>
 
 <pre><code>AdcVizHome='/home/myusername/GitHubRepos/AdcircViz';
 addpath(AdcVizHome)
 </code></pre>
 
-<hr><h2>
-<a name="running-adcircviz" class="anchor" href="#running-adcircviz"><span class="octicon octicon-link"></span></a>Running AdcircViz</h2>
+<hr><h4>
+<a name="run-adcircviz" class="anchor" href="#run-adcircviz"><span class="octicon octicon-link"></span></a>Run AdcircViz</h4>
 
 <p>Start MATLAB.  To open the GUI window of the AdcircViz Tool, type AdcircViz in the Command Window to get a default view. </p>
 
@@ -89,43 +95,59 @@ addpath(AdcVizHome)
 
 <p><strong>Note: Only one instance of AdcircViz GUI is allowed to run at a time. Close the previous one before open another.</strong></p>
 
+<h4>
+<a name="change-font-size" class="anchor" href="#change-font-size"><span class="octicon octicon-link"></span></a>Change font size</h4>
+
 <p>If the fonts and GUI layout is cramped, change the fontsize of the GUI window by setting the <strong>FontOffset</strong> parameter to adjust, e.g., type </p>
 
 <pre><code>close all;  AdcircViz('FontOffset',-2)
 </code></pre>
 
-<p>To change the units of the map (default “Meters” ) to “Feet”, use the <strong>Units</strong> parameter to adjust, e.g., type </p>
+<h4>
+<a name="change-scalar-field-units" class="anchor" href="#change-scalar-field-units"><span class="octicon octicon-link"></span></a>Change scalar field units</h4>
+
+<p>To change the units of the map (default “Meters” ) to <strong>Feet</strong>, use the <strong>Units</strong> parameter to adjust, e.g., type </p>
 
 <pre><code>close all; AdcircViz('Units','Feet')
 </code></pre>
+
+<h4>
+<a name="point-to-a-different-thredds-server" class="anchor" href="#point-to-a-different-thredds-server"><span class="octicon octicon-link"></span></a>Point to a different Thredds Server</h4>
 
 <p>To view a different Thredds Server, use the <strong>ThreddsServer</strong> parameter to specify a different URL, as in </p>
 
 <pre><code>close all; AdcircViz('ThreddsServer','http://coastalmodeldev.data.noaa.gov/thredds')
 </code></pre>
 
+<h4>
+<a name="point-to-a-different-catalog-file" class="anchor" href="#point-to-a-different-catalog-file"><span class="octicon octicon-link"></span></a>Point to a different catalog file</h4>
+
 <p>To specify a different catalog file, use the <strong>Catalog</strong> parameter to specify a different URL.  For example, to view the catalog file with only the small, coarse-grid ec_95d test files on the default RENCI Thredds Server, type</p>
 
 <pre><code>close all; AdcircViz('CatalogName','catalog.tree.tc.ec95d')
 </code></pre>
+
+<h4>
+<a name="plotting-vector-fields" class="anchor" href="#plotting-vector-fields"><span class="octicon octicon-link"></span></a>Plotting vector fields</h4>
+
+<p>Vector plotting is enabled when the user checks on an available vector field (e.g., <strong>Wind Velocity</strong>) and sets a time in the Vector Snapshot List.  To have both water level and wind vectors simultaneously, the user must also check the <strong>Water Level</strong> field.  Parameters for tuning the vector drawing are accessible through the <strong>Vector Options</strong> panel, which is enabled by clicking on the VO button <img src="https://raw.githubusercontent.com/renci-unc/AdcircViz/master/private/vo.png" alt="VO button"> in the main MATLAB toolbar.  These details are shown in the following screen-grab, with red boxes around the places to enable.</p>
+
+<p><img src="https://raw.githubusercontent.com/renci-unc/AdcircViz/master/private/AdcircViz_VectorView.png?raw=true" alt="Vector View"></p>
 
 <hr><h2>
 <a name="complete-documentation" class="anchor" href="#complete-documentation"><span class="octicon octicon-link"></span></a>Complete Documentation</h2>
 
 <p>Detailed documentation for AdcircViz is maintained on Google Docs, at this URL:
 <a href="https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub">https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub</a></p>
-      </section>
+        </section>
+
+        <footer>
+          AdcircViz is maintained by <a href="https://github.com/renci-unc">renci-unc</a><br>
+          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+        </footer>
+
+        
+      </div>
     </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">AdcircViz maintained by <a href="https://github.com/renci-unc">renci-unc</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
   </body>
 </html>
