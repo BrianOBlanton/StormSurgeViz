@@ -144,8 +144,6 @@ end
 %% Initialize AdcircViz
 fprintf('\nAdcViz++ Initializing application.\n')
 
-global AdcVizOpts
-
 AdcircViz_Init;  % this sets defaults and processes vars
 
 % Storm
@@ -166,7 +164,7 @@ switch AdcVizOpts.Mode
         %% Get the catalog
         %global TheCatalog
         fprintf('\nAdcViz++ Getting Catalog.\n')
-        TheCatalog=GetCatalogFromServer(UrlBase,AdcVizOpts.CatalogName);
+        TheCatalog=GetCatalogFromServer(UrlBase,AdcVizOpts.CatalogName,TempDataLocation);
         %catalog=TheCatalog.Catalog;
         %CatalogHash=TheCatalog.CatalogHash;
         
@@ -364,11 +362,12 @@ function CheckForUpdateFromTimer(~,~)
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
     Url=getappdata(Handles.MainFigure,'Url');
+    TempDataLocation=getappdata(Handles.MainFigure,'TempDataLocation');
     OldCatalogName=getappdata(Handles.MainFigure,'CatalogName');
     OldCatalogHash=Url.CatalogHash;
 
     % Get the current catalog...
-    [~,CatalogHash]=GetCatalogFromServer(Url.Base,OldCatalogName);
+    [~,CatalogHash]=GetCatalogFromServer(Url.Base,OldCatalogName,TempDataLocation);
     timenow=datestr(fix(clock),'HH:MM PM');
     if strcmp(OldCatalogHash,CatalogHash)
         %update=[];
@@ -402,9 +401,10 @@ function [update,CatalogHash]=CheckForUpdate(Url,TheCatalog)
     AdcVizOpts=getappdata(Handles.MainFigure,'AdcVizOpts');
     OldCatalogHash=TheCatalog.CatalogHash;
     OldCatalogName=AdcVizOpts.CatalogName;
+    TempDataLocation=getappdata(Handles.MainFigure,'TempDataLocation');
 
     % Get the current catalog...
-    tempCatalog=GetCatalogFromServer(Url.Base,OldCatalogName);
+    tempCatalog=GetCatalogFromServer(Url.Base,OldCatalogName,TempDataLocation);
     update=tempCatalog.Catalog;
     CatalogHash=tempCatalog.CatalogHash;
     if strcmp(OldCatalogHash,CatalogHash)
@@ -944,7 +944,8 @@ function InstanceUrl(varargin)
    end
 
    AdcVizOpts=getappdata(FigThatCalledThisFxn,'AdcVizOpts');
-   
+   TempDataLocation=getappdata(FigThatCalledThisFxn,'TempDataLocation');
+
    url=get(hObj,'String');
    
    temp = textscan(url, '%s','Delimiter','/','MultipleDelimsAsOne',1);
@@ -959,7 +960,7 @@ function InstanceUrl(varargin)
    
    CatalogName=AdcVizOpts.CatalogName;
    
-   TheCatalog=GetCatalogFromServer(Url.Base,CatalogName);
+   TheCatalog=GetCatalogFromServer(Url.Base,CatalogName,TempDataLocation);
       
    f=fields(TheCatalog.Catalog);
    for i=1:length(f)

@@ -2,10 +2,19 @@
 
 HOME=fileparts(which(mfilename));
 addpath([HOME '/extern'])
+
+% need to set up main java path before setting any global variables
+if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
+    cd([HOME '/extern/nctoolbox'])
+    setup_nctoolbox;
+end
+
 if isempty(which('detbndy'))
     cd([HOME '/adcirc_util'])
     adcircinit
 end
+
+global AdcVizOpts
 
 ThreddsList={
              'http://opendap.renci.org:1935/thredds'
@@ -47,7 +56,6 @@ if exist('MyAdcircViz_Init.m','file')
     for i=1:size(snames,1)
         opts=parseargs(opts,snames{i},svals{i});
     end
-   
 end
 
 opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
@@ -69,7 +77,7 @@ AdcVizOpts.AppName=blank(fileread('ThisVersion'));
 fprintf('AdcViz++ %s\n',AdcVizOpts.AppName')
 
 AdcVizOpts.HOME = HOME;
-cd(AdcVizOpts.HOME)
+%cd(AdcVizOpts.HOME)
 
 if AdcVizOpts.UseStrTree
     f=[AdcVizOpts.HOME '/extern/' jts];
@@ -81,16 +89,6 @@ if AdcVizOpts.UseStrTree
     end
 end
 
-if isempty(which('detbndy'))
-    cd([AdcVizOpts.HOME '/adcirc_util'])
-    adcircinit
-end
-
-if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
-    cd([AdcVizOpts.HOME '/extern/nctoolbox'])
-    setup_nctoolbox;
-end
-cd(AdcVizOpts.HOME)
 
 AdcVizOpts.HasMapToolBox=false;
 if ~isempty(which('almanac'))
