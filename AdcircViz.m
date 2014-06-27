@@ -15,6 +15,7 @@ function varargout=AdcircViz(varargin)
 % FontOffset        - Integer to increase (+) or decrease (-) fontsize in the app;
 % LocalTimeOffset   - (0, i.e. UTC) Hour offset for displayed times ( < 0 for west of GMT).
 % BoundingBox       - [xmin xmax ymin ymax] vector for initial axes zoom
+% CatalogName       - Name of catalog file to search for
 % ColorMax          - Maximum scalar value for color scaling
 % ColorMin          - Minimum scalar value for color scaling
 % ColorMap          - Color map to use; {'noaa_cmap','jet','hsv',...}
@@ -22,6 +23,7 @@ function varargout=AdcircViz(varargin)
 % GoogleMapsApiKey  - Api Key from Google for extended map accessing
 % PollingInterval   - (900) interval in seconds to poll for catalog updates.
 % ThreddsServer     - specify alternative THREDDS server
+% Mode              - Local | Url | Network
 % Help              - Opens a help window with parameter/value details.
 %                     Must be the first and only argument to AdcircViz.
 % SendDiagnosticsToCommandWindow - {false,true}
@@ -45,7 +47,7 @@ function varargout=AdcircViz(varargin)
 % or
 % >> close all; AdcircViz('Instance','rencidaily','Units','feet')
 %
-% Copyright (c) 2012  Renaissance Computing Institute. All rights reserved.
+% Copyright (c) 2014  Renaissance Computing Institute. All rights reserved.
 % Licensed under the RENCI Open Source Software License v. 1.0.
 % This software is open source. See the bottom of this file for the 
 % license.
@@ -175,9 +177,28 @@ switch AdcVizOpts.Mode
         Url.Units=AdcVizOpts.Units;
         
     case 'Url'
-        str={'Direct Url file access is not yet supported.'};
-        errordlg(str)
-        return
+        str={'Direct Url file access is not yet supported. Best of Luck!!'};
+        UrlBase=AdcVizOpts.Url;
+        Url.ThisInstance='Url';
+        Url.ThisStorm=NaN;
+        Url.ThisAdv=NaN;
+        Url.ThisGrid=NaN;
+        Url.Basin=NaN;
+        Url.StormType='other';
+        Url.ThisStormNumber=NaN;
+        Url.FullDodsC= UrlBase;
+        Url.FullFileServer= UrlBase;
+        Url.Ens={''};
+        Url.CurrentSelection=NaN;
+        Url.Base=UrlBase;
+        Url.UseShapeFiles=AdcVizOpts.UseShapeFiles;
+        Url.Units=AdcVizOpts.Units;
+        
+        TheCatalog.Catalog='Local';
+        TheCatalog.CatalogHash=NaN;
+        TheCatalog.CurrentSelection=[];
+%        errordlg(str)
+%        return
         
     otherwise
         %% Set up for Local Files
@@ -194,8 +215,8 @@ switch AdcVizOpts.Mode
         Url.Ens={LocalDirectory};
         Url.CurrentSelection=NaN;
         Url.Base=UrlBase;
-        Url.UseShapeFiles=UseShapeFiles;
-        Url.Units=Units;
+        Url.UseShapeFiles=AdcVizOpts.UseShapeFiles;
+        Url.Units=AdcVizOpts.Units;
         
         TheCatalog.Catalog='Local';
         TheCatalog.CatalogHash=NaN;
@@ -234,9 +255,12 @@ set(Handles.MainFigure,'Pointer','watch');
 
 %% OpenDataConnections 
 global Connections
-if any(strcmpi(AdcVizOpts.Mode,{'Local','Url'}))
+if strcmpi(AdcVizOpts.Mode,'Local')
     set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
     Connections=OpenDataConnectionsLocal(Url);
+elseif strcmpi(AdcVizOpts.Mode,'Url')
+    set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
+    Connections=OpenDataConnectionsUrl(Url);
 else
     set(Handles.ServerInfoString,'String',Url.FullDodsC);
     Connections=OpenDataConnections(Url);
@@ -587,9 +611,11 @@ function Connections=OpenDataConnections(Url)
     global TheGrids Debug 
     if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
 
+    msg='Opening Remote OPeNDAP connections ...\n';
+    SetUIStatusMessage(msg)
+    
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
-    
     AdcVizOpts=getappdata(fig,'AdcVizOpts');
 
     FileNetcdfVariableNames={}; 
@@ -666,7 +692,9 @@ function Connections=OpenDataConnections(Url)
         SetUIStatusMessage(['Could not connect to ' Url.Ens{i} ' run.properties file. This is terminal.\n'])
         throw(ME);
     end
+    
     SetUIStatusMessage(['* Successfully retrieved ' Url.Ens{i} ' run.properties file. \n'])
+    
     Connections.RunProperties=RunProperties;   
     
     % now, add storm parts

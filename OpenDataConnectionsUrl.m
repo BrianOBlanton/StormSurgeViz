@@ -1,36 +1,26 @@
-%%  OpenDataConnectionsLocal
-%%% OpenDataConnectionsLocal
-%%% OpenDataConnectionsLocal
-function Connections=OpenDataConnectionsLocal(Url)
+%%  OpenDataConnectionsUrl
+%%% OpenDataConnectionsUrl
+%%% OpenDataConnectionsUrl
+function Connections=OpenDataConnectionsUrl(Url)
 
     global TheGrids Debug 
-    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
-
-    ll=false;
-    msg='Opening Local OPeNDAP connections ...\n';
+    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
+ 
+    msg='Opening Remote OPeNDAP connections ...\n';
     SetUIStatusMessage(msg)
     
-    if Debug,fprintf('* Function = %s\n',ThisFunctionName);end
-
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
-    
-    HOME=fileparts(which(mfilename));
+    AdcVizOpts=getappdata(fig,'AdcVizOpts');
 
-    if ~exist([HOME '/private/run.properties.local'],'file')
-        msg=['Local run.properties file not found in ' HOME '/private.'];
-        if ll
-            fprintf(msg);
-        else
-            SetUIStatusMessage(msg)
-        end
-    elseif strcmp(Url.ThisInstance,'Local') && ~strfind(Url.Base,'file://')
-        msg='Local mode Url.Base must start with "file://"';
-        if ll
-            fprintf(msg);
-        else
-            SetUIStatusMessage(msg)
-        end
+    HOME=AdcVizOpts.HOME;
+
+    if ~exist([HOME '/private/run.properties.url'],'file')
+        msg=['Url run.properties file not found in ' HOME '/private.'];         
+        SetUIStatusMessage(msg)
+    elseif strcmp(Url.ThisInstance,'Url') && ~strfind(Url.Base,'http://')
+        msg='Url mode Url.Base must start with "http://"';
+        SetUIStatusMessage(msg)
     end
      
     if isnan(Url.Ens{1}),Url.Ens{1}='./';end
@@ -47,18 +37,19 @@ function Connections=OpenDataConnectionsLocal(Url)
     % to make it easier to edit.  The first row are the variable names
     % in this function, declared above as empty cells.
     ff='AdcircVizVariableList.xls';
-    fig=findobj(0,'Tag','MainVizAppFigure');
-    
-    TempDataLocation=getappdata(fig,'TempDataLocation');    
-    AdcVizOpts=getappdata(fig,'AdcVizOpts');
-
     sheet=AdcVizOpts.VariablesTable;  % this is the sheet NAME to read, not the sheet data!
     [~,~,C] = xlsread(ff,sheet);
     [m,n]=size(C);
     vars=C(1,:)';
     for i=1:n
         for j=2:m
-            com=sprintf('%s{j-1}=''%s'';',vars{i},C{j,i});
+            thisvar=vars{i};
+            switch thisvar
+                case {'VariableUnitsFac.mks','VariableUnitsFac.eng'}
+                    com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i})); %#ok<ST2NM>
+                otherwise
+                    com=sprintf('%s{j-1}=''%s'';',thisvar,C{j,i});
+            end
             eval(com)
         end
     end
@@ -84,6 +75,7 @@ function Connections=OpenDataConnectionsLocal(Url)
     NVars=length(FilesToOpen);
 
     DeleteTempFiles=false;
+    SetUIStatusMessage('Opening Url OPeNDAP connections ...\n')
 
     Connections.EnsembleNames=Url.Ens;
     Connections.VariableNames=VariableNames;
@@ -91,55 +83,25 @@ function Connections=OpenDataConnectionsLocal(Url)
     Connections.VariableUnitsFac=VariableUnitsFac;
     Connections.VariableTypes=VariableTypes;
     
-    % get run.properties file from first ens.
-    i=1;
-    if ~exist([Url.Ens{i} '/maxele.63.nc'],'file')
-        % pop up a directory browser
-        msg=['maxele.63.nc file not found in ' Url.Ens{i} '. Navigate to a simulations directory...\n'];
-        if ll
-            fprintf(msg);
-        else
-            SetUIStatusMessage(msg);
-        end
-        [filename, pathname, filterindex] = uigetfile('*.nc', 'Navigate to a maxele.63.nc file');
-        if filename==0 % cancel was pressed
-            error('This is terminal.')
-        end
-        Url.Ens{1}=pathname;
-    end
-    
-    RPurl=[Url.Ens{1} '/run.properties'];
-    if ~exist(RPurl,'file')
-        RPurl=[HOME '/private/run.properties.local'];
-    end
+    RPurl=[HOME '/private/run.properties.url'];
     
     try
         msg=['* Connecting to ' RPurl '  ... \n'];
-        if ll
-            fprintf(msg);
-        else
-            SetUIStatusMessage(msg)
-        end
+        SetUIStatusMessage(msg)
         urlwrite(['file://' RPurl],[TempDataLocation '/run.properties']);
         RunProperties=LoadRunProperties([TempDataLocation '/run.properties']);
         if DeleteTempFiles
             delete([TempDataLocation '/run.properties']) %#ok<UNRCH>
         end
     catch ME
-        msg=['Could not connect to ' Url.Ens{i} ' run.properties file. This is terminal.\n'];
-        if ll
-            fprintf(msg);
-        else
-            SetUIStatusMessage(msg); 
-        end
+        msg=['Could not connect to run.properties.url file. This is terminal.\n'];
+        SetUIStatusMessage(msg); 
         throw(ME);
     end
+    
     msg=['* Successfully retrieved ' RPurl  '\n'];
-    if ll
-        fprintf(msg);
-    else
-        SetUIStatusMessage(msg)
-    end
+    SetUIStatusMessage(msg)
+ 
     Connections.RunProperties=RunProperties;
     
     % now, add storm parts
@@ -173,45 +135,13 @@ function Connections=OpenDataConnectionsLocal(Url)
                 delete([TempDataLocation '/fort.22']) %#ok<UNRCH>
             end
         catch ME
-            msg='* Could not open remote fort.22 file. \n';
-            if ll
-                fprintf(msg);
-            else
-                SetUIStatusMessage(msg)
-            end
-        end
-        msg=sprintf('* Successfully retrieved %s file links ...\n',Url.Ens{i});
-        if ll
-            fprintf(msg);
-        else
             SetUIStatusMessage(msg)
         end
+        msg=sprintf('* Successfully retrieved %s file links ...\n',Url.Ens{i});
+        SetUIStatusMessage(msg)
     end
  
-%     % try to get the nhc shapefile
-%     if Url.UseShapeFiles
-%         if strcmp(Url.StormType,'TC')
-%             adv=str2double(Url.ThisAdv);
-%             UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
-%             yr=GetRunProperty(RunProperties,'year');
-%             stormnumber=GetRunProperty(RunProperties,'stormnumber');
-%             f=sprintf('%s%02d%s_5day_%03d.zip',Url.Basin,Url.ThisStormNumber,yr,adv);
-%             try
-%                 urlwrite([UrlBase f],sprintf('%s/%s','TempData',f));
-%                 Connections.AtcfShape=LoadAtcfShapefile(Url.Basin,Url.ThisStorm,yr,adv,'TempData');
-%             catch ME
-%                 SetUIStatusMessage(sprintf('Failed to get %s/%s.  Check arguments to %s.\n',UrlBase,f,mfilename));
-%             end
-%         end
-%     end
-    
-%     msg=sprintf('%d ensemble members found. \n\n',i);
-%     if ll
-%         fprintf(msg)
-%     else
-%         SetUIStatusMessage(msg)
-%     end
-    
+
     % add bathy as a variable
     Connections.VariableNames{NVars+1}='Grid Elevation';
     Connections.VariableDisplayNames{NVars+1}='Grid Elevation';

@@ -24,6 +24,7 @@ p.CatalogName='catalog.tree';
 p.VariablesTable={'Full','Reduced'};
 p.PollInterval=900;        % update check interval in seconds; Inf for no polling
 p.ThreddsServer='';
+p.Url='';
 
 % feature options
 p.Verbose=true;
