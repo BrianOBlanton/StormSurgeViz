@@ -247,8 +247,7 @@ function Connections=OpenDataConnectionsLocal(Url)
                        if any(strcmpi(Url.Units,{'english','feet'}))
                            TheGrids{GridId}.z=TheGrids{GridId}.z*3.2808;
                        end
-                   end
-                   
+                   end               
                    Connections.members{i,j}.GridId=GridId;
                else
                    Connections.members{i,j}.GridId=gridid;
@@ -317,8 +316,4 @@ function Connections=OpenDataConnectionsLocal(Url)
        end
   
     end
-end
-function dh=DataHash2(obj)
-    temp=DataHash(obj);
-    dh=temp(1:5);
 end

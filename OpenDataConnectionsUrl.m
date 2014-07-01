@@ -141,7 +141,6 @@ function Connections=OpenDataConnectionsUrl(Url)
         SetUIStatusMessage(msg)
     end
  
-
     % add bathy as a variable
     Connections.VariableNames{NVars+1}='Grid Elevation';
     Connections.VariableDisplayNames{NVars+1}='Grid Elevation';
@@ -208,8 +207,8 @@ function Connections=OpenDataConnectionsUrl(Url)
                 ttemp=ncgeodataset(url);
                 SetUIStatusMessage(sprintf('* Opened %s  file connection.\n',ThisVariable))
                 if length(ttemp.variables)<1
-                SetUIStatusMessage(sprintf('***** No variables found in %s\n', ThisVariable))
-                ttemp=[];
+%                 SetUIStatusMessage(sprintf('***** No variables found in %s\n', ThisVariable))
+%                 ttemp=[];
                 end
             catch ME
                 SetUIStatusMessage(sprintf('***** Could not open %s connection. *****\n',ThisVariable))
@@ -242,13 +241,8 @@ function Connections=OpenDataConnectionsUrl(Url)
                 storm(ii).NNodes=m;
                 storm(ii).NTimes=n;
             end
-            
             %storm(ii).VariableType=ThisVariableType;
-       end
-  
+        end  
     end
 end
-function dh=DataHash2(obj)
-    temp=DataHash(obj);
-    dh=temp(1:5);
-end
+
