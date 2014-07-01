@@ -83,7 +83,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     Connections.VariableUnitsFac=VariableUnitsFac;
     Connections.VariableTypes=VariableTypes;
     
-    RPurl=[HOME '/private/run.properties.url'];
+    RPurl=[HOME '/private/run.properties.url']
     
     try
         msg=['* Connecting to ' RPurl '  ... \n'];
