@@ -517,7 +517,7 @@ function DisplayCatalog(~,~)
             eval(s);
             if isempty(ll)
                 fmt=sprintf('  %%%ds  ',fwidth(j));
-               ll=sprintf(fmt,char(d));
+                ll=sprintf(fmt,char(d));
             else
                 fmt=sprintf('%%s   :   %%%ds  ',fwidth(j));
                 ll=sprintf(fmt,ll,char(d));
@@ -536,6 +536,7 @@ function DisplayCatalog(~,~)
         s=sprintf('D=[D [catalog.%s]''];',f{i});
         eval(s);
     end
+    
 %     DD=cell(length(str),7);
 %     DD(:,2:7)=D;  
 %     for i=1:length(str)
@@ -571,11 +572,13 @@ function DisplayCatalog(~,~)
 %     jtable.setRowSelectionAllowed(true);
 %     jtable.setRowHeight(trh);
 
-    if ~isempty(CurrentSelection) && (CurrentSelection>0 && CurrentSelection < length(str)) 
-    
-    end
+%     if ~isempty(CurrentSelection) && (CurrentSelection>0 && CurrentSelection < length(str)) 
+%     
+%     end
         
-    [s,~]=listdlg('Name',sprintf('ASGS Catalog on %s', Url.Base),'PromptString','Select a Catalog Entry or click Cancel.','ListString',str,'ListSize',[1200 700],'SelectionMode','single');
+    [s,~]=listdlg('Name',sprintf('ASGS Catalog on %s', Url.Base),...
+        'PromptString','Select a Catalog Entry or click Cancel.',...
+        'ListString',str,'ListSize',[1200 700],'SelectionMode','single');
 
     %%% this is going to wait until the user selects and clicks OK, or
     %%% clicks Cancel
