@@ -21,12 +21,12 @@ if isfield(S,'pgn')
     end
 end
 
-%if isfield(S,'pts')
-    %for i=1:length(S.pts)
-        %j=j+1;
-        %h(j)=line(S.pts(i).X,S.pts(i).Y,2*ones(size(S.pts(i).Y)),'Color','k','Marker','o','LineStyle','none','Tag','AtcfTrackShape','Clipping','on');
-    %end
-%end
+if isfield(S,'pts')
+    for i=1:length(S.pts)
+        j=j+1;
+        h(j)=line(S.pts(i).X,S.pts(i).Y,2*ones(size(S.pts(i).Y)),'Color','k','Marker','o','LineStyle','none','Tag','AtcfTrackShape','Clipping','on');
+    end
+end
 
 
 % if isfield(S,'ww')

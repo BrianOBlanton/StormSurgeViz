@@ -83,18 +83,18 @@ function Connections=OpenDataConnectionsUrl(Url)
     Connections.VariableUnitsFac=VariableUnitsFac;
     Connections.VariableTypes=VariableTypes;
     
-    RPurl=[HOME '/private/run.properties.url']
+    RPurl=[HOME '/private/run.properties.url'];
     
     try
         msg=['* Connecting to ' RPurl ' ... \n'];
         SetUIStatusMessage(msg)
-        urlwrite(['file:///' RPurl],[TempDataLocation '/run.properties'])
+        urlwrite(['file:///' RPurl],[TempDataLocation '/run.properties']);
         RunProperties=LoadRunProperties([TempDataLocation '/run.properties']);
         if DeleteTempFiles
             delete([TempDataLocation '/run.properties']) %#ok<UNRCH>
         end
     catch ME
-        msg=['Could not connect to run.properties.url file. This is terminal.\n'];
+        msg='Could not connect to run.properties.url file. This is terminal.\n';
         SetUIStatusMessage(msg); 
         throw(ME);
     end

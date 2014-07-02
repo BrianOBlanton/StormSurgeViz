@@ -50,10 +50,14 @@ catch ME
 end
 
 cd(destination)
-unzip(sprintf('%s',f))
+try 
+    unzip(sprintf('%s',f))
+catch ME
+    throw(ME);
+end
 cd(HERE)
 
-fb=sprintf('%s/%s%02d%4d.%03d',destination,basin,stormnumber,year,advisory);
+fb=sprintf('%s/%s%02d%4d-%03d',destination,basin,stormnumber,year,advisory);
 f=sprintf('%s_5day_lin',fb);
 if exist([f '.shp'],'file')
     s=shaperead(f);

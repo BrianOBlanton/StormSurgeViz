@@ -4727,9 +4727,11 @@ function SetTitle(RunProperties)
 
     
     if ~isempty(advisory)
-        titlestr={sprintf('%s  Advisory=%s  ',stormname, advisory),[LowerString ' ']};
+        %titlestr={sprintf('%s  Advisory=%s  ',stormname, advisory),[LowerString ' ']};
+        titlestr=[sprintf('%s  Advisory=%s  ',stormname, advisory),[' ' LowerString ' ']];
     else    
-        titlestr={sprintf('%s',stormname),[LowerString ' ']};
+        %titlestr={sprintf('%s',stormname),[LowerString ' ']};
+        titlestr=[sprintf('%s',stormname),[' ' LowerString ' ']];
     end
     title(titlestr,'FontWeight','bold') 
 end
