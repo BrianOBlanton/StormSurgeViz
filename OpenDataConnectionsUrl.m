@@ -86,9 +86,9 @@ function Connections=OpenDataConnectionsUrl(Url)
     RPurl=[HOME '/private/run.properties.url']
     
     try
-        msg=['* Connecting to ' RPurl '  ... \n'];
+        msg=['* Connecting to ' RPurl ' ... \n'];
         SetUIStatusMessage(msg)
-        urlwrite(['file://' RPurl],[TempDataLocation '/run.properties']);
+        urlwrite(['file:///' RPurl],[TempDataLocation '/run.properties'])
         RunProperties=LoadRunProperties([TempDataLocation '/run.properties']);
         if DeleteTempFiles
             delete([TempDataLocation '/run.properties']) %#ok<UNRCH>

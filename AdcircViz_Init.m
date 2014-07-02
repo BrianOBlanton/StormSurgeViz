@@ -1,5 +1,7 @@
 %function AdcircViz_Init
 
+PWD=pwd;
+
 HOME=fileparts(which(mfilename));
 addpath([HOME '/extern'])
 
@@ -13,6 +15,8 @@ if isempty(which('detbndy'))
     cd([HOME '/adcirc_util'])
     adcircinit
 end
+
+cd(PWD)
 
 global AdcVizOpts
 
