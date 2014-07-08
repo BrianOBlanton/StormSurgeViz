@@ -69,6 +69,7 @@ opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
 opts=parseargs(opts,varargin{:});
 
 AdcVizOpts=opts;
+AdcVizOpts.Storm=lower(AdcVizOpts.Storm);
 
 if isempty(AdcVizOpts.ThreddsServer)
     AdcVizOpts.ThreddsServer=ThreddsList{1};

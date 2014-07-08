@@ -1,6 +1,7 @@
 function S=PlotAtcfShapefile(S)
 
 co=get(gca,'ColorOrder');
+co(2,:)=[0 1 0];
 
 j=0;
 if isfield(S,'lin')  
@@ -16,7 +17,7 @@ if isfield(S,'pgn')
     for i=1:length(S.pgn)
         j=j+1;
         h(j)=line(S.pgn(i).X,S.pgn(i).Y,2*ones(size(S.pgn(i).Y)),...
-            'Color',co(i,:),'Linewidth',2,'Tag','AtcfTrackShape',...
+            'Color',co(i,:),'Tag','AtcfTrackShape','Linewidth',2,...
             'Clipping','on');
     end
 end

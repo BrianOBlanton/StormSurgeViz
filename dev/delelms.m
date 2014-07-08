@@ -1,0 +1,1 @@
+delete(findobj(gca,'Tag','elements'))

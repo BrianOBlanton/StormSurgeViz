@@ -171,8 +171,13 @@ switch AdcVizOpts.Mode
         %CatalogHash=TheCatalog.CatalogHash;
         
         %% Determine starting URL based on Instance
-        Url=GetUrl2(AdcVizOpts.Storm,AdcVizOpts.Advisory,AdcVizOpts.Grid,...
-            AdcVizOpts.Machine,AdcVizOpts.Instance,UrlBase,TheCatalog);
+        Url=GetUrl2(AdcVizOpts.Storm,...
+                    AdcVizOpts.Advisory,...
+                    AdcVizOpts.Grid,...
+                    AdcVizOpts.Machine,...
+                    AdcVizOpts.Instance,...
+                    UrlBase,...
+                    TheCatalog);
         Url.UseShapeFiles=AdcVizOpts.UseShapeFiles;
         Url.Units=AdcVizOpts.Units;
         
@@ -531,11 +536,11 @@ function DisplayCatalog(~,~)
     set(0,'DefaultUICOntrolFontName','Courier')
     set(0,'DefaultUICOntrolFontSize',14)
     
-    D={};
-    for i=1:length(f)
-        s=sprintf('D=[D [catalog.%s]''];',f{i});
-        eval(s);
-    end
+%     D={};
+%     for i=1:length(f)
+%         s=sprintf('D=[D [catalog.%s]''];',f{i});
+%         eval(s);
+%     end
     
 %     DD=cell(length(str),7);
 %     DD(:,2:7)=D;  
@@ -1354,7 +1359,10 @@ function Handles=MakeTheAxesMap(Handles)
     set(Handles.ColorBar,'FontSize',FontSizes(2))
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
     set(Handles.AxisLimits,'String',num2str(axx))
-        
+
+    SetUIStatusMessage('** Done.\n')
+
+    
 end
 
 %%  DrawTriSurf
