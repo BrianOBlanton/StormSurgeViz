@@ -38,7 +38,7 @@ set(0,'DefaultAxesTickDir','out')
 set(0,'DefaultFigureRenderer','zbuffer');
 
 LocalDirectory='./';
-TempDataLocation=[HOME '/TempData']; 
+TempDataLocation=[PWD '/TempData']; 
 DateStringFormatInput='yyyy-mm-dd HH:MM:SS';
 DateStringFormatOutput='ddd, dd mmm, HH:MM PM';
 
@@ -93,7 +93,6 @@ if AdcVizOpts.UseStrTree
         AdcVizOpts.UseStrTree=false;
     end
 end
-
 
 AdcVizOpts.HasMapToolBox=false;
 if ~isempty(which('almanac'))
