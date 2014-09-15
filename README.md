@@ -1,11 +1,11 @@
-AdcircViz
+StormSurgeViz
 =========
 
 MATLAB GUI for accessing and visualizing UGRID-compliant ADCIRC model results
 
 GH Website:
 
-http://renci-unc.github.io/AdcircViz
+http://renci-unc.github.io/StormSurgeViz
 
 Documentation:
 
