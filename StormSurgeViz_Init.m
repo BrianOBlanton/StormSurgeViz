@@ -12,7 +12,7 @@ if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
 end
 
 if isempty(which('detbndy'))
-    cd([HOME '/ss_util'])
+    cd([HOME '/util'])
     ssinit
 end
 

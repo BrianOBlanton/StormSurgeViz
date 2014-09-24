@@ -4,7 +4,7 @@
 function TheGrid=GetGridStructure(Member,id)
 
     global Debug
-    if Debug,fprintf('AdcViz++ Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
     
     SetUIStatusMessage(['* Getting Grid Structure for ' Member.VariableDisplayName ' ... \n']);
     
@@ -15,7 +15,7 @@ function TheGrid=GetGridStructure(Member,id)
     %GridName=GetRunProperty(Connection.RunProperties,'ADCIRCgrid');
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
-    AdcVizOpts=getappdata(fig,'AdcVizOpts');
+    SSVizOpts=getappdata(fig,'SSVizOpts');
     
     if ~exist([TempDataLocation '/' Member.GridHash '_FGS.mat'],'file')
        TheGrid.name=['GridID.eq.' int2str(id)];
@@ -50,8 +50,8 @@ function TheGrid=GetGridStructure(Member,id)
        % add element areas and basis function arrays
        TheGrid=el_areas(TheGrid);
        TheGrid=belint(TheGrid);
-       if AdcVizOpts.UseStrTree
-           if Debug,fprintf('AdcViz++ Computing Strtree for grid %s\n',Member.GridHash);end
+       if SSVizOpts.UseStrTree
+           if Debug,fprintf('SSViz++ Computing Strtree for grid %s\n',Member.GridHash);end
            TheGrid.strtree=ComputeStrTree(TheGrid);
        end
        save([TempDataLocation '/' Member.GridHash '_FGS.mat'],'TheGrid') 
