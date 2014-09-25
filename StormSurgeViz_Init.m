@@ -23,10 +23,17 @@ global SSVizOpts
 ThreddsList={
              'http://opendap.renci.org:1935/thredds'
              'http://coastalmodeldev.data.noaa.gov/thredds'
+             'http://mrtee.europa.renci.org:8080/thredds'
             };
 %            'http://workhorse.europa.renci.org:8080/thredds'
 %            'http://thredds.crc.nd.edu/thredds'
         
+CatalogEntryPoint={
+                   'ASGS'
+                   'ASGS'
+                   'SSV'
+                  };
+
 InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/ASGS/InstanceDefaults_SS.m';
 
 %if ~exist('varargin','var')
@@ -73,6 +80,7 @@ SSVizOpts.Storm=lower(SSVizOpts.Storm);
 
 if isempty(SSVizOpts.ThreddsServer)
     SSVizOpts.ThreddsServer=ThreddsList{1};
+    SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{1};
 end
 
 %scc=get(0,'ScreenSize');

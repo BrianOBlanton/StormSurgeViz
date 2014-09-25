@@ -1,4 +1,4 @@
-function Url=GetUrl2(ThisStorm,ThisAdvisory,ThisGrid,ThisMachine,ThisInstance,UrlBase,TheCatalog)
+function Url=GetUrl2(ThisStorm,ThisAdvisory,ThisGrid,ThisMachine,ThisInstance,UrlBase,TheCatalog,CatalogEntryPoint)
 
 
 %%
@@ -40,9 +40,9 @@ else
     idxMachines=strcmp(Machines,ThisMachine); %#ok<*NODEF>
     idxInstances=strcmp(Instances,ThisInstance); %#ok<*NODEF>
 
-    idxAll=sum([idxStorms idxAdvisories idxGrids idxMachines idxInstances ]')==sum(N);
+    idxAll=sum([idxStorms idxAdvisories idxGrids idxMachines idxInstances]')==sum(N);
 
-    idxAny=any([idxStorms idxAdvisories idxGrids idxMachines idxInstances ]');
+    idxAny=any([idxStorms idxAdvisories idxGrids idxMachines idxInstances]');
 
     if any(idxAll)
         % select most recent from those that satisty all of the
@@ -75,20 +75,12 @@ Url.ThisAdv     =currentAdv;
 Url.ThisGrid    =currentGrid;
 Url.Basin='al';
 if str2double(currentAdv)<1000
-    % need to skip "Q" since there are no storm names starting with Q
-    startingnameletters={'a','b','c','d','e','f','g','h','i','j',...
-                         'k','l','m','n','o','p','r','s','t','u',...
-                         'v','w','x','y','z'};
-    Url.StormType='TC';
-    Url.ThisStormNumber=find(strcmpi(Url.ThisStorm(1),startingnameletters));
-    
+    Url.StormType='TC';    
 else  %  otherwise it will be the nam date...
     Url.StormType='other';
 end
-Url.FullDodsC=[UrlBase '/dodsC/ASGS/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
-Url.FullFileServer=[UrlBase '/fileServer/ASGS/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+Url.FullDodsC=[UrlBase '/dodsC/' CatalogEntryPoint '/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+Url.FullFileServer=[UrlBase '/fileServer/' CatalogEntryPoint '/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
 Url.Ens=TheseEnsembles;
 Url.CurrentSelection=CurrentSelection;
-% Url.catalog=TheCatalog.Catalog;
-% Url.CatalogHash=TheCatalog.CatalogHash;
 Url.Base=UrlBase;

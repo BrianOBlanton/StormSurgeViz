@@ -117,7 +117,7 @@ switch SSVizOpts.Mode
         UrlBase=SSVizOpts.ThreddsServer;  %  ThreddsList{1}; %#ok<USENS>
         
         %% Test for the catalog existence
-        err=TestForCatalogServer(UrlBase,SSVizOpts.CatalogName);
+        err=TestForCatalogServer(UrlBase,SSVizOpts.CatalogEntryPoint,SSVizOpts.CatalogName);
         if err
             error('catalog file could not be found.')
         end
@@ -125,7 +125,7 @@ switch SSVizOpts.Mode
         %% Get the catalog
         %global TheCatalog
         fprintf('\nSSViz++ Getting Catalog.\n')
-        TheCatalog=GetCatalogFromServer(UrlBase,SSVizOpts.CatalogName,TempDataLocation);
+        TheCatalog=GetCatalogFromServer(UrlBase,SSVizOpts.CatalogEntryPoint,SSVizOpts.CatalogName,TempDataLocation);
         %catalog=TheCatalog.Catalog;
         %CatalogHash=TheCatalog.CatalogHash;
         
@@ -136,7 +136,8 @@ switch SSVizOpts.Mode
                     SSVizOpts.Machine,...
                     SSVizOpts.Instance,...
                     UrlBase,...
-                    TheCatalog);
+                    TheCatalog,...
+                    SSVizOpts.CatalogEntryPoint);
         Url.UseShapeFiles=SSVizOpts.UseShapeFiles;
         Url.Units=SSVizOpts.Units;
         
@@ -307,12 +308,15 @@ if exist('timer','file')
     if isfinite(SSVizOpts.PollInterval)
         SetUIStatusMessage('Setting Timer Function to check for updates.\n')
         Handles.Timer=timer('ExecutionMode','fixedRate',...
-                            'TimerFcn',@CheckForUpdateFromTimer,...
-                            'Period',SSVizOpts.PollInterval,...
-                            'StartDelay',SSVizOpts.PollInterval,...
-                            'Name','StormSurgeVizTimer');
-        start(Handles.Timer);
+            'TimerFcn',@CheckForUpdateFromTimer,...
+            'Period',SSVizOpts.PollInterval,...
+            'StartDelay',SSVizOpts.PollInterval,...
+            'Name','StormSurgeVizTimer');
+        
         set(Handles.MainFigure,'UserData',Handles);
+        if SSVizOpts.PollInterval>0
+            start(Handles.Timer);
+        end
     end
 end
 
@@ -352,13 +356,17 @@ function CheckForUpdateFromTimer(~,~)
     Handles=get(f,'UserData');
     Url=getappdata(Handles.MainFigure,'Url');
     TempDataLocation=getappdata(Handles.MainFigure,'TempDataLocation');
-    OldCatalogName=getappdata(Handles.MainFigure,'CatalogName');
-    OldCatalogHash=Url.CatalogHash;
+    SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
+    TheCatalog=getappdata(Handles.MainFigure,'Catalog');
 
+    OldCatalogHash=TheCatalog.CatalogHash;
+    OldCatalogName=SSVizOpts.CatalogName;
+    CatalogEntryPoint=SSVizOpts.CatalogEntryPoint;
+    
     % Get the current catalog...
-    [~,CatalogHash]=GetCatalogFromServer(Url.Base,OldCatalogName,TempDataLocation);
+    tempCatalog=GetCatalogFromServer(Url.Base,CatalogEntryPoint,OldCatalogName,TempDataLocation);
     timenow=datestr(fix(clock),'HH:MM PM');
-    if strcmp(OldCatalogHash,CatalogHash)
+    if strcmp(OldCatalogHash,tempCatalog.CatalogHash)
         %update=[];
         %CatalogHash=[];
         SetUIStatusMessage(sprintf('No Catalog Updates yet at %s\n',timenow))
@@ -390,10 +398,11 @@ function [update,CatalogHash]=CheckForUpdate(Url,TheCatalog)
     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
     OldCatalogHash=TheCatalog.CatalogHash;
     OldCatalogName=SSVizOpts.CatalogName;
+    CatalogEntryPoint=SSVizOpts.CatalogEntryPoint;
     TempDataLocation=getappdata(Handles.MainFigure,'TempDataLocation');
 
     % Get the current catalog...
-    tempCatalog=GetCatalogFromServer(Url.Base,OldCatalogName,TempDataLocation);
+    tempCatalog=GetCatalogFromServer(Url.Base,CatalogEntryPoint,OldCatalogName,TempDataLocation);
     update=tempCatalog.Catalog;
     CatalogHash=tempCatalog.CatalogHash;
     if strcmp(OldCatalogHash,CatalogHash)
@@ -951,8 +960,9 @@ function InstanceUrl(varargin)
    ThisInstance=urlparts{10};
    
    CatalogName=SSVizOpts.CatalogName;
+   CatalogEntryPoint=SSVizOpts.CatalogEntryPoint;
    
-   TheCatalog=GetCatalogFromServer(Url.Base,CatalogName,TempDataLocation);
+   TheCatalog=GetCatalogFromServer(Url.Base,CatalogEntryPoint,CatalogName,TempDataLocation);
       
    f=fields(TheCatalog.Catalog);
    for i=1:length(f)
@@ -987,8 +997,8 @@ function InstanceUrl(varargin)
    Url.FullDodsC=sprintf('%s/%s/%s/%s/%s/%s/%s',Url.Base,'/dodsC/ASGS/',ThisStorm,ThisAdv,ThisGrid,ThisMachine,ThisInstance);
    Url.FullFileServer=sprintf('%s/%s/%s/%s/%s/%s/%s',Url.Base,'/fileServer/ASGS/',ThisStorm,ThisAdv,ThisGrid,ThisMachine,ThisInstance);
    Url.Ens=Ensembles;
-   Url.catalog=TheCatalog.Catalog;
-   Url.CatalogHash=TheCatalog.CatalogHash;
+%   Url.Catalog=TheCatalog.Catalog;
+%   Url.CatalogHash=TheCatalog.CatalogHash;
    
    UseShapeFiles=SSVizOpts.UseShapeFiles;
    Url.UseShapeFiles=UseShapeFiles;
@@ -1048,7 +1058,8 @@ function InstanceUrl(varargin)
    set(Handles.HydrographButton,'Value',0);
    
    setappdata(Handles.MainFigure,'Url',Url);
-   
+   setappdata(Handles.MainFigure,'TheCatalog',TheCatalog);
+
    SetUIStatusMessage('Done.\n')
 
    RendererKludge;
@@ -1947,7 +1958,6 @@ BackgroundMapsContainerContents;
             'Enable','on',...
             'Tag','GraphicOutputPrint');
         
-        
         %%% Shape Files
         %%% Shape Files
         %%% Shape Files
@@ -2299,17 +2309,31 @@ BackgroundMapsContainerContents;
             'HorizontalAlignment','left',...
             'Tag','TimeOffsetString',...
             'String','0');
-        
+
+        % ShowCatalogToggleButton
+        % ShowCatalogToggleButton
+        % ShowCatalogToggleButton
         if strcmp(Mode,'Network')
             Handles.ShowCatalogToggleButton=uicontrol(...
                 'Parent',Handles.InformationPanel,...
                 'Style','pushbutton',...
                 'Units','normalized',...
-                'Position',[.25 .01 .50 .1],...
+                'Position',[.15 .01 .35 .1],...
                 'Tag','ShowCatalogToggleButton',...
                 'FontSize',fs1,...
                 'String','Show Catalog',...
                 'CallBack',@DisplayCatalog);
+            
+            Handles.CheckForCatalogUpdate=uicontrol(...
+                'Parent',Handles.InformationPanel,...
+                'Style','pushbutton',...
+                'Units','normalized',...
+                'Position',[.55 .01 .45 .1],...
+                'Tag','CheckForCatalogUpdate',...
+                'FontSize',fs1,...
+                'String','CheckForUpdates',...
+                'CallBack',@CheckForUpdateFromTimer);
+            
         else
             Handles.ShowCatalogToggleButton=uicontrol(...
                 'Parent',Handles.InformationPanel,...
