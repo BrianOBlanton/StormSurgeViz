@@ -34,6 +34,7 @@ p.LocalTimeOffset=0;
 p.UseStrTree=false;
 p.UseGoogleMaps=true;
 p.UseShapeFiles=true;
+p.UseNcml=true;
 p.KeepScalarsAndVectorsInSync=true;
 
 p.Mode={'Network','Local', 'Url'}; 

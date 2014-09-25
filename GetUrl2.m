@@ -18,11 +18,11 @@ N=[~isempty(ThisStorm)    ...
 
 if isempty([ThisStorm ThisAdvisory ThisGrid ThisMachine ThisInstance])
     % take first entry in catalog.  It's the most recent
-    currentStorm=Storms{1};
-    currentAdv=Advisories{1};
-    currentGrid=Grids{1};
-    currentMachine=Machines{1};
-    currentInstance=Instances{1};
+    currentStorm=Storms{1}; %#ok<USENS>
+    currentAdv=Advisories{1}; %#ok<USENS>
+    currentGrid=Grids{1}; %#ok<USENS>
+    currentMachine=Machines{1}; %#ok<USENS>
+    currentInstance=Instances{1}; %#ok<USENS>
     CurrentSelection=1;
 
 else
@@ -40,7 +40,7 @@ else
     idxMachines=strcmp(Machines,ThisMachine); %#ok<*NODEF>
     idxInstances=strcmp(Instances,ThisInstance); %#ok<*NODEF>
 
-    idxAll=sum([idxStorms idxAdvisories idxGrids idxMachines idxInstances]')==sum(N);
+    idxAll=sum([idxStorms idxAdvisories idxGrids idxMachines idxInstances]')==sum(N); %#ok<UDIM>
 
     idxAny=any([idxStorms idxAdvisories idxGrids idxMachines idxInstances]');
 

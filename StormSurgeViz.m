@@ -653,60 +653,82 @@ function Connections=OpenDataConnections(Url)
     Connections.VariableUnitsFac=VariableUnitsFac;
     Connections.VariableTypes=VariableTypes;
     
-    % get run.properties file from first ens.
-    i=1;
-    TopTextUrl= [Url.FullFileServer '/' Url.Ens{i}];
-    RPurl=[TopTextUrl '/run.properties'];
-    RPlocation=[TempDataLocation '/run.properties'];
-    try
-        SetUIStatusMessage(['* Connecting to ' Url.Ens{i} ' run.properties file ... \n'])
-        urlwrite(RPurl,RPlocation);
-        RunProperties=LoadRunProperties(RPlocation);
-        if DeleteTempFiles
-            delete(RPlocation) %#ok<UNRCH>
-        end
-    catch ME
-        SetUIStatusMessage(['Could not connect to ' Url.Ens{i} ' run.properties file. This is terminal.\n'])
-        throw(ME);
-    end
     
-    SetUIStatusMessage(['* Successfully retrieved ' Url.Ens{i} ' run.properties file. \n'])
-    
-    Connections.RunProperties=RunProperties;   
-    
-    % now, add storm parts
-    
-    Connections.members=cell(length(Connections.EnsembleNames),length(Connections.VariableNames));
-    
-    NEns=length(Url.Ens);
-       
-    for i=1:NEns
-        TopDodsCUrl=[Url.FullDodsC '/' Url.Ens{i}];
-        storm=GetStorm(TopDodsCUrl); 
-
-        for j=1:NVars
-            Connections.members{i,j}=storm(j);
+    if SSVizOpts.UseNcml
+        if Debug,fprintf('SSV++   Attempting to use NCML files on server.\n');end
+        i=1;
+        TopTextUrl= [Url.FullFileServer '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
+        [~,status]=urlread(TopTextUrl);
+        if isempty(status)
+            SetUIStatusMessage(['Could not connect to an ncml file. This is terminal.\n'])
+            ME = MException('CheckForNcml:NotPresent', ...
+                ['Could not connect to an ncml file. ',...
+                TopTextUrl]);
+            throw(ME);
         end
         
-        % attach extra stuff if available.
-        f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
-        f22Location=[TempDataLocation '/fort.22'];
-        Connections.Tracks{i}='';
+        % ncml file exists on the other end!!
+        TopDodsCUrl= [Url.FullDodsC '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
+        
+    else
+    
+        % get run.properties file from first ens.
+        i=1;
+        TopTextUrl= [Url.FullFileServer '/' Url.Ens{i}];
+        RPurl=[TopTextUrl '/run.properties'];
+        RPlocation=[TempDataLocation '/run.properties'];
         try
-            SetUIStatusMessage('* Connecting to fort.22 file\n')
-            urlwrite(f22url,f22Location);
-            temp=read_adcirc_nws19(f22Location);
-            Connections.Tracks{i}=temp;
+            SetUIStatusMessage(['* Connecting to ' Url.Ens{i} ' run.properties file ... \n'])
+            urlwrite(RPurl,RPlocation);
+            RunProperties=LoadRunProperties(RPlocation);
             if DeleteTempFiles
-                delete(f22Location) %#ok<UNRCH>
+                delete(RPlocation) %#ok<UNRCH>
             end
         catch ME
-            SetUIStatusMessage('* Could not open remote fort.22 file. \n')
+            SetUIStatusMessage(['Could not connect to ' Url.Ens{i} ' run.properties file. This is terminal.\n'])
+            throw(ME);
         end
-   
-        SetUIStatusMessage(sprintf('Successfully retrieved %s forecast links ...\n',Url.Ens{i}))
+        
+        SetUIStatusMessage(['* Successfully retrieved ' Url.Ens{i} ' run.properties file. \n'])
+        
+        Connections.RunProperties=RunProperties;
+        
+        % now, add storm parts
+        
+        Connections.members=cell(length(Connections.EnsembleNames),length(Connections.VariableNames));
+        
+        NEns=length(Url.Ens);
+        
+        for i=1:NEns
+            TopDodsCUrl=[Url.FullDodsC '/' Url.Ens{i}];
+            storm=GetStorm(TopDodsCUrl);
+            
+            for j=1:NVars
+                Connections.members{i,j}=storm(j);
+            end
+            
+            % attach extra stuff if available.
+            f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
+            f22Location=[TempDataLocation '/fort.22'];
+            Connections.Tracks{i}='';
+            try
+                SetUIStatusMessage('* Connecting to fort.22 file\n')
+                urlwrite(f22url,f22Location);
+                temp=read_adcirc_nws19(f22Location);
+                Connections.Tracks{i}=temp;
+                if DeleteTempFiles
+                    delete(f22Location) %#ok<UNRCH>
+                end
+            catch ME
+                SetUIStatusMessage('* Could not open remote fort.22 file. \n')
+            end
+            
+            SetUIStatusMessage(sprintf('Successfully retrieved %s forecast links ...\n',Url.Ens{i}))
+        end
+        
     end
- 
+    
+    
     % try to get the nhc shapefile
     if Url.UseShapeFiles
         if strcmp(Url.StormType,'TC')

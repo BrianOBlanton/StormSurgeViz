@@ -74,13 +74,15 @@ opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
 % now process varargins, which will override any parameters set in
 % MyStormSurge_Init.m
 opts=parseargs(opts,varargin{:});
+opts.UseNcml=true;
+opts.NcmlDefaultFileName='00_dir.ncml';
 
 SSVizOpts=opts;
 SSVizOpts.Storm=lower(SSVizOpts.Storm);
 
 if isempty(SSVizOpts.ThreddsServer)
-    SSVizOpts.ThreddsServer=ThreddsList{1};
-    SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{1};
+    SSVizOpts.ThreddsServer=ThreddsList{3};
+    SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{3};
 end
 
 %scc=get(0,'ScreenSize');
