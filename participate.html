@@ -26,12 +26,29 @@
           <h2>
 <a name="participation-in-stormsurgeviz-activities" class="anchor" href="#participation-in-stormsurgeviz-activities"><span class="octicon octicon-link"></span></a>Participation in StormSurgeViz Activities</h2>
 
-<p>StormSurgeViz is a vizualization tool for storm surge model output. The model output may represent data on structured grids (CGRID) or unstructured grids (UGRID). StormSurgeViz visualizes storm surge model output which conforms to a few of requirements which enable StormSurgeViz to recognize and process the model output. StormSurgeViz comes preconfigured to visualize the ASGS grid of ADCIRC model output. However, it may be configured to visualize the output of any storm surge model which conforms to a few conventions recognized by StormSrugeViz. Those requirements are outlined below.</p>
+<p>StormSurgeViz is a vizualization tool for storm surge model output. Storm surge model output represents data on horizontal structured grids (CGRID) or unstructured grids (UGRID). StormSurgeViz visualizes storm surge model output which conforms to a few requirements which enable StormSurgeViz to recognize and process the model output. StormSurgeViz comes preconfigured to visualize the <a href="http://coastalemergency.org/">ASGS grid</a> of <a href="http://adcirc.org/">ADCIRC</a> and <a href="http://swanmodel.sourceforge.net/">SWAN</a> model output. However, StormSurgeViz may be configured to visualize the output of any storm surge model which conforms to a few conventions recognized by StormSrugeViz. The requirements are outlined below.</p>
 
 <h2>
 <a name="cf-compliance" class="anchor" href="#cf-compliance"><span class="octicon octicon-link"></span></a>Climate and Forecast (CF) Compliance</h2>
 
-<p>Lorem Ipsum</p>
+<p>Models output data for independent variables located in time and space. The names of those variables, as well as the formats for specifying time and space, vary greatly from model to model. For a tool such as StormSurgeViz to recognize variables of interest and how to locate them in space and time, naming conventions are necessary. By requiring conformance to naming conventions, a tool such as StormSurgeViz may search model data for both the variables of interest as well as the locating coordinates in time and space.</p>
+
+<p>Climatologists, meteorologists, and oceanographers have come together over the past two decades to standardize a comprehensive naming convention for variables of interest and associated metadata. The standard, the <a href="http://cfconventions.org/">Climate and Forecast (CF) Conventions</a>, is universally accepted today and community-maintained. StormSurgeViz requires a minimum degree of CF-compliance. These instructions do not repeat the entirity of the CF standard, but instead outline what parts of CF conventions are necessary for StormSurgeViz to use model output.</p>
+
+<p>CF takes an interesting approach to naming conventions. Rather than requiring specific variable names, presecribed lists of metadata are associated with each variable so that tools may derive the meaning of each variable from the associated metadata. Metadata consists of pairs, called "attributes," of both a name and a value. CF prescribes allowable attribute names and the vocabulary of attribute values for a given attribute name. Some attributes are required and some are optional.</p>
+
+<p>CF specifies some attributes, known as "global" attributes, which apply to all variables contained in the model output. These attributes, such as the <em>title</em> attribute, are placed in the model output only once and are described in the CF Conventions <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#description-of-file-contents">here</a>.</p>
+
+<p>CF recommends several attributes for data variables. The most useful among these and required for StormSurgeViz is <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#standard-name"><em>standard_name</em></a>. The CF lists a vocabulary of acceptable values for standard name <a href="http://cfconventions.org/Data/cf-standard-names/28/build/cf-standard-name-table.html">here</a>. StormSurgeViz searches model output for CF standard names in order to identify variables of interest. For storm surge models these are the variables <em>u</em> and <em>v</em> for surface currents and <em>zeta</em> for wave height.</p>
+
+<p>Two other attributes are associated with a given standard name value, <em>long_name</em> and <em>units</em>. Long names are free form text descriptions and are not standardized for particular standard names. Units are values taken from the <a href="http://www.unidata.ucar.edu/software/udunits/">UDUNITS</a> software package. Particular standard names have prescribed lists of acceptable units values.</p>
+
+<p>Coordinate data (latitude, longitude, vertical coordinate, and time) have special treatment within the CF standard. Coordinate data are identified by an <em>axis</em> attribute with one of the values <em>X</em>, <em>Y</em>, <em>Z</em>, or <em>T</em> associated with variables typically named <em>x</em>, <em>y</em>, <em>z</em>, and <em>time</em>. Applicable standard names are <em>latitude</em>, <em>longitude</em>, <em>time</em>, and <em>depth</em> or <em>height</em>.</p>
+
+<h2>
+<a name="ugrid-extensions" class="anchor" href="#ugrid-extensions"><span class="octicon octicon-link"></span></a>UGRID Extensions to CF</h2>
+
+<p>If the model output is represented on an unstructured grid, StormSurgeViz recognizes a proposed extension to the CF Conventions known as <a href="https://github.com/ugrid-conventions/ugrid-conventions">UGRID</a>.</p>
 
 <h2>
 <a name="netcdf-format" class="anchor" href="#netcdf-format"><span class="octicon octicon-link"></span></a>NetCDF Formatting</h2>
