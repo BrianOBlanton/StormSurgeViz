@@ -34,7 +34,7 @@
           <h2>
 <a name="welcome-to-the-stormsurgeviz-home-page" class="anchor" href="#welcome-to-the-stormsurgeviz-home-page"><span class="octicon octicon-link"></span></a>Welcome to the StormSurgeViz Home Page</h2>
 
-<p>StormSurgeViz is a MATLAB-based tool for visualization and analysis of CF/UGRID-compliant model output funded by NOAA's Joint Hurricane Testbed (2013) Program (<a href="http://www.nhc.noaa.gov/jht/">http://www.nhc.noaa.gov/jht/</a>).</p>
+<p>StormSurgeViz is a MATLAB-based tool for visualization and analysis of CF-compliant model output funded by NOAA's Joint Hurricane Testbed (2013) Program (<a href="http://www.nhc.noaa.gov/jht/">http://www.nhc.noaa.gov/jht/</a>).</p>
 
 <table>
 <thead><tr>
@@ -53,10 +53,15 @@
 <p>Check out the documentation at <a href="https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub">https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub</a>
 or contact <a href="mailto:Brian_Blanton@Renci.Org">Brian_Blanton@Renci.Org</a>.</p>
 
+<h2>
+<a name="participation-in-stormsurgeviz-activities" class="anchor" href="#participation-in-stormsurgeviz-activities"><span class="octicon octicon-link"></span></a>Participation in StormSurgeViz Activities</h2>
+
+<p>If you are a producer of storm surge model output, you may pariticpate in StormSurgeViz activities to make your model output visible in StormSurgeViz. By following an "onboarding" checklist of steps available <a href="participate.html">here</a>, you may participate in those activites.</p>
+
 <hr><h2>
 <a name="basic-implementation-of-stormsurgeviz" class="anchor" href="#basic-implementation-of-stormsurgeviz"><span class="octicon octicon-link"></span></a>Basic Implementation of StormSurgeViz</h2>
 
-<p>StormSurgeViz relies on making connections to the OPeNDAP server using the MATLAB toolbox nctoolbox.  This toolbox (<a href="http://nctoolbox.github.com/nctoolbox">http://nctoolbox.github.com/nctoolbox</a>) is used extensively to open netCDF data files, without accessing the data components until they are needed.  Each graphic is generated using MATLAB functions and tools “on the fly”;  the color map, color limits and color increment are specified by the user with default values appropriate to the scalar field being rendered.  The default colormap is one similar to the NOAA colormap currently used for NHC surge maps:</p>
+<p>StormSurgeViz relies on making connections to an OPeNDAP server using the MATLAB toolbox nctoolbox.  This toolbox (<a href="http://nctoolbox.github.com/nctoolbox">http://nctoolbox.github.com/nctoolbox</a>) is used extensively to open netCDF data files, without accessing the data components until they are needed.  Each graphic is generated using MATLAB functions and tools “on the fly”;  the color map, color limits and color increment are specified by the user with default values appropriate to the scalar field being rendered.  The default colormap is one similar to the NOAA colormap currently used for NHC surge maps:</p>
 
 <p><img src="https://raw.githubusercontent.com/renci-unc/StormSurgeViz/master/private/cbar.png" alt="Image of noaa_cmap"></p>
 
