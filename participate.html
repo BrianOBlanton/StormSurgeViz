@@ -53,17 +53,23 @@
 <h2>
 <a name="netcdf-format" class="anchor" href="#netcdf-format"><span class="octicon octicon-link"></span></a>NetCDF Formatting</h2>
 
-<p>Lorem Ipsum</p>
+<p><a href="http://www.unidata.ucar.edu/software/netcdf/">NetCDF</a> is a standard binary file format for array data maintained by the University Coorporation for Atmospheric Research (UCAR) and supported by the National Science Foundation (NSF). The CF Conventions were designed to take advantage of the NetCDF format. The NetCDF format facilitates global attributes, mutltidimensional data arrays (variables), and variable dimensions and attributes. StormSurgeViz requires model output stored in the NetCDF format.</p>
+
+<p>NetCDF files may be read and written by free and open source programs (ncdump and ncgen) supplied by Unidata, a UCAR subsidiary, or by user-supplied programs which take advantage of software NetCDF libraries. Free and open source NetCDF libraries are available from both Unidata and other third parties. NetCDF libraries are available with application programming interfaces (API) in C, Java, Python, Perl, R, Fortran, and Matlab. The ncdump and ncgen programs from Unidata transforms NetCDF files into and from human readable text representations of NetCDF using a description format known as <a href="http://www.unidata.ucar.edu/software/netcdf/docs/netcdf_utilities_guide.html#cdl_guide">Common Data Language</a> (CDL).</p>
 
 <h2>
-<a name="thredds-service" class="anchor" href="#thredds-service"><span class="octicon octicon-link"></span></a>THREDDS Service</h2>
+<a name="thredds-service" class="anchor" href="#thredds-service"><span class="octicon octicon-link"></span></a>DAP Service</h2>
 
-<p>Lorem Ipsum</p>
+<p>StormSurgeViz may view NetCDF files stored on a filesystem local to the StormSurgeViz program itself. But more typically storm surge model output stored in NetCDF is large and stored on remote servers. Moving large amounts of data over network connections is inefficient. Therefore an efficient transport protocol for NetCDF known as <a href="http://www.opendap.org/support">Data Access Protocol</a> (DAP), formerly known as Distributed Ocean Data Protocol (DODS), was developed by NASA and is maintained by an NSF-supported non-profit, OpenDAP.</p>
+
+<p>The DAP protocol allows NetCDF files to be queried for subsets of data constrained by space, time, and variable constraints. By requesting only necessary subsets of data, network transfers of data are more efficient. Programs which make DAP requests are known as DAP clients and programs which provide responses to DAP requests are known as DAP servers. StormSurgeViz is a DAP client and requires DAP server access to storm surge model output in CF-compliant NetCDF files.</p>
+
+<p>There are many implementations of DAP servers. <a href="http://docs.opendap.org/index.php/Hyrax">Hyrax</a> is the StormSurgeViz recommended DAP server as it provides the most up-to-date standards compatibility and the best extensibility. The Hyrax server is a special type of DAP server which also implements a convention known as <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/">THREDDS</a>. The THREDDS feature of a THREDDS-enabled DAP server provides a customizable catalog of dataset holdings on a DAP server and the DAP services available for each of those holdings.</p>
 
 <h2>
 <a name="stormsurgeviz-index" class="anchor" href="#stormsurgeviz-index"><span class="octicon octicon-link"></span></a>StormSurgeViz Index</h2>
 
-<p>Lorem Ipsum</p>
+<p>Storm surge model output are typically stored in NetCDF files on DAP servers with individual files for storm events, model ensembles, model runs, and possibly even individual variables. Output may also be served from more than one DAP server. StormSurgeViz requires an index of remote NetCDF resources available for viewing. These indices are constructed by running scripts which compile lists of DAP URLs corresponding to model output datasets. Construction of StormSurgeViz indices is decribed <a href="https://docs.google.com/document/d/1tsu3t_uwvpymVAmKG81cmsgf6F7mCYGWpic-2L7qFEU/edit?usp=sharing">here></a>.</p>
 
         </section>
 
