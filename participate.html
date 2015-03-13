@@ -63,11 +63,15 @@
 <a name="global-attributes" class="anchor" href="#global-attributes"><span class="octicon octicon-link"></span></a>Global Attributes</h4>
 
 <ul>
-  <li>Convention - The value should be " CF-1.6 " which may be modified to reflect a more recent version of the CF conventions as specified <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#identification-of-conventions">here</a>.</li>
+  <li>Convention - The value should be "CF-1.6" which may be modified to reflect a more recent version of the CF conventions as specified <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#identification-of-conventions">here</a>.</li>
 </ul>
 
 <h4>
 <a name="variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Variable Attributes</h4>
+
+<p>There are two types of variables with affected attributes: <em>coordinate variable arrays</em> which provide coordinate data for corresponding dimensional indices, and <em>data variable arrays</em> which provide observed or modeled data which is dimensionally indexed. All cooredinate variables are required. Data variables are optional to the degree that StormSurgeViz will only display the variables included in the NetCDF.<p>
+
+<h5><a name="coordinate-variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Coordinate Variables</h5>
 
 <ul>
   <li>time - A required <em>dimensionally-unlimited</em> coordinate variable named "time" is a 1D array of 64-bit Reals and should have the following required attributes as partially described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#time-coordinate">here</a>:
@@ -92,6 +96,20 @@
       <li>units - The value should be "degrees_north"</li>
       <li>positive - The value should be "north"</li>
     </ul>
+</ul>
+
+<h5><a name="data-variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Data Variable Attributes</h5>
+
+<ul>
+  <li>significant_wave_height - A data variable preferably named "significant_wave_height" is a 3D array of 64-bit Reals and should have the following required attributes:
+    <ul style="list-style-type: square;">
+      <li>standard_name - The value should be "sea_surface_wave_significant_height"</li>
+      <li>long_name - The value should be "significant_wave_height"</li>
+      <li>units - The value should be "m"</li>
+      <li>coordinates - The value should be "time y x"</li>
+      <li>_FillValue = The recommended value is "-99999.0"</li>
+    </ul>
+  </li>
 </ul>
 
 <h2>
