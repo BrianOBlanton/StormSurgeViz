@@ -46,6 +46,8 @@ function varargout=StormSurgeViz(varargin)
 % >> StormSurgeViz;
 % or
 % >> close all; StormSurgeViz('Instance','rencidaily','Units','feet')
+% or 
+% [Handles,Url,Connections,Options]=StormSurgeViz(P1,V1,P2,V2,...);
 %
 % Copyright (c) 2014  Renaissance Computing Institute. All rights reserved.
 % Licensed under the RENCI Open Source Software License v. 1.0.
@@ -55,9 +57,6 @@ function varargout=StormSurgeViz(varargin)
 % Brian Blanton, Renaissance Computing Institute, UNC-CH, Brian_Blanton@Renci.Org
 % Rick Luettich, Institute of Marine SCiences,    UNC-CH, Rick_Luettich@Unc.Edu
 %
-
-% Call as: [Handles,Url,Connections,Options]=StormSurgeViz(P1,V1,P2,V2,...);
-%}
 
 if nargin==1
     if strcmp(varargin{1},'help')
