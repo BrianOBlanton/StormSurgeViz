@@ -29,18 +29,18 @@ if ischar(advisory)
     advisory=str2double(advisory);
 end
 
-if ischar(stormnumber) % assume a tc name...
-    % need to skip "Q" since there are no storm names starting with Q
-    startingnameletters={'a','b','c','d','e','f','g','h','i','j',...
-                         'k','l','m','n','o','p','r','s','t','u',...
-                         'v','w','x','y','z'};
-    stormnumber=find(strcmp(lower(stormnumber(1)),startingnameletters));
-end
+% if ischar(stormnumber) % assume a tc name...
+%     % need to skip "Q" since there are no storm names starting with Q
+%     startingnameletters={'a','b','c','d','e','f','g','h','i','j',...
+%                          'k','l','m','n','o','p','r','s','t','u',...
+%                          'v','w','x','y','z'};
+%     stormnumber=find(strcmpi(stormnumber(1),startingnameletters));
+% end
 
 
 % for archived files:
 UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
-f=sprintf('%s%02d%4d_5day_%03d.zip',basin,stormnumber,year,advisory);
+f=sprintf('%s%s%4d_5day_%03d.zip',basin,stormnumber,year,advisory);
 
 try 
     urlwrite([UrlBase f],sprintf('%s/%s',destination,f));
@@ -57,7 +57,7 @@ catch ME
 end
 cd(HERE)
 
-fb=sprintf('%s/%s%02d%4d-%03d',destination,basin,stormnumber,year,advisory);
+fb=sprintf('%s/%s%s%4d-%03d',destination,basin,stormnumber,year,advisory);
 f=sprintf('%s_5day_lin',fb);
 if exist([f '.shp'],'file')
     s=shaperead(f);

@@ -80,9 +80,10 @@ opts.NcmlDefaultFileName='00_dir.ncml';
 SSVizOpts=opts;
 SSVizOpts.Storm=lower(SSVizOpts.Storm);
 
+cn=1;
 if isempty(SSVizOpts.ThreddsServer)
-    SSVizOpts.ThreddsServer=ThreddsList{3};
-    SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{3};
+    SSVizOpts.ThreddsServer=ThreddsList{cn};
+    SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{cn};
 end
 
 %scc=get(0,'ScreenSize');

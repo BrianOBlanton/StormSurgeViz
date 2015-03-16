@@ -55,9 +55,9 @@ function varargout=StormSurgeViz(varargin)
 % Brian Blanton, Renaissance Computing Institute, UNC-CH, Brian_Blanton@Renci.Org
 % Rick Luettich, Institute of Marine SCiences,    UNC-CH, Rick_Luettich@Unc.Edu
 %
-
-% Call as: [Handles,Url,Connections,Options]=StormSurgeViz(P1,V1,P2,V2,...);
-%}
+% Call as: [Handles,Url,Connections,Options]=StormSurgeViz;
+% or:      [Handles,Url,Connections,Options]=StormSurgeViz(P1,V1,P2,V2,...);
+%
 
 if nargin==1
     if strcmp(varargin{1},'help')
@@ -201,6 +201,8 @@ setappdata(Handles.MainFigure,'VectorOptions',VectorOptions);
 setappdata(Handles.MainFigure,'DateStringFormatInput',DateStringFormatInput);
 setappdata(Handles.MainFigure,'DateStringFormatOutput',DateStringFormatOutput);
 setappdata(Handles.MainFigure,'TempDataLocation',TempDataLocation);
+setappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow',SSVizOpts.SendDiagnosticsToCommandWindow);
+
 
 set(Handles.MainFigure,'UserData',Handles);
     
@@ -293,13 +295,6 @@ set(Handles.MainFigure,'UserData',Handles);
 
 UpdateUI(Handles.MainFigure);
 SetTitle(Connections.RunProperties);
-
-% Final UI tweaks; based on availible files
-if isempty(Connections.Tracks{1})
-    set(Handles.ShowTrackButton,'String','No Track to Show')
-    set(Handles.ShowTrackButton,'Enable','off')
-end
-
 axes(Handles.MainAxes);
 
 % Last thing
@@ -408,7 +403,7 @@ function [update,CatalogHash]=CheckForUpdate(Url,TheCatalog)
     if strcmp(OldCatalogHash,CatalogHash)
         update=[];
         CatalogHash=[];
-        SetUIStatusMessage('  No Updates.\n')
+        SetUIStatusMessage('No Updates.\n')
     else
         SetUIStatusMessage('Update Available.  Click on Show Catalog to update.\n')
     end
@@ -660,7 +655,7 @@ function Connections=OpenDataConnections(Url)
         TopTextUrl= [Url.FullFileServer '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
         [~,status]=urlread(TopTextUrl);
         if isempty(status)
-            SetUIStatusMessage(['Could not connect to an ncml file. This is terminal.\n'])
+            SetUIStatusMessage('Could not connect to an ncml file. This is terminal.\n')
             ME = MException('CheckForNcml:NotPresent', ...
                 ['Could not connect to an ncml file. ',...
                 TopTextUrl]);
@@ -3049,7 +3044,7 @@ function UpdateUI(varargin)
 %    set(Handles.UnitsString,   'String',Units)
 %    set(Handles.TimeOffsetString,   'String',LocalTimeOffset)
 
-    if isempty(Connections.Tracks{1})
+    if isempty(Connections.Tracks{1})  && isempty(Connections.AtcfShape)
         set(Handles.ShowTrackButton,'String','No Track to Show')
         set(Handles.ShowTrackButton,'Enable','off')
     else
@@ -3996,9 +3991,10 @@ function ShowTrack(hObj,~)
     CurrentPointer=get(Handles.MainFigure,'Pointer');
     set(Handles.MainFigure,'Pointer','watch');
     
+    % are there tracks already on the axes? 
     temp=findobj(Handles.MainAxes,'Tag','Storm_Track');
     temp2=findobj(Handles.MainAxes,'Tag','AtcfTrackShape');
-    if isempty(temp)
+    if isempty(temp) && isempty(temp2)
         SetUIStatusMessage('Drawing Track ... \n')
 
         % get the current ens member
@@ -4011,11 +4007,14 @@ function ShowTrack(hObj,~)
         
         if isfield(Connections,'Tracks')
             track=Connections.Tracks{CurrentEnsMember};
-            axes(Handles.MainAxes);
-            Handles.Storm_Track=DrawTrack(track);
-            if isfield(Connections,'AtcfShape')
-               Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
+            if ~isempty(track)
+                axes(Handles.MainAxes);
+                Handles.Storm_Track=DrawTrack(track);
+                set(hObj,'String','Hide Track')
             end
+        end
+        if isfield(Connections,'AtcfShape')
+            Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
             set(hObj,'String','Hide Track')
         end
     else
