@@ -16,218 +16,302 @@
   <body>
     <div id="container">
       <div class="inner">
-<center>
-        <header>
+
+        <header style="text-align: center;">
           <h1>StormSurgeViz</h1>
           <h2>A MATLAB-based tool for visualization and analysis of CF-compliant storm surge and inundation model output</h2>
         </header>
-</center>
+
         <section id="main_content">
+
           <h2>
-<a name="participation-in-stormsurgeviz-activities" class="anchor" href="#participation-in-stormsurgeviz-activities"><span class="octicon octicon-link"></span></a>Joining the StormSurgeViz Collection</h2>
+            <a name="participation-in-stormsurgeviz-activities" class="anchor" href="#participation-in-stormsurgeviz-activities"><span class="octicon octicon-link"></span></a>Joining the StormSurgeViz Collection
+          </h2>
 
 
-<p>StormSurgeViz is a MATLAB-based analysis and vizualization application for storm surge model output, on either structured/rectangular (CGRID) or unstructured/non-rectangular horizontal (UGRID) grids. The key to this flexibility is conformance of model output files to requirements that enables StormSurgeViz to recognize and process the model output in a consistent way. Currently, StormSurgeViz accesses and visualizes ADCIRC+SWAN model output, with draft extensions to handle rectangular CGRID model output. Examples of ADCIRC output can be found  <a href="http://coastalemergency.org/">here </a>
+          <p>StormSurgeViz is a MATLAB-based analysis and vizualization application for storm surge model output, on either structured/rectangular (CGRID) or unstructured/non-rectangular horizontal (UGRID) grids.
+             The key to this flexibility is conformance of model output files to requirements that enables StormSurgeViz to recognize and process the model output in a consistent way.
+             Currently, StormSurgeViz accesses and visualizes ADCIRC+SWAN model output, with draft extensions to handle rectangular CGRID model output.
+             Examples of ADCIRC output can be found  <a href="http://coastalemergency.org/">here</a>.
+          </p>
 
-<!-- of <a href="http://adcirc.org/"> ADCIRC</a> and <a href="http://swanmodel.sourceforge.net/">SWAN</a> model output. However, StormSurgeViz may be configured to visualize the output of any storm surge model which conforms to a few conventions recognized by StormSrugeViz. The requirements are outlined below.</p> --> 
+          <p>There are 4 requirements that model output should conform to, in order for StormSurgeViz to ingest, process, and visualize the data.</p>
 
-<p> There are 4 requirements that model output should conform to, in order for StormSurgeViz to ingest, process, and visualize the data. </p>
-<ol> 
-<li>Files must be in <a href=#netcdf-format>netCDF format</a>.  
-<li>Dimension and variable attributes (metadata) must conform to the <a href=#cf-compliance>Climate and Forecast (CF) standards and conventions </a>for metadata description.   For model output already in netCDF format and for which other client applications already handle that models output, it is possible to mark up a netCDF file so make it appear, to a data server and client-side request, that it is CF-compliant.  This approach allows the native netCDF file to remain unaltered for some applications, while providing CF compliance through an intermediate xml file using the netCDF markup language ncml.
-<li>Files must be posted on <a href=#thredds-service>DAP-enabled data servers</a> that can serve data requests via the OPeNDAP protocol. 
-<li>Creation and maintenance of a <a href=#stormsurgeviz-index>model output index</a> on the data server.  
-</ol>
+          <ol>
+            <li>Files must be in <a href=#netcdf-format>NetCDF format</a>.</li>
+            <li>Dimension and variable attributes (metadata) must conform to the <a href=#cf-compliance>Climate and Forecast (CF) standards and conventions</a> for metadata description.
+                For model output already in NetCDF format and for which other client applications already handle that models output, it is possible to mark up a NetCDF file to make it appear to a client-side request that it is CF-compliant.
+                This approach allows the native NetCDF file to remain unaltered for some applications, while providing CF compliance through an intermediate XML file using the NetCDF markup language <a href="http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/ncml/">NcML</a>.</li>
+            <li>Files must be posted on <a href=#thredds-service>DAP-enabled data servers</a> that can serve data requests via the OPeNDAP protocol.</li>
+            <li>Creation and maintenance of a <a href=#stormsurgeviz-index>model output index</a> on the data server.</li>
+          </ol>
 
-These requirements are described below.  
-<hr>
+          <p>These requirements are described below.</p>
 
-<!-- netCDF Format -->
-<!-- netCDF Format -->
-<!-- netCDF Format -->
+          <hr>
 
-<h2>
-<a name="netcdf-format" class="anchor" href="#netcdf-format"><span class="octicon octicon-link"></span></a>1) NetCDF Formatting</h2>
+          <!-- NetCDF Format -->
+          <!-- NetCDF Format -->
+          <!-- NetCDF Format -->
 
-<p>StormSurgeViz depends on model output stored in the <a href="http://www.unidata.ucar.edu/software/netcdf/">NetCDF</a> file format. NetCDF is a standard binary file format for array data maintained by the University Coorporation for Atmospheric Research (UCAR) and supported by the National Science Foundation (NSF). The NetCDF format facilitates global attributes, mutltidimensional data arrays (variables), and variable dimensions and attributes.</p>
+          <h2>
+            <a name="netcdf-format" class="anchor" href="#netcdf-format"><span class="octicon octicon-link"></span></a>1) NetCDF Formatting
+          </h2>
 
-<p>NetCDF files may be read and written by free and open source programs (ncdump and ncgen) supplied by Unidata, a UCAR subsidiary, or by user-supplied programs that take advantage of software NetCDF libraries. Free and open source NetCDF libraries are available from both Unidata and other third parties. NetCDF libraries are available with application programming interfaces (API) in C, Java, Python, Perl, R, Fortran, and Matlab. The ncdump and ncgen programs from Unidata transform NetCDF files to and from human readable text representations of NetCDF using a description format known as <a href="http://www.unidata.ucar.edu/software/netcdf/docs/netcdf_utilities_guide.html#cdl_guide">Common Data Language</a> (CDL).</p>
+          <p>StormSurgeViz depends on model output stored in the <a href="http://www.unidata.ucar.edu/software/netcdf/">NetCDF</a> file format.
+             NetCDF is a standard binary file format for array data maintained by the University Coorporation for Atmospheric Research (UCAR) and supported by the National Science Foundation (NSF).
+             The NetCDF format facilitates global attributes, mutltidimensional data arrays (variables), and variable dimensions and attributes.
+          </p>
 
-<p> Many models already output files in netCDF format, due to the many benefits of having files in netCDF.  For models that do not natively output in netCDF, there are two options: 1) instrument the model source code with netCDF library calls to open, describe, and populate the files with model output variables. 2) write a post-processor that converts the native model  output into netCDF.  This latter option is usually easier.  Either way, getting model otuput into netCDF is beyond the scope of this document.  We are happy, however, to provide examples of either approach.</p> 
+          <p>NetCDF files may be read and written by free and open source programs (ncdump and ncgen) supplied by Unidata, a UCAR subsidiary, or by user-supplied programs that take advantage of software NetCDF libraries.
+             Free and open source NetCDF libraries are available from both Unidata and other third parties.
+             NetCDF libraries are available with application programming interfaces (API) in C, Java, Python, Perl, R, Fortran, and Matlab.
+             The ncdump and ncgen programs from Unidata transform NetCDF files to and from human readable text representations of NetCDF using a description format known as <a href="http://www.unidata.ucar.edu/software/netcdf/docs/netcdf_utilities_guide.html#cdl_guide">Common Data Language</a> (CDL).
+          </p>
 
+          <p>Many models already output files in NetCDF format, due to the many benefits of having files in NetCDF.
+             For models that do not natively output in NetCDF, there are two options:
+          </p>
+          <ol>
+             <li>Instrument the model source code with NetCDF library calls to open, describe, and populate the files with model output variables.</li>
+             <li>Write a post-processor that converts the native model output into NetCDF.</li>
+          </ol>
+          <p>
+             This latter option is usually easier.
+             Either way, getting model otuput into NetCDF is beyond the scope of this document.
+             We are happy, however, to provide examples of either approach.
+          </p>
 
+          <!-- CF Compliance -->
+          <!-- CF Compliance -->
+          <!-- CF Compliance -->
 
-<!-- CF Compliance -->
-<!-- CF Compliance -->
-<!-- CF Compliance -->
+          <h2>
+            <a name="cf-compliance" class="anchor" href="#cf-compliance"><span class="octicon octicon-link"></span></a>2) Climate and Forecast (CF) Compliance
+          </h2>
 
+          <p>Climatologists, meteorologists, and oceanographers have come together over the past two decades to standardize a comprehensive naming convention for variables of interest and associated metadata.
+             The standard, known as the <a href="http://cfconventions.org/">Climate and Forecast (CF) Conventions</a>, is universally accepted today and community-maintained.
+             The CF Conventions are designed to take advantage of the NetCDF format.
+          </p>
 
-<h2>
-<a name="cf-compliance" class="anchor" href="#cf-compliance"><span class="octicon octicon-link"></span></a>2) Climate and Forecast (CF) Compliance</h2>
+          <p>Models generally output the solution (dependent variables) on a computational grid (independent variables) and along the temporal dimension.
+             In NetCDF parlance for dynamic models, time is usually the "unlimited" dimension, meaning that it can grow by appending new time levels to the NetCDF file.
+             The names and formats for specifying the variables and dimensions vary from model to model.
+             For a tool such as StormSurgeViz to recognize variables of interest and correctly locate them in space and time, conventions for naming and describing the variables are necessary.
+             By requiring conformance to naming conventions, software can access and properly display model output without error-prone "guessing" of metadata.
+          </p>
 
-<p>Climatologists, meteorologists, and oceanographers have come together over the past two decades to standardize a comprehensive naming convention for variables of interest and associated metadata. The standard, known as the <a href="http://cfconventions.org/">Climate and Forecast (CF) Conventions</a>, is universally accepted today and community-maintained. The CF Conventions are designed to take advantage of the NetCDF format. 
-Models generally output the solution (dependent variables) on a computational grid (independent variables) and along the temporal dimension.  In netCDF parlance for dynamic models, time is usually the "unlimited" dimension, meaning that it can grow by appending new time levels to the netCDF file.  The names and formats for specifying the variables and dimensions vary from model to model.  For a tool such as StormSurgeViz to recognize variables of interest and correctly locate them in space and time, conventions for naming and describing the variables are necessary. By requiring conformance to naming conventions, software can access and properly display model output without error-prone "guessing" of metadata.</p>
+          <p>CF takes an interesting approach to naming conventions.
+             Rather than requiring specific variable names, presecribed lists of metadata are associated with each variable so that tools may derive the meaning of each variable from the associated metadata.
+             Metadata consists of pairs, called "attributes," of both a name and a value.
+             CF prescribes allowable attribute names and the vocabulary of attribute values for a given attribute name.
+             Some attributes are required and some are optional.
+          </p>
+          <p>StormSurgeViz requires a minimum degree of CF-compliance.
+             This document does not describe CF in detail; it outlines the parts of CF conventions necessary for StormSurgeViz to operate in a community and interoperable way.
+          </p>
 
-<p>CF takes an interesting approach to naming conventions. Rather than requiring specific variable names, presecribed lists of metadata are associated with each variable so that tools may derive the meaning of each variable from the associated metadata. Metadata consists of pairs, called "attributes," of both a name and a value. CF prescribes allowable attribute names and the vocabulary of attribute values for a given attribute name. Some attributes are required and some are optional.</p>
-<p>
-StormSurgeViz requires a minimum degree of CF-compliance. This document does not describe CF in detail; it outlines the parts of CF conventions necessary for StormSurgeViz to operate in a community and interoperable way. </p>
+          <p>CF specifies some attributes, known as "global" attributes, which apply to all variables contained in the model output.
+             These attributes, such as the <em>title</em> and <em>Conventions</em> attributes, are placed in the model output only once and are described in the CF Conventions <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#description-of-file-contents">here</a>.
+          </p>
 
+          <p>CF recommends several attributes for individual variables rather than all variables contained in a dataset globally.
+             The most useful among these and required for StormSurgeViz is <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#standard-name"><em>standard_name</em></a>.
+             The CF lists a vocabulary of acceptable values for standard name <a href="http://cfconventions.org/Data/cf-standard-names/28/build/cf-standard-name-table.html">here</a>.
+             StormSurgeViz searches model output for CF standard names in order to identify variables of interest <a href="#data-variable-attributes">listed below</a>.
+          </p>
 
-<p>CF specifies some attributes, known as "global" attributes, which apply to all variables contained in the model output. These attributes, such as the <em>title</em> and <em>Conventions</em> attributes, are placed in the model output only once and are described in the CF Conventions <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#description-of-file-contents">here</a>.</p>
+          <p>Two other attributes are associated with a given standard name value, <em>long_name</em> and <em>units</em>.
+             Long names are free form text descriptions and are not standardized for particular standard names.
+             Units are values taken from the <a href="http://www.unidata.ucar.edu/software/udunits/">UDUNITS</a> software package.
+             Particular standard names have prescribed lists of acceptable units values.
+          </p>
 
-<p>CF recommends several attributes for individual variables rather than all variables contained in a dataset globally. The most useful among these and required for StormSurgeViz is <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#standard-name"><em>standard_name</em></a>. The CF lists a vocabulary of acceptable values for standard name <a href="http://cfconventions.org/Data/cf-standard-names/28/build/cf-standard-name-table.html">here</a>. StormSurgeViz searches model output for CF standard names in order to identify variables of interest <a href="#data-variable-attributes">listed below</a>.</p>
+          <p>Coordinate data (latitude, longitude, vertical coordinate, and time) have special treatment within the CF standard.
+             Coordinate data are identified by an <em>axis</em> attribute with one of the values <em>X</em>, <em>Y</em>, <em>Z</em>, or <em>T</em> associated with variables typically named <em>x</em>, <em>y</em>, <em>z</em>, and <em>time</em>.
+             Applicable standard names are <em>latitude</em>, <em>longitude</em>, <em>time</em>, and <em>depth</em> or <em>height</em>.
+          </p>
 
-<p>Two other attributes are associated with a given standard name value, <em>long_name</em> and <em>units</em>. Long names are free form text descriptions and are not standardized for particular standard names. Units are values taken from the <a href="http://www.unidata.ucar.edu/software/udunits/">UDUNITS</a> software package. Particular standard names have prescribed lists of acceptable units values.</p>
+          <h3>
+            <a name="cgrid-specific" class="anchor" href="#cgrid-specific"><span class="octicon octicon-link"></span></a>2a) CGRID-specific Requirements For CF Compliance
+          </h3>
 
-<p>Coordinate data (latitude, longitude, vertical coordinate, and time) have special treatment within the CF standard. Coordinate data are identified by an <em>axis</em> attribute with one of the values <em>X</em>, <em>Y</em>, <em>Z</em>, or <em>T</em> associated with variables typically named <em>x</em>, <em>y</em>, <em>z</em>, and <em>time</em>. Applicable standard names are <em>latitude</em>, <em>longitude</em>, <em>time</em>, and <em>depth</em> or <em>height</em>.</p>
+          <p>Structured grid (CGRID) model output will require the following CF attributes for processing by StormSurgeViz:
+          </p>
 
-<h3>
-<a name="cgrid-specific" class="anchor" href="#cgrid-specific"><span class="octicon octicon-link"></span></a>2a) CGRID-specific Requirements For CF Compliance</h3>
+          <h4>
+            <a name="global-attributes" class="anchor" href="#global-attributes"><span class="octicon octicon-link"></span></a>Global Attributes
+          </h4>
 
-<p>Structured grid (CGRID) model output will require the following CF attributes for processing by StormSurgeViz:</p>
+          <ul>
+            <li>Convention - The value should be "CF-1.6" which may be modified to reflect a more recent version of the CF conventions as specified <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#identification-of-conventions">here</a>.</li>
+          </ul>
 
-<h4>
-<a name="global-attributes" class="anchor" href="#global-attributes"><span class="octicon octicon-link"></span></a>Global Attributes</h4>
+          <h4>
+            <a name="variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Variable Attributes
+          </h4>
 
-<ul>
-  <li>Convention - The value should be "CF-1.6" which may be modified to reflect a more recent version of the CF conventions as specified <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#identification-of-conventions">here</a>.</li>
-</ul>
+          <p>There are two types of variables with affected attributes: <em>coordinate variable arrays</em> which provide coordinate data for corresponding dimensional indices, and <em>data variable arrays</em> which provide observed or modeled data which is dimensionally indexed.
+             All cooredinate variables are required.
+             Data variables are optional to the degree that StormSurgeViz will only display the variables included in the NetCDF.
+          </p>
 
-<h4>
-<a name="variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Variable Attributes</h4>
+          <h5>
+            <a name="coordinate-variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Coordinate Variables
+          </h5>
 
-<p>There are two types of variables with affected attributes: <em>coordinate variable arrays</em> which provide coordinate data for corresponding dimensional indices, and <em>data variable arrays</em> which provide observed or modeled data which is dimensionally indexed. All cooredinate variables are required. Data variables are optional to the degree that StormSurgeViz will only display the variables included in the NetCDF.<p>
+          <ul>
+            <li>time - A required <em>dimensionally-unlimited</em> coordinate variable named "time" is a 1D array of 64-bit Reals and should have the following required attributes as partially described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#time-coordinate">here</a>:
+              <ul style="list-style-type: square;">
+                <li>standard_name -  The value should be "time"</li>
+                <li>long_name - The recommended value is "model_time"</li>
+                <li>units = The value should be "s"</li>
+                <li>base_date - The value should be "YYYY-MM-DD HH:MM:SS -HH:MM" in the date/time stamp format specified by <a href="http://www.unidata.ucar.edu/software/udunits/">udunits</a> and relative to Coordinated Universal Time (UTC).
+                    All time variable data are relative to this date/time stamp.</li>
+              </ul>
+            </li>
+            <li>x - A required dimensional coordinate variable named "x" is a 1D array of 64-bit Reals and should have the following required attributes as described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#longitude-coordinate">here</a>:
+              <ul style="list-style-type: square;">
+                <li>standard_name - The value should be "longitude"</li>
+                <li>long_name - The recommended value is "longitude"</li>
+                <li>units - The value should be "degrees_east"</li>
+                <li>positive - The value should be "east"</li>
+              </ul>
+            <li>y - A required dimensional coordinate variable named "y" is a 1D array of 64-bit Reals and should have the following required attributes as described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#latitude-coordinate">here</a>:
+              <ul style="list-style-type: square;">
+                <li>standard_name - The value should be "latitude"</li>
+                <li>long_name - The recommended value is "latitude"</li>
+                <li>units - The value should be "degrees_north"</li>
+                <li>positive - The value should be "north"</li>
+              </ul>
+          </ul>
 
-<h5><a name="coordinate-variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Coordinate Variables</h5>
+          <h5><a name="data-variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Data Variable Attributes</h5>
 
-<ul>
-  <li>time - A required <em>dimensionally-unlimited</em> coordinate variable named "time" is a 1D array of 64-bit Reals and should have the following required attributes as partially described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#time-coordinate">here</a>:
-    <ul style="list-style-type: square;">
-      <li>standard_name -  The value should be "time"</li>
-      <li>long_name - The recommended value is "model_time"</li>
-      <li>units = The value should be "s"</li>
-      <li>base_date - The value should be "YYYY-MM-DD HH:MM:SS -HH:MM" in the date/time stamp format specified by <a href="http://www.unidata.ucar.edu/software/udunits/">udunits</a> and relative to Coordinated Universal Time (UTC). All time variable data are relative to this date/time stamp.</li>
-    </ul>
-  </li>
-  <li>x - A required dimensional coordinate variable named "x" is a 1D array of 64-bit Reals and should have the following required attributes as described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#longitude-coordinate">here</a>:
-    <ul style="list-style-type: square;">
-      <li>standard_name - The value should be "longitude"</li>
-      <li>long_name - The recommended value is "longitude"</li>
-      <li>units - The value should be "degrees_east"</li>
-      <li>positive - The value should be "east"</li>
-    </ul>
-  <li>y - A required dimensional coordinate variable named "y" is a 1D array of 64-bit Reals and should have the following required attributes as described <a href="http://cfconventions.org/Data/cf-conventions/cf-conventions-1.6/build/cf-conventions.html#latitude-coordinate">here</a>:
-    <ul style="list-style-type: square;">
-      <li>standard_name - The value should be "latitude"</li>
-      <li>long_name - The recommended value is "latitude"</li>
-      <li>units - The value should be "degrees_north"</li>
-      <li>positive - The value should be "north"</li>
-    </ul>
-</ul>
+          <ul>
+            <li>significant wave height - A data variable preferably named "significant_wave_height" is a 3D array of 64-bit Reals and should have the following required attributes:
+              <ul style="list-style-type: square;">
+                <li>standard_name - The value should be "sea_surface_wave_significant_height"</li>
+                <li>long_name - The recommended value is "significant wave height"</li>
+                <li>units - The value should be "m"</li>
+                <li>coordinates - The value should be "time y x"</li>
+                <li>_FillValue = The recommended value is "-99999.0"</li>
+              </ul>
+            </li>
+            <li>sea surface height - A data variable preferably named "zeta" is a 3D array of 64-bit Reals and should have the following required attributes:
+              <ul style="list-style-type: square;">
+                <li>standard_name - The value should be "sea_surface_height_above_geoid"</li>
+                <li>long_name - The recommended value is "water surface elevation above geoid"</li>
+                <li>units - The value should be "m"</li>
+                <li>coordinates - The value should be "time y x"</li>
+                <li>_FillValue = The recommended value is "-99999.0"</li>
+              </ul>
+            </li>
+          </ul>
 
-<h5><a name="data-variable-attributes" class="anchor" href="#variable-attributes"><span class="octicon octicon-link"></span></a>Data Variable Attributes</h5>
+          <h3>
+            <a name="ugrid-extensions" class="anchor" href="#ugrid-extensions"><span class="octicon octicon-link"></span></a>2b) UGRID Extensions to CF
+          </h3>
 
-<ul>
-  <li>significant wave height - A data variable preferably named "significant_wave_height" is a 3D array of 64-bit Reals and should have the following required attributes:
-    <ul style="list-style-type: square;">
-      <li>standard_name - The value should be "sea_surface_wave_significant_height"</li>
-      <li>long_name - The recommended value is "significant wave height"</li>
-      <li>units - The value should be "m"</li>
-      <li>coordinates - The value should be "time y x"</li>
-      <li>_FillValue = The recommended value is "-99999.0"</li>
-    </ul>
-  </li>
-  <li>sea surface height - A data variable preferably named "zeta" is a 3D array of 64-bit Reals and should have the following required attributes:
-    <ul style="list-style-type: square;">
-      <li>standard_name - The value should be "sea_surface_height_above_geoid"</li>
-      <li>long_name - The recommended value is "water surface elevation above geoid"</li>
-      <li>units - The value should be "m"</li>
-      <li>coordinates - The value should be "time y x"</li>
-      <li>_FillValue = The recommended value is "-99999.0"</li>
-    </ul>
-  </li>
-</ul>
+          <p>If the model output is represented on an unstructured grid, StormSurgeViz recognizes a proposed extension to the CF Conventions known as <a href="https://github.com/ugrid-conventions/ugrid-conventions">UGRID</a>.
+          </p>
 
-<h3>
-<a name="ugrid-extensions" class="anchor" href="#ugrid-extensions"><span class="octicon octicon-link"></span></a>2b) UGRID Extensions to CF</h2>
+          <h3>
+            <a name="ncml" class="anchor" href="#ncml"><span class="octicon octicon-link"></span></a>2c) Using NcML for CF-compliance
+          </h3>
 
-<p>If the model output is represented on an unstructured grid, StormSurgeViz recognizes a proposed extension to the CF Conventions known as <a href="https://github.com/ugrid-conventions/ugrid-conventions">UGRID</a>.</p>
+          <p>NetCDF files with metadata that does not meet CF standards and conventions can be "marked up" so that they are compliant.
+             The <a href=http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/ncml/>NetCDF Markup Language</a> (NcML) provides an XML representation of the NetCDF file, and client applications can use this marked up version.
+             We typically use NcML for exactly this purpose: making non-compliant NetCDF file into compliant NetCDF files.
+          </p>
 
-<h3>
-<a name="ncml" class="anchor" href="#ncml"><span class="octicon octicon-link"></span></a>2c) Using ncml for CF-compliance</h2>
+          <p>An example of an NcML file that makes a non-compliant ADCIRC file compliant is shown below.
+             In this example, the ADCIRC NetCDF file variables <em>adcirc_mesh</em> and <em>element</em> are being augmented to include the <em>cf_role</em>, <em>start_index</em>, and <em>long_name attributes</em>, among others.
+             Additional information is being added to the global attributes segment of the NetCDF file, such as <em>title</em>, <em>Concentions</em>, and <em>cdm_data_type</em>.
+          </p>
 
-<p>
-netCDF files with metadata that does not meet CF standards and conventions can be "marked up" so that they are compliant.  The <a href=http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/ncml/>netCDF Markup Language (ncml)  </a> provides an xml representation of the netCDF file, and client applications can use this marked up version.  We typically use ncml for exactly this purpose:  making non-compliant netCDF file into compliant netCDF files.  </p>
+          <!--
+          <img src="Screenshot_2015-03-19_09.58.14.png">
+          -->
 
-<p>
-An example of an ncml file that makes a non-compliant ADCIRC file compliant is shown below.  In this example, the ADCIRC netCDF file variables <em>adcirc_mesh</em> and <em>element</em> are being augmented to include the <em>cf_role</em>, <em>start_index</em>, and <em>long_name attributes</em>, among others.  Additional information is being added to the global attributes segment of the netCDF file, such as <em>title</em>, <em>Concentions</em>, and <em>cdm_data_type</em>. 
-</p>
+<pre>&lt;netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2"&gt;
+  &lt;attribute name="title" type="string" value="ASGS NCFS Sandy Advisory 31"/&gt;
+  &lt;attribute name="Conventions" value="CF-1.6, UGRID-0.9" /&gt;
+  &lt;attribute name="id" value="UND_ADCIRC.ASGS.NCFS.Sandy.31" /&gt;
+  &lt;attribute name="cdm_data_type" value="ugrid" /&gt;
+  &lt;attribute name="summary" value="The ADCIRC Surge Guidance System Forecast for Hurricane Sandy (2012) Advisory 31 on the nc6b mesh." /&gt;
 
-<img src=Screenshot_2015-03-19_09.58.14.png> 
-<!-- <pre><code>
-<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
-  <attribute name="title" type="string" value="ASGS NCFS Sandy Advisory 31"/>
-  <attribute name="Conventions" value="CF-1.6, UGRID-0.9" />
-  <attribute name="id" value="UND_ADCIRC.ASGS.NCFS.Sandy.31" />
-  <attribute name="cdm_data_type" value="ugrid" />
-  <attribute name="summary" value="The ADCIRC Surge Guidance System Forecast for Hurricane Sandy (2012) Advisory 31 on the nc6b mesh." />
-  
-  <variable name="adcirc_mesh" shape="mesh" type="int">
-    <attribute name="long_name" value="mesh_topology" />
-    <attribute name="node_coordinates" value="x y" />
-    <attribute name="face_node_connectivity" value="element" />
-    <attribute name="cf_role" value="mesh_topology" />
-    <attribute name="topology_dimension" type="int" value="2" />
-  </variable>
-    <variable name="element" >
-      <attribute name="long_name" value="element" />
-      <attribute name="start_index" type="int" value="1" />
-      <attribute name="units" value="1" />
-      <attribute name="cf_role" value="face_node_connectivity" />
-    </variable>
+  &lt;variable name="adcirc_mesh" shape="mesh" type="int"&gt;
+    &lt;attribute name="long_name" value="mesh_topology" /&gt;
+    &lt;attribute name="node_coordinates" value="x y" /&gt;
+    &lt;attribute name="face_node_connectivity" value="element" /&gt;
+    &lt;attribute name="cf_role" value="mesh_topology" /&gt;
+    &lt;attribute name="topology_dimension" type="int" value="2" /&gt;
+  &lt;/variable&gt;
+    &lt;variable name="element" &gt;
+      &lt;attribute name="long_name" value="element" /&gt;
+      &lt;attribute name="start_index" type="int" value="1" /&gt;
+      &lt;attribute name="units" value="1" /&gt;
+      &lt;attribute name="cf_role" value="face_node_connectivity" /&gt;
+    &lt;/variable&gt;
 
+  &lt;aggregation type="union"&gt;
+    &lt;scan location="." regExp=".*\.nc$" subdirs="false"/&gt;
+  &lt;/aggregation&gt;
 
-  <aggregation type="union">
-    <scan location="." regExp=".*\.nc$" subdirs="false"/>        
-  </aggregation>
+  &lt;!-- aggregation type="union"&gt;
+    &lt;netcdf location="http://opendap.renci.org:1935/thredds/dodsC/ASGS/sandy/31/nc6b/blueridge.renci.org/ncfs/nhcConsensus/fort.63.nc"/&gt;
+    &lt;netcdf location="http://opendap.renci.org:1935/thredds/dodsC/ASGS/sandy/31/nc6b/blueridge.renci.org/ncfs/nhcConsensus/swan_TPS.63.nc"/&gt;
+  &lt;/aggregation&gt;
+  --&gt;
+&lt;/netcdf&gt;</pre>
 
+          <!-- OPeNDAP Servers  -->
+          <!-- OPeNDAP Servers  -->
+          <!-- OPeNDAP Servers  -->
 
-  <!-- aggregation type="union">    
-    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC/ASGS/sandy/31/nc6b/blueridge.renci.org/ncfs/nhcConsensus/fort.63.nc"/>
-    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC/ASGS/sandy/31/nc6b/blueridge.renci.org/ncfs/nhcConsensus/swan_TPS.63.nc"/>
-  </aggregation> 
-  -->
-</netcdf>
-</code>
-</pre>
+          <h2>
+            <a name="thredds-service" class="anchor" href="#thredds-service"><span class="octicon octicon-link"></span></a>3) OPeNDAP Data Servers and the DAP protocol.
+          </h2>
 
+          <p>StormSurgeViz may view NetCDF files stored on a filesystem local to the StormSurgeViz program itself.
+             But more typically, storm surge model output stored in NetCDF is large and stored on remote servers.
+             Moving large amounts of data over network connections is inefficient.
+             Therefore an efficient transport protocol for NetCDF known as <a href="http://www.opendap.org/support">Data Access Protocol</a> (DAP), formerly known as Distributed Ocean Data Protocol (DODS), was developed by NASA and is maintained by an NSF-supported non-profit, OpenDAP.org.
+          </p>
 
-<!-- OPeNDAP Servers  -->
-<!-- OPeNDAP Servers  -->
-<!-- OPeNDAP Servers  -->
+          <p>The DAP protocol allows NetCDF files to be queried for subsets of data by constraints along space and time dimensions.
+             By requesting only necessary subsets of data, network transfers of data are minimized.
+             Programs which make DAP requests are known as DAP clients and programs which provide responses to DAP requests are known as DAP servers.
+             StormSurgeViz uses a DAP client in the NetCDF-Java library, via <a href=https://github.com/nctoolbox/nctoolbox>nctoolbox</a>, a MATLAB toolbox for working with common model datasets.
+          </p>
 
-<h2>
-<a name="thredds-service" class="anchor" href="#thredds-service"><span class="octicon octicon-link"></span></a>3) OPeNDAP Data Servers and the DAP protocol.</h2>
+          <p>There are several implementations of DAP servers.
+             Unidata's <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/">THREDDS</a> and OPenDAP.org's <a href="http://docs.opendap.org/index.php/Hyrax">Hyrax</a> are typically used in data centers and by local/laboratory data servers.
+             Both work well with StyormSurgeViz.
+             <a href="http://docs.opendap.org/index.php/Hyrax">Hyrax</a> is the StormSurgeViz recommended DAP server as it provides the most up-to-date standards compatibility and the best extensibility.
+             The Hyrax server is a special type of DAP server which also implements a convention known as <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/">THREDDS</a>.
+             The THREDDS feature of a THREDDS-enabled DAP server provides a customizable catalog of dataset holdings on a DAP server and the DAP services available for each of those holdings.
+          </p>
 
-<p>StormSurgeViz may view NetCDF files stored on a filesystem local to the StormSurgeViz program itself. But more typically, storm surge model output stored in NetCDF is large and stored on remote servers. Moving large amounts of data over network connections is inefficient. Therefore an efficient transport protocol for NetCDF known as <a href="http://www.opendap.org/support">Data Access Protocol</a> (DAP), formerly known as Distributed Ocean Data Protocol (DODS), was developed by NASA and is maintained by an NSF-supported non-profit, OpenDAP.org.</p>
+          <h2>
+            <a name="stormsurgeviz-index" class="anchor" href="#stormsurgeviz-index"><span class="octicon octicon-link"></span></a>4) StormSurgeViz Index
+          </h2>
 
-<p>The DAP protocol allows NetCDF files to be queried for subsets of data by constraints along space and time dimensions. By requesting only necessary subsets of data, network transfers of data are minimized. Programs which make DAP requests are known as DAP clients and programs which provide responses to DAP requests are known as DAP servers. StormSurgeViz uses a DAP client in the netCDF-java library, via  <a href=https://github.com/nctoolbox/nctoolbox> nctoolbox</a>, a MATLAB toolbox for working with common model datasets. </p>
-
-
-<p>There are several implementations of DAP servers. Unidata's <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/">THREDDS</a> and OPenDAP.org's <a href="http://docs.opendap.org/index.php/Hyrax">Hyrax</a> are typically used in data centers and by local/laboratory data servers. Both work well with StyormSurgeViz.  <a href="http://docs.opendap.org/index.php/Hyrax">Hyrax</a> is the StormSurgeViz recommended DAP server as it provides the most up-to-date standards compatibility and the best extensibility.  The Hyrax server is a special type of DAP server which also implements a convention known as <a href="http://www.unidata.ucar.edu/software/thredds/current/tds/catalog/">THREDDS</a>. The THREDDS feature of a THREDDS-enabled DAP server provides a customizable catalog of dataset holdings on a DAP server and the DAP services available for each of those holdings.</p>
-
-<h2>
-<a name="stormsurgeviz-index" class="anchor" href="#stormsurgeviz-index"><span class="octicon octicon-link"></span></a>4) StormSurgeViz Index</h2>
-
-<p>Storm surge model output are typically stored in NetCDF files on DAP servers with individual files for storm events, model ensembles, model runs, and possibly even individual variables. Output may also be served from more than one DAP server. StormSurgeViz requires an index of remote netCDF resources available for viewing. These indices are constructed by running scripts on the data server that compile lists of DAP URLs corresponding to model output datasets. Construction of StormSurgeViz indices is decribed <a href="https://docs.google.com/document/d/1tsu3t_uwvpymVAmKG81cmsgf6F7mCYGWpic-2L7qFEU/edit?usp=sharing">here></a>.</p>
+          <p>Storm surge model output are typically stored in NetCDF files on DAP servers with individual files for storm events, model ensembles, model runs, and possibly even individual variables.
+             Output may also be served from more than one DAP server.
+             StormSurgeViz requires an index of remote NetCDF resources available for viewing.
+             These indices are constructed by running scripts on the data server that compile lists of DAP URLs corresponding to model output datasets.
+             Construction of StormSurgeViz indices is decribed <a href="https://docs.google.com/document/d/1tsu3t_uwvpymVAmKG81cmsgf6F7mCYGWpic-2L7qFEU/edit?usp=sharing">here></a>.
+          </p>
 
         </section>
 
         <footer>
-          StormSurgeViz is maintained by <a href="https://github.com/renci-unc">renci-unc</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
+          StormSurgeViz is maintained by <a href="https://github.com/renci-unc">RENCI</a>.
+          <br />Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
         </footer>
-
 
       </div>
     </div>
