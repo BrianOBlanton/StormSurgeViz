@@ -46,6 +46,7 @@ try
             end
             notFound=false;
         end
+        pause(2)
     end
 catch ME
      

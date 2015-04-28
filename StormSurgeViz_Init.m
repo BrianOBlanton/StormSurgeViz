@@ -128,7 +128,7 @@ switch SSVizOpts.Mode
     case {'Local','Url'}
         
         fprintf('SSViz++ Mode is Local/Url.\n')
-        fprintf('SSViz++ Local/Url Mode not yet fully supported. Best of Luck... \n')
+        fprintf('SSViz++ Local/Url Mode not fully supported. Best of Luck... \n')
         
         [status,result]=system([cpcom ' private/run.properties.fake ' TempDataLocation '/run.properties']);
         SSVizOpts.DefaultBoundingBox=NaN;

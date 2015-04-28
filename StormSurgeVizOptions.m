@@ -45,7 +45,7 @@ p.ColorIncrement=.25;    % in whatever units
 p.NumberOfColors=32;
 p.ColorMax=NaN;
 p.ColorMin=NaN;
-p.ColorMap='noaa_cmap';
+p.ColorMap='parula';
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
 
 

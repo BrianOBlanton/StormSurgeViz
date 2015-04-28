@@ -140,7 +140,7 @@ switch SSVizOpts.Mode
         Url.Units=SSVizOpts.Units;
         
     case 'Url'
-        str={'Direct Url file access is not yet supported. Best of Luck!!'};
+        str={'Direct Url file access is not fully supported. Best of Luck!!'};
         UrlBase=SSVizOpts.Url;
         Url.ThisInstance='Url';
         Url.ThisStorm=NaN;
@@ -189,6 +189,7 @@ end
 
 %% InitializeUI
 Handles=InitializeUI(SSVizOpts);
+drawnow
 
 setappdata(Handles.MainFigure,'SSVizOpts',SSVizOpts);
 setappdata(Handles.MainFigure,'Catalog',TheCatalog);
@@ -223,8 +224,8 @@ if strcmpi(SSVizOpts.Mode,'Local')
     Connections=OpenDataConnectionsLocal(Url);
 elseif strcmpi(SSVizOpts.Mode,'Url')
     set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
-    Connections=OpenDataConnectionsUrl(Url);
-else
+    Connections=OpenDataConnectionsUrl2(Url);
+else  %  mode is "network"
     set(Handles.ServerInfoString,'String',Url.FullDodsC);
     Connections=OpenDataConnections(Url);
 end
@@ -247,8 +248,8 @@ set(Handles.MainFigure,'UserData',Handles);
 
 %% GetDataObject 
 SetUIStatusMessage('Getting initial data set links...\n');
-EnsIndex=1;
-VarIndex=1;
+EnsIndex=GetCurrentEnsIndex(Handles);
+VarIndex=GetCurrentVarIndex(Handles);
 TimIndex=1;
 Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
 
@@ -782,8 +783,8 @@ function Connections=OpenDataConnections(Url)
                 ttemp=ncgeodataset(url);
                 SetUIStatusMessage(sprintf('* Opened %s  file connection.\n',ThisVariable))
                 if length(ttemp.variables)<1
-                SetUIStatusMessage(sprintf('***** No variables found in %s\n', ThisVariable))
-                ttemp=[];
+                    SetUIStatusMessage(sprintf('***** No variables found in %s\n', ThisVariable))
+                    ttemp=[];
                 end
             catch ME
                 SetUIStatusMessage(sprintf('***** Could not open %s connection. *****\n',ThisVariable))
@@ -1583,7 +1584,7 @@ Vecs='on';
 
 %LeftEdge=.01;
 
-colormaps={'noaa_cmap','jet','hsv','hot','cool','gray'};
+colormaps={'noaa_cmap','jet','hsv','hot','cool','gray','parula'};
 cmapidx=find(strcmp(ColorMap,colormaps));
 
 % normalized positions of container panels depend on ForkAxes
@@ -2871,6 +2872,7 @@ BackgroundMapsContainerContents;
         
         
     end
+
     fprintf('SSViz++    Done.\n\n')
 
 end
@@ -3183,7 +3185,6 @@ end
 %%% SetVariableControls
 function Handles=SetVariableControls(varargin)
     
-
     global Connections Debug Vecs SSVizOpts
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
@@ -3246,7 +3247,7 @@ function Handles=SetVariableControls(varargin)
     for i=1:length(Handles.ScalarVarButtonHandles)
         if isempty(Connections.members{1,Scalars(i)}.NcTBHandle)
             set(Handles.ScalarVarButtonHandles(i),'Value',0)
-            %set(Handles.ScalarVarButtonHandles(i),'Value','off')
+            set(Handles.ScalarVarButtonHandles(i),'Enable','off')
         end
     end
     for i=1:length(Handles.ScalarVarButtonHandles)
@@ -3390,7 +3391,27 @@ function Handles=SetSnapshotControls(varargin)
         %disp('disable Find Hydrographbutton')
         snapshotlist={'Not Available'};
         m=2;
+        Handles.ScalarSnapshotButtonHandlePanel=[];
+        Handles.VectorSnapshotButtonHandlePanel=[];
         
+        Handles.ScalarSnapshotButtonHandlePanel=uipanel(...
+            'Parent',Handles.CenterContainerUpper,...
+            'Title','SnapShot Control ',...
+            'BorderType','etchedin',...
+            'FontSize',FontSizes(2),...
+            'BackGroundColor',panelColor,...
+            'Position',[.01 0.2 .49 .15],...
+            'Units','normalized',...
+            'Tag','ScalarSnapshotButtonGroup');
+        Handles.ScalarSnapshotButtonHandlePanel2=uicontrol(...
+            'Parent',Handles.ScalarSnapshotButtonHandlePanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'FontWeight','bold',...
+            'Position',[.01 0.01 .99 .99],...
+            'ForegroundColor','r',...
+            'String','No Time Dependence Detected');
+
     else
                
         % base the times on the variables selected in the UI. 
@@ -3430,7 +3451,6 @@ function Handles=SetSnapshotControls(varargin)
             'BackGroundColor',panelColor,...
             'Position',[.01 0.02 .49 .15],...
             'Tag','VectorSnapshotButtonGroup');
-        
         
         if m>0
             Handles.ScalarSnapshotButtonHandle=uicontrol(...

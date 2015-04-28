@@ -11,9 +11,9 @@ function Connections=OpenDataConnectionsUrl(Url)
     
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
-    AdcVizOpts=getappdata(fig,'AdcVizOpts');
+    SSVizOpts=getappdata(fig,'SSVizOpts');
 
-    HOME=AdcVizOpts.HOME;
+    HOME=SSVizOpts.HOME;
 
     if ~exist([HOME '/private/run.properties.url'],'file')
         msg=['Url run.properties file not found in ' HOME '/private.'];         
@@ -37,7 +37,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     % to make it easier to edit.  The first row are the variable names
     % in this function, declared above as empty cells.
     ff='AdcircVizVariableList.xls';
-    sheet=AdcVizOpts.VariablesTable;  % this is the sheet NAME to read, not the sheet data!
+    sheet=SSVizOpts.VariablesTable;  % this is the sheet NAME to read, not the sheet data!
     [~,~,C] = xlsread(ff,sheet);
     [m,n]=size(C);
     vars=C(1,:)';
