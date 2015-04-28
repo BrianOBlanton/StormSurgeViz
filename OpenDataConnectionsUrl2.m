@@ -91,12 +91,12 @@ function Connections=OpenDataConnectionsUrl2(Url)
     Connections.RunProperties=RunProperties;
     
     % now, add storm parts
-    
-    FileNetcdfVariableNames={}; 
-    FilesToOpen={};              
-    %VariableDisplayNames={};     
+    %FileNetcdfVariableNames={}; 
+    %FilesToOpen={};              
+    VariableDisplayNames={};     
     VariableNames={};
     VariableTypes={};
+    VariableDimensions={};
     VariableUnits={};
     VariableUnitsFac={};
 
@@ -145,26 +145,26 @@ function Connections=OpenDataConnectionsUrl2(Url)
     disp('Looking for water level variables ...')
     % possible standard names
     stdnames={'sea_surface_height_above_sea_level',...
-        'sea_surface_height_above_geoid',...
-        'sea_surface_elevation_anomaly',...
-        'sea_surface_height_above_reference_ellipsoid',...
-        'sea_surface_height',...
-        'maximum_sea_surface_height_above_geoid'};
+              'sea_surface_height_above_geoid',...
+              'sea_surface_elevation_anomaly',...
+              'sea_surface_height_above_reference_ellipsoid',...
+              'sea_surface_height'};
     
     str=GetVariableName(nc,stdnames);
     if isempty(str)
         error('No water level variable found in %s.\n\nWhat''s the point!!\n\n',url)
     end
+    v=nc{str};
     c=c+1;
     VariableNames{c}=str;
-    v=nc{str};
     VariableLongNames{c}=v.attribute('long_name');
     VariableUnits{c}=v.attribute('units');
     VariableStandardNames{c}=v.attribute('standard_name'); 
     VariableDisplayNames{c}=v.attribute('long_name');
     VariableTypes{c}='scalar';
     VariableUnitsFac{c}=1.;
-    
+    VariableDimensions{c}=3;  % meaning x,y,t
+
     % look for "atmos pressure" variables
     disp('Looking for atmos pressure  variables ...')
     % possible standard names
@@ -174,14 +174,15 @@ function Connections=OpenDataConnectionsUrl2(Url)
         fprintf('No atmospheric pressure variable found in %s.\n\nContinuing without it...!!\n\n',url)
     else
         c=c+1;
-        VariableNames{c}=str;
         v=nc{str};
+        VariableNames{c}=str;
         VariableLongNames{c}=v.attribute('long_name');
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
         VariableTypes{c}='scalar';
         VariableUnitsFac{c}=1.;
+        VariableDimensions{c}=3;  % meaning x,y,t
     end
     
     % look for "depth" variables
@@ -193,14 +194,15 @@ function Connections=OpenDataConnectionsUrl2(Url)
         fprintf('No depth/bahtymetry variable found in %s.\n\nContinuing without it...!!\n\n',url)
     else
         c=c+1;
-        VariableNames{c}=str;
         v=nc{str};
+        VariableNames{c}=str;
         VariableLongNames{c}=v.attribute('long_name');
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
         VariableTypes{c}='scalar';
         VariableUnitsFac{c}=1.;
+        VariableDimensions{c}=2;  % meaning x,y (no time-dependence)
     end
     
     % look for "wind" variables
@@ -212,14 +214,15 @@ function Connections=OpenDataConnectionsUrl2(Url)
         fprintf('No eastward_wind variable found in %s.\n\nContinuing without it...!!\n\n',url)
     else
         c=c+1;
-        VariableNames{c}=str;
         v=nc{str};
+        VariableNames{c}=str;
         VariableLongNames{c}=v.attribute('long_name');
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
         VariableTypes{c}='scalar';
         VariableUnitsFac{c}=1.;
+        VariableDimensions{c}=3;  % meaning x,y,t
     end
     
     % look for "wind" variables
@@ -231,18 +234,23 @@ function Connections=OpenDataConnectionsUrl2(Url)
         fprintf('No northward_wind variable found in %s.\n\nContinuing without it...!!\n\n',url)
     else
         c=c+1;
-        VariableNames{c}=str;
         v=nc{str};
+        VariableNames{c}=str;
         VariableLongNames{c}=v.attribute('long_name');
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
         VariableTypes{c}='scalar';
         VariableUnitsFac{c}=1.;
+        VariableDimensions{c}=3;  % meaning x,y,t
     end
+    
+    
     
     Connections.EnsembleNames=Url.Ens;
     Connections.VariableNames=VariableNames;
+    Connections.VariableLongNames=VariableLongNames;
+    Connections.VariableStandardNames=VariableStandardNames;
     Connections.VariableDisplayNames=VariableDisplayNames;
     Connections.VariableUnitsFac=VariableUnitsFac;
     Connections.VariableTypes=VariableTypes;
@@ -250,7 +258,8 @@ function Connections=OpenDataConnectionsUrl2(Url)
     Connections.members=cell(length(Connections.EnsembleNames),length(Connections.VariableNames));
     
     NEns=length(Url.Ens);
-       
+    NVars=length(VariableNames);
+   
     for i=1:NEns
         TopDodsCUrl=Url.FullDodsC;
         
@@ -258,7 +267,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
         
         for ii=1:length(VariableDisplayNames)
             ThisVariableDisplayName=VariableDisplayNames{ii};
-            ThisVariable=cell2mat(VariableNames{ii});
+            ThisVariable=VariableNames{ii};
             %ThisVariableType=VariableType{ii};
             ThisUnits=VariableUnits{ii};
             %ThisFileNetcdfVariableName=FileNetcdfVariableNames{ii};
@@ -298,89 +307,98 @@ function Connections=OpenDataConnectionsUrl2(Url)
                 % create regular grid
             else
                 
-                if numel(SZ)~=3
-                    error('Variable dimension for CGRID variable %s does not equal 3. Terminal.',ThisVariable)
+                switch numel(SZ)
+                    case 2  %  probably depth/bathy
+                         storm(ii).NNodes=SZ;     % number of computational points
+                         storm(ii).NTimes=1;      % length of time 
+                    case 3    
+                         storm(ii).NNodes=[SZ(2) SZ(3)];     % number of computational points
+                         storm(ii).NTimes=SZ(1);      % length of time 
+                    otherwise
+                        error('Variable dimension (%d) for CGRID variable %s not supported. Terminal.',ThisVariable,numel(SZ))
                 end
-                
-                storm(ii).NNodes=SZ(2)*SZ(3);  % number of computational points
-                storm(ii).NTimes=SZ(1);        % length of time 
-                %storm(ii).VariableType=ThisVariableType;
+            
             end
             
             for j=1:NVars
-                Connections.members{i,j}=storm(j);
+                Connections.members{i,j}=storm(i);
             end
             
             % attach extra stuff if available.
-            f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
-            Connections.Tracks{i}='';
-            try
-                msg='* Connecting to fort.22 file\n';
-                if ll
-                    fprintf(msg);
-                else
-                    SetUIStatusMessage(msg);
-                end
-                urlwrite(f22url,[TempDataLocation '/fort.22']);
-                temp=read_adcirc_nws19([TempDataLocation '/fort.22']);
-                Connections.Tracks{i}=temp;
-                if DeleteTempFiles
-                    delete([TempDataLocation '/fort.22']) %#ok<UNRCH>
-                end
-            catch ME
-                SetUIStatusMessage(msg)
-            end
-            msg=sprintf('* Successfully retrieved %s file links ...\n',Url.Ens{i});
+%             f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
+%             Connections.Tracks{i}='';
+%             try
+%                 msg='* Connecting to fort.22 file\n';
+%                 if ll
+%                     fprintf(msg);
+%                 else
+%                     SetUIStatusMessage(msg);
+%                 end
+%                 urlwrite(f22url,[TempDataLocation '/fort.22']);
+%                 temp=read_adcirc_nws19([TempDataLocation '/fort.22']);
+%                 Connections.Tracks{i}=temp;
+%                 if DeleteTempFiles
+%                     delete([TempDataLocation '/fort.22']) %#ok<UNRCH>
+%                 end
+%             catch ME
+%                 SetUIStatusMessage(msg)
+%             end
+            [a,b,c]=fileparts(Url.FullDodsC);
+            msg=sprintf('* Successfully retrieved %s.%s file links ...\n',b,c);
             SetUIStatusMessage(msg)
         end
         
         % add bathy as a variable
-        Connections.VariableNames{NVars+1}='Grid Elevation';
-        Connections.VariableDisplayNames{NVars+1}='Grid Elevation';
-        Connections.VariableTypes{1,NVars+1}='Scalar';
-        Connections.members{1,NVars+1}.NcTBHandle=Connections.members{1,1}.NcTBHandle;
-        Connections.members{1,NVars+1}.FieldDisplayName=[];
-        Connections.members{1,NVars+1}.FileNetcdfVariableName='depth';
-        Connections.members{1,NVars+1}.VariableDisplayName='Grid Elevation';
-        Connections.members{1,NVars+1}.NNodes=Connections.members{1,1}.NNodes;
-        Connections.members{1,NVars+1}.NTimes=1;
-        
-        Connections.members{1,NVars+1}.Units='Meters';
-        Connections.VariableUnitsFac{NVars+1}=1;
-        if any(strcmpi(Url.Units,{'english','feet'}))
-            Connections.VariableUnitsFac{NVars+1}=3.2808;
-            Connections.members{1,NVars+1}.Units='Feet';
-        end
+%         Connections.VariableNames{NVars+1}='Grid Elevation';
+%         Connections.VariableDisplayNames{NVars+1}='Grid Elevation';
+%         Connections.VariableTypes{1,NVars+1}='Scalar';
+%         Connections.members{1,NVars+1}.NcTBHandle=Connections.members{1,1}.NcTBHandle;
+%         Connections.members{1,NVars+1}.FieldDisplayName=[];
+%         Connections.members{1,NVars+1}.FileNetcdfVariableName='depth';
+%         Connections.members{1,NVars+1}.VariableDisplayName='Grid Elevation';
+%         Connections.members{1,NVars+1}.NNodes=Connections.members{1,1}.NNodes;
+%         Connections.members{1,NVars+1}.NTimes=1;
+%         
+%         Connections.members{1,NVars+1}.Units='Meters';
+%         Connections.VariableUnitsFac{NVars+1}=1;
+%         if any(strcmpi(Url.Units,{'english','feet'}))
+%             Connections.VariableUnitsFac{NVars+1}=3.2808;
+%             Connections.members{1,NVars+1}.Units='Feet';
+%         end
         
     % check the grids on which the variables are defined
-    NumberOfGridNodes=NaN*ones(NEns*NVars,1);
-    GridId=0;
-    for i=1:NEns
-        for j=1:NVars+1        % +1 for the added grid depth
-           Member=Connections.members{i,j};
-           if ~isempty(Member) && ~isempty(Member.NcTBHandle)
-               nnodes=Member.NNodes;
-               gridid=find(NumberOfGridNodes==nnodes);
-               if isempty(gridid)
-                   GridId=GridId+1;
-                   NumberOfGridNodes(GridId)=nnodes;
-                   TheGrids{GridId}=GetGridStructure(Member,GridId);
-                   if isfield(TheGrids{GridId},'z')
-                       if any(strcmpi(Url.Units,{'english','feet'}))
-                           TheGrids{GridId}.z=TheGrids{GridId}.z*3.2808;
-                       end
-                   end
-                   
-                   Connections.members{i,j}.GridId=GridId;
-               else
-                   Connections.members{i,j}.GridId=gridid;
-               end
-           end
+    if strcmp(Connections.Conventions,'UGRID')
+        
+        NumberOfGridNodes=NaN*ones(NEns*NVars,1);
+        GridId=0;
+        for i=1:NEns
+            for j=1:NVars+1        % +1 for the added grid depth
+                Member=Connections.members{i,j};
+                if ~isempty(Member) && ~isempty(Member.NcTBHandle)
+                    nnodes=Member.NNodes;
+                    gridid=find(NumberOfGridNodes==nnodes);
+                    if isempty(gridid)
+                        GridId=GridId+1;
+                        NumberOfGridNodes(GridId)=nnodes;
+                        TheGrids{GridId}=GetGridStructure(Member,GridId);
+                        if isfield(TheGrids{GridId},'z')
+                            if any(strcmpi(Url.Units,{'english','feet'}))
+                                TheGrids{GridId}.z=TheGrids{GridId}.z*3.2808;
+                            end
+                        end
+                        
+                        Connections.members{i,j}.GridId=GridId;
+                    else
+                        Connections.members{i,j}.GridId=gridid;
+                    end
+                end
+            end
         end
     end
-             
+    
     SetUIStatusMessage('* Done.\n\n')
 
+    end
  
 end
 

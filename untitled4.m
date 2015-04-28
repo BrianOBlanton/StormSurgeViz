@@ -1,13 +1,19 @@
 %function test
 
-    url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/Complete_gcmplt.nc';
-    url='http://opendap.renci.org:1935/thredds/dodsC/ASGS/gonzalo/22/nc_inundation_v9.99/hatteras.renci.org/livegahm/nhcConsensus/00_dir.ncml';
-    %url='http://opendap.renci.org:1935/thredds/dodsC/ASGS/gonzalo/22/nc_inundation_v9.99/hatteras.renci.org/livegahm/nhcConsensus/maxele.63.nc';
-%    url='http://milas.marine.ie/thredds/dodsC/IMI_ROMS_HYDRO/AGGREGATE';
-   % url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/2015042900.nc'; 
+    %url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/maxele.63.nc';
+    %url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/00_dir.ncml';
+    %url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/Complete_gcmplt.nc';
+    %url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/Complete_gcmplt.ncml';
+    %url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/2015042900.nc'; 
     url='http://mrtee.europa.renci.org:8080/thredds/dodsC/testAll/2015042900.ncml'; 
     
-    url='http://opendap.renci.org:1935/thredds/dodsC/Test/2015042900.ncml';
+    %url='http://opendap.renci.org:1935/thredds/dodsC/ASGS/gonzalo/22/nc_inundation_v9.99/hatteras.renci.org/livegahm/nhcConsensus/00_dir.ncml';
+    %url='http://opendap.renci.org:1935/thredds/dodsC/ASGS/gonzalo/22/nc_inundation_v9.99/hatteras.renci.org/livegahm/nhcConsensus/maxele.63.nc';
+    %url='http://milas.marine.ie/thredds/dodsC/IMI_ROMS_HYDRO/AGGREGATE';
+    %url='http://opendap.renci.org:1935/thredds/dodsC/Test/2015042900.ncml';
+    %url='http://opendap.renci.org:1935/thredds/dodsC/Test/Complete_gcmplt.ncml';
+    %url='http://opendap.renci.org:1935/thredds/dodsC/Test/00_dir.ncml';
+    %url='http://opendap.renci.org:1935/thredds/dodsC/Test/maxele.63.nc';
 
     nc=ncgeodataset(url);
 
