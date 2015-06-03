@@ -189,7 +189,6 @@ end
 
 %% InitializeUI
 Handles=InitializeUI(SSVizOpts);
-drawnow
 
 setappdata(Handles.MainFigure,'SSVizOpts',SSVizOpts);
 setappdata(Handles.MainFigure,'Catalog',TheCatalog);
@@ -2066,11 +2065,12 @@ BackgroundMapsContainerContents;
                 'Style','Radiobutton',...
                 'String',buttonnames{i},...
                 'Units','normalized',...
-                'Value',5,...
+                'Value',0,...
                 'FontSize',fs2,...
                 'Position', [.1 ytemp(i) .9 .15],...
                 'Tag','BaseMapRadioButton');
         end
+        set(Handles.BaseMapButtonHandles(1),'Value',1)
         
         uicontrol(...
             'Parent',Handles.CenterContainerMiddle,...
@@ -3366,15 +3366,17 @@ function Handles=SetSnapshotControls(varargin)
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     EnsembleNames=Connections.EnsembleNames; 
     VariableNames=Connections.VariableNames; 
-    VariableLongNames=Connections.VariableLongNames; 
+    %VariableLongNames=Connections.VariableLongNames; 
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     VarIndex=find(strcmp(VariableClicked,VariableNames));
    
-    [a,b]=ismember(ThreeDVars,VariableLongNames);
+%    [a,b]=ismember(ThreeDVars,VariableLongNames);
+    [a,b]=ismember(ThreeDVars,VariableNames);
     ThreeDvarsattached=false;
     for i=1:length(b)
         if ~isempty(Connections.members{EnsIndex,b(i)}.NcTBHandle)
             ThreeDvarsattached=true;
+            break
         end
     end
  
