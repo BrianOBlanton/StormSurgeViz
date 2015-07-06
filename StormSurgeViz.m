@@ -89,7 +89,7 @@ if ~usejava('jvm')
     return
 end
 
-if java.lang.Runtime.getRuntime.maxMemory/1e9  < 0.5
+if java.lang.Runtime.getRuntime.maxMemory/1e9  < 1.0 
     str={'Java Heap Space is < 1Gb.  For big model grids, this may '
         'be too small.  Increase Java Heap Memory through the MATLAB '
         'preferences.  This message is non-fatal, but if strange '

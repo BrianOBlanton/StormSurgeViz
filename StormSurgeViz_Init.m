@@ -74,7 +74,7 @@ opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
 % now process varargins, which will override any parameters set in
 % MyStormSurge_Init.m
 opts=parseargs(opts,varargin{:});
-opts.UseNcml=true;
+opts.UseNcml=false;
 opts.NcmlDefaultFileName='00_dir.ncml';
 
 SSVizOpts=opts;
