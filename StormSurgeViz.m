@@ -650,7 +650,7 @@ function Connections=OpenDataConnections(Url)
     
     
     if SSVizOpts.UseNcml
-        if Debug,fprintf('SSV++   Attempting to use NCML files on server.\n');end
+        if Debug,fprintf('SSViz++   Attempting to use NCML files on server.\n');end
         i=1;
         TopTextUrl= [Url.FullFileServer '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
         [~,status]=urlread(TopTextUrl);
@@ -664,6 +664,12 @@ function Connections=OpenDataConnections(Url)
         
         % ncml file exists on the other end!!
         TopDodsCUrl= [Url.FullDodsC '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
+        
+        try
+            websave('test.retrieve.ncml',TopDodsCUrl);
+        catch
+            error('Failed to get ncml for %s\n.  This is fatal.  Server needs to be fixed.',TopDodsCUrl);
+        end
         
     else
     
