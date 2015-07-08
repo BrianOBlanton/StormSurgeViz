@@ -7,8 +7,10 @@ addpath([HOME '/extern'])
 
 % need to set up main java path before setting any global variables
 if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
-    cd([HOME '/extern/nctoolbox'])
+%    cd([HOME '/extern/nctoolbox'])
+    cd(['/Users/bblanton/GitHub/nctoolbox/nctoolbox'])
     setup_nctoolbox;
+    cd(HOME)
 end
 
 if isempty(which('detbndy'))
@@ -23,7 +25,7 @@ global SSVizOpts
 ThreddsList={
              'http://opendap.renci.org:1935/thredds'
              'http://coastalmodeldev.data.noaa.gov/thredds'
-             'http://mrtee.europa.renci.org:8080/thredds'
+%             'http://mrtee.europa.renci.org:8080/thredds'
             };
 %            'http://workhorse.europa.renci.org:8080/thredds'
 %            'http://thredds.crc.nd.edu/thredds'
@@ -31,7 +33,7 @@ ThreddsList={
 CatalogEntryPoint={
                    'ASGS'
                    'ASGS'
-                   'SSV'
+%                   'SSV'
                   };
 
 InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/ASGS/InstanceDefaults_SS.m';
@@ -69,7 +71,7 @@ if exist('MyStormSurgeViz_Init.m','file')
     end
 end
 
-opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
+%opts=parseargs(opts,'KeepScalarsAndVectorsInSync',true);
 
 % now process varargins, which will override any parameters set in
 % MyStormSurge_Init.m
@@ -111,9 +113,10 @@ if ~isempty(which('almanac'))
     %set(0,'DefaultFigureRenderer','opengl');
 end
 
-if isempty(which('shaperead'))
-    SSVizOpts.UseShapeFiles=false;
-end
+SSVizOpts.UseShapeFiles=false;
+%if isempty(which('shaperead'))
+%    SSVizOpts.UseShapeFiles=false;
+%end
 
 if isempty(which('shapewrite'))
     disp('Can''t locate MATLAB''s shapewrite.  Disabling shape file output.')

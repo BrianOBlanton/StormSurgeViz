@@ -294,7 +294,8 @@ set(Handles.TimeOffsetString,'String',SSVizOpts.LocalTimeOffset)
 set(Handles.MainFigure,'UserData',Handles);
 
 UpdateUI(Handles.MainFigure);
-SetTitle(Connections.RunProperties);
+%SetTitle(Connections.RunProperties);
+SetTitle(Connections);
 axes(Handles.MainAxes);
 
 % Last thing
@@ -583,152 +584,150 @@ function Connections=OpenDataConnections(Url)
     global TheGrids Debug 
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    msg='Opening Remote OPeNDAP connections ...\n';
+    msg='Opening Network OPeNDAP connections ...\n';
     SetUIStatusMessage(msg)
     
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
     SSVizOpts=getappdata(fig,'SSVizOpts');
 
-    FileNetcdfVariableNames={}; 
-    FilesToOpen={};              
-    VariableDisplayNames={};     
-    VariableNames={};
-    VariableTypes={};
-    VariableUnits={};
-    VariableUnitsFac={};
+    VariableNames={'maximum_sea_surface_height_above_geoid','maximum_sea_surface_wave_significant_height'};
 
-    % read the variable list, which is actually an excel spreadsheet
-    % to make it easier to edit.  The first row is the variable names
-    % in this function, declared above as empty cells.
-    ff='AdcircVizVariableList.xls';
-    sheet=SSVizOpts.VariablesTable;
-    [~,~,C] = xlsread(ff,sheet);
-    [m,n]=size(C);
-    vars=C(1,:)';
-    for i=1:n
-        for j=2:m
-            thisvar=vars{i};
-            switch thisvar
-                case {'VariableUnitsFac.mks','VariableUnitsFac.eng'}
-                    com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i})); %#ok<ST2NM>
-                otherwise
-                    com=sprintf('%s{j-1}=''%s'';',thisvar,C{j,i});
-            end
-            eval(com)
-        end
-    end
-    % convert any FileNetcdfVariableNames from a 2-string string into a
-    % 2-element cell.
-    for i=1:m-1 
-        if strcmp(VariableTypes{i},'Vector')
-            temp=FileNetcdfVariableNames{i};
-            temp=textscan(temp,'%s %s');
-            temp={char(temp{1}) char(temp{2})};
-            FileNetcdfVariableNames{i}=temp; %#ok<AGROW>
-        end
-    end
     
-    if any(strcmpi(Url.Units,{'english','feet'}))
-        VariableUnitsFac=VariableUnitsFac.eng;
-        VariableUnits=VariableUnits.eng;
-    else
-        VariableUnitsFac=VariableUnitsFac.mks;
-        VariableUnits=VariableUnits.mks;
-    end
+%     FileNetcdfVariableNames={}; 
+%     FilesToOpen={};              
+%     VariableDisplayNames={};     
+%     VariableNames={};
+%     VariableTypes={};
+%     VariableUnits={};
+%     VariableUnitsFac={};
+
+%     % read the variable list, which is actually an excel spreadsheet
+%     % to make it easier to edit.  The first row is the variable names
+%     % in this function, declared above as empty cells.
+%     ff='AdcircVizVariableList.xls';
+%     sheet=SSVizOpts.VariablesTable;
+%     [~,~,C] = xlsread(ff,sheet);
+%     [m,n]=size(C);
+%     vars=C(1,:)';
+%     for i=1:n
+%         for j=2:m
+%             thisvar=vars{i};
+%             switch thisvar
+%                 case {'VariableUnitsFac.mks','VariableUnitsFac.eng'}
+%                     com=sprintf('%s{j-1}=%f;',thisvar, str2num(C{j,i})); %#ok<ST2NM>
+%                 otherwise
+%                     com=sprintf('%s{j-1}=''%s'';',thisvar,C{j,i});
+%             end
+%             eval(com)
+%         end
+%     end
+%     % convert any FileNetcdfVariableNames from a 2-string string into a
+%     % 2-element cell.
+%     for i=1:m-1 
+%         if strcmp(VariableTypes{i},'Vector')
+%             temp=FileNetcdfVariableNames{i};
+%             temp=textscan(temp,'%s %s');
+%             temp={char(temp{1}) char(temp{2})};
+%             FileNetcdfVariableNames{i}=temp; %#ok<AGROW>
+%         end
+%     end
+    
+%     if any(strcmpi(Url.Units,{'english','feet'}))
+%         VariableUnitsFac=VariableUnitsFac.eng;
+%         VariableUnits=VariableUnits.eng;
+%     else
+%         VariableUnitsFac=VariableUnitsFac.mks;
+%         VariableUnits=VariableUnits.mks;
+%     end
         
-    NVars=length(FilesToOpen);
+    %NVars=length(FilesToOpen);
 
     DeleteTempFiles=false;
-    SetUIStatusMessage('Opening Network OPeNDAP connections ...\n')
     
     Connections.EnsembleNames=Url.Ens;
     Connections.VariableNames=VariableNames;
-    Connections.VariableDisplayNames=VariableDisplayNames;
-    Connections.VariableUnitsFac=VariableUnitsFac;
-    Connections.VariableTypes=VariableTypes;
+    %Connections.VariableUnitsFac=VariableUnitsFac;
+    %Connections.VariableTypes=VariableTypes;
     
+    if Debug,fprintf('SSViz++   Attempting to use NCML files on server.\n');end
+    i=1;
+    TopDodsCUrl= [Url.FullDodsC '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
+    TopTextUrl= [Url.FullFileServer '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
     
-    if SSVizOpts.UseNcml
-        if Debug,fprintf('SSViz++   Attempting to use NCML files on server.\n');end
-        i=1;
-        TopTextUrl= [Url.FullFileServer '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
-        [~,status]=urlread(TopTextUrl);
-        if isempty(status)
-            SetUIStatusMessage('Could not connect to an ncml file. This is terminal.\n')
-            ME = MException('CheckForNcml:NotPresent', ...
-                ['Could not connect to an ncml file. ',...
-                TopTextUrl]);
-            throw(ME);
-        end
-        
-        % ncml file exists on the other end!!
-        TopDodsCUrl= [Url.FullDodsC '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
-        
-        try
-            websave('test.retrieve.ncml',TopDodsCUrl);
-        catch
-            error('Failed to get ncml for %s\n.  This is fatal.  Server needs to be fixed.',TopDodsCUrl);
-        end
-        
-    else
-    
-        % get run.properties file from first ens.
-        i=1;
-        TopTextUrl= [Url.FullFileServer '/' Url.Ens{i}];
-        RPurl=[TopTextUrl '/run.properties'];
-        RPlocation=[TempDataLocation '/run.properties'];
-        try
-            SetUIStatusMessage(['* Connecting to ' Url.Ens{i} ' run.properties file ... \n'])
-            urlwrite(RPurl,RPlocation);
-            RunProperties=LoadRunProperties(RPlocation);
-            if DeleteTempFiles
-                delete(RPlocation) %#ok<UNRCH>
-            end
-        catch ME
-            SetUIStatusMessage(['Could not connect to ' Url.Ens{i} ' run.properties file. This is terminal.\n'])
-            throw(ME);
-        end
-        
-        SetUIStatusMessage(['* Successfully retrieved ' Url.Ens{i} ' run.properties file. \n'])
-        
-        Connections.RunProperties=RunProperties;
-        
-        % now, add storm parts
-        
-        Connections.members=cell(length(Connections.EnsembleNames),length(Connections.VariableNames));
-        
-        NEns=length(Url.Ens);
-        
-        for i=1:NEns
-            TopDodsCUrl=[Url.FullDodsC '/' Url.Ens{i}];
-            storm=GetStorm(TopDodsCUrl);
-            
-            for j=1:NVars
-                Connections.members{i,j}=storm(j);
-            end
-            
-            % attach extra stuff if available.
-            f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
-            f22Location=[TempDataLocation '/fort.22'];
-            Connections.Tracks{i}='';
-            try
-                SetUIStatusMessage('* Connecting to fort.22 file\n')
-                urlwrite(f22url,f22Location);
-                temp=read_adcirc_nws19(f22Location);
-                Connections.Tracks{i}=temp;
-                if DeleteTempFiles
-                    delete(f22Location) %#ok<UNRCH>
-                end
-            catch ME
-                SetUIStatusMessage('* Could not open remote fort.22 file. \n')
-            end
-            
-            SetUIStatusMessage(sprintf('Successfully retrieved %s forecast links ...\n',Url.Ens{i}))
-        end
-        
+    try
+        websave([TempDataLocation '/test.retrieve.ncml'],TopTextUrl);
+    catch
+        SetUIStatusMessage('Could not connect to an ncml file. This is terminal.\n')
+        ME = MException('CheckForNcml:NotPresent', ...
+            ['Could not connect to an ncml file. ',...
+            TopTextUrl]);
+        throw(ME);
     end
     
+    
+    % open up connection to ncml file
+    nc=ncgeodataset(TopDodsCUrl);
+    
+    
+    %         % get run.properties file from first ens.
+    %         i=1;
+    %         TopTextUrl= [Url.FullFileServer '/' Url.Ens{i}];
+    %         RPurl=[TopTextUrl '/run.properties'];
+    %         RPlocation=[TempDataLocation '/run.properties'];
+    %         try
+    %             SetUIStatusMessage(['* Connecting to ' Url.Ens{i} ' run.properties file ... \n'])
+    %             urlwrite(RPurl,RPlocation);
+    %             RunProperties=LoadRunProperties(RPlocation);
+    %             if DeleteTempFiles
+    %                 delete(RPlocation) %#ok<UNRCH>
+    %             end
+    %         catch ME
+    %             SetUIStatusMessage(['Could not connect to ' Url.Ens{i} ' run.properties file. This is terminal.\n'])
+    %             throw(ME);
+    %         end
+    %
+    %         SetUIStatusMessage(['* Successfully retrieved ' Url.Ens{i} ' run.properties file. \n'])
+    %
+    %        Connections.RunProperties=RunProperties;
+    
+    % now, add storm parts
+    
+    Connections.members=cell(length(Connections.EnsembleNames),length(Connections.VariableNames));
+    
+    NEns=length(Url.Ens);
+    
+    for i=1:NEns
+        storm=GetStormNcml(TopDodsCUrl);
+        NVars=length(storm);
+        
+        for j=1:NVars
+            Connections.members{i,j}=storm(j);
+            Connections.VariableDisplayNames{j}=storm(j).VariableDisplayName;
+            Connections.VariableUnitsFac{j}=1.0;
+            Connections.VariableTypes{j}='Scalar';
+        end
+        
+%         % attach extra stuff if available.
+%         f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
+%         f22Location=[TempDataLocation '/fort.22'];
+%         Connections.Tracks{i}='';
+%         try
+%             SetUIStatusMessage('* Connecting to fort.22 file\n')
+%             urlwrite(f22url,f22Location);
+%             temp=read_adcirc_nws19(f22Location);
+%             Connections.Tracks{i}=temp;
+%             if DeleteTempFiles
+%                 delete(f22Location) %#ok<UNRCH>
+%             end
+%         catch ME
+%             SetUIStatusMessage('* Could not open remote fort.22 file. \n')
+%         end
+%         
+        SetUIStatusMessage(sprintf('Successfully retrieved %s forecast links ...\n',Url.Ens{i}))
+    end
+    
+   
     
     % try to get the nhc shapefile
     if Url.UseShapeFiles
@@ -799,46 +798,44 @@ function Connections=OpenDataConnections(Url)
     %%% nested fxn to get the data objects (not the data itself; that's
     %%% done in GetDataObjects)
     
-    function storm=GetStorm(url1) 
+    function storm=GetStormNcml(url1) 
         storm=struct('NcTBHandle',[],'Units',[],'FieldDisplayName',[],'FileNetcdfVariableName',[],'GridHash',[]);
-        for ii=1:length(FilesToOpen)
-            ThisVariable=FilesToOpen{ii};
-            ThisVariableDisplayName=VariableDisplayNames{ii};
+        nctemp=ncgeodataset(url1);
+        
+        % populate with small number of variables:
+        % max water level
+        for ii=1:length(VariableNames)
+            ThisVariable=VariableNames{ii};
+            ncgvar=GetByStandardName(nctemp,ThisVariable);
+            
+            ThisVariableDisplayName=value4key(ncgvar.attributes,'long_name');
+            ThisUnits=value4key(ncgvar.attributes,'units');
+
+            %ThisVariableDisplayName=VariableDisplayNames{ii};
             %ThisVariableName=VariableNames{ii};
             %ThisVariableType=VariableType{ii};
-            ThisUnits=VariableUnits{ii};
-            ThisFileNetcdfVariableName=FileNetcdfVariableNames{ii};
-            url=[url1 '/' ThisVariable];
-            ttemp=[];
-            try
-                SetUIStatusMessage(sprintf('* Connecting to %s\n', ThisVariable))
-                ttemp=ncgeodataset(url);
-                SetUIStatusMessage(sprintf('* Opened %s  file connection.\n',ThisVariable))
-                if length(ttemp.variables)<1
-                SetUIStatusMessage(sprintf('***** No variables found in %s\n', ThisVariable))
-                ttemp=[];
-                end
-            catch ME
-                SetUIStatusMessage(sprintf('***** Could not open %s connection. *****\n',ThisVariable))
-                if ii==1,throw(ME);end
-            end
+            %ThisUnits=VariableUnits{ii};
             
-            storm(ii).NcTBHandle=ttemp;
+            ThisVariableType='Scalar';
+            ThisFileNetcdfVariableName=ncgvar.name;
+            ThisVariableName=ncgvar.name;
+            
+            storm(ii).NcTBHandle=nctemp;
             storm(ii).Units=ThisUnits;
             storm(ii).VariableDisplayName=ThisVariableDisplayName;
             storm(ii).FileNetcdfVariableName=ThisFileNetcdfVariableName;
             
-            if ~isempty(ttemp)
+            if ~isempty(nctemp)
                 
-                a=prod(double(size(ttemp.variable{'element'})));
-                b=prod(double(size(ttemp.variable{'x'})));
+                a=prod(double(size(nctemp.variable{'element'})));
+                b=prod(double(size(nctemp.variable{'x'})));
 
                 storm(ii).GridHash=DataHash2(a*b);
                 
                 if iscell(ThisFileNetcdfVariableName)
-                    MandN=size(ttemp{ThisFileNetcdfVariableName{1}});
+                    MandN=size(nctemp{ThisFileNetcdfVariableName{1}});
                 else
-                    MandN=size(ttemp{ThisFileNetcdfVariableName});
+                    MandN=size(nctemp{ThisFileNetcdfVariableName});
                 end
                 
                 if (length(MandN)>1  && ~any(MandN==1))
@@ -854,6 +851,7 @@ function Connections=OpenDataConnections(Url)
        end
   
     end
+    
 end
 
 %%  GetDataObject
@@ -1210,8 +1208,9 @@ function SetNewField(varargin)
     
     set(Handles.MainFigure,'UserData',Handles);
     UpdateUI(Handles.MainFigure);
+    
     % doesnt matter which Connection is passed in.
-    SetTitle(Connections.RunProperties);  
+    SetTitle(Connections);  
     
     set(FigHandle,'Pointer','arrow');
 
@@ -1618,7 +1617,7 @@ Vecs='on';
 
 %LeftEdge=.01;
 
-colormaps={'noaa_cmap','jet','hsv','hot','cool','gray'};
+colormaps={'parula','noaa_cmap','jet','hsv','hot','cool','gray'};
 cmapidx=find(strcmp(ColorMap,colormaps));
 
 % normalized positions of container panels depend on ForkAxes
@@ -2099,7 +2098,7 @@ BackgroundMapsContainerContents;
                 'Style','Radiobutton',...
                 'String',buttonnames{i},...
                 'Units','normalized',...
-                'Value',5,...
+                'Value',1,...
                 'FontSize',fs2,...
                 'Position', [.1 ytemp(i) .9 .15],...
                 'Tag','BaseMapRadioButton');
@@ -2163,7 +2162,8 @@ BackgroundMapsContainerContents;
         
     function InformationPanelContainerContents
              
-        Width=.48;
+        Width=.40;
+        Width2=.580;
         Height=.09;
               
         % InstanceName
@@ -2183,7 +2183,7 @@ BackgroundMapsContainerContents;
             'Style','text',...
             'Units','normalized',...
             'BackGroundColor','w',...
-            'Position',[.50 .9 Width Height],...
+            'Position',[.42 .9 Width2 Height],...
             'FontSize',fs1,...
             'HorizontalAlignment','left',...
             'Tag','InstanceName',...
@@ -2206,7 +2206,7 @@ BackgroundMapsContainerContents;
             'Style','text',...
             'Units','normalized',...
             'BackGroundColor','w',...
-            'Position',[.50 .8 Width Height],...
+            'Position',[.42 .8 Width2 Height],...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
             'Tag','ModelName',...
@@ -2227,7 +2227,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .7 Width Height],...
+            'Position',[.42 .7 Width2 Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -2250,7 +2250,7 @@ BackgroundMapsContainerContents;
             'Style','text',...
             'Units','normalized',...
             'BackGroundColor','w',...
-            'Position',[.50 .6 Width Height],...
+            'Position',[.42 .6 Width2 Height],...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
             'Tag','AdvisoryNumber',...
@@ -2271,7 +2271,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .5 Width Height],...
+            'Position',[.42 .5 Width2 Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -2282,7 +2282,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .32 Width Height*1.9],...
+            'Position',[.42 .32 Width2 Height*1.9],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -2304,7 +2304,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .21 Width Height],...
+            'Position',[.42 .21 Width2 Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -2326,7 +2326,7 @@ BackgroundMapsContainerContents;
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.50 .11 Width Height],...
+            'Position',[.42 .11 Width2 Height],...
             'BackGroundColor','w',...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
@@ -3044,13 +3044,28 @@ function UpdateUI(varargin)
 %        hr=str2double(temp(9:10));
 %        t2=datenum(yyyy,mm,dd,hr,0,0);
 %        set(Handles.ForecastEndTime,'String',sprintf('%s',datestr(t2+LocalTimeOffset/24,0)))
+
+    else
+        nc=Connections.members{1}.NcTBHandle;
+        ModelGrid=value4key(nc.attributes,'agrid');
+        ModelName=value4key(nc.attributes,'model');  
+        StormName=value4key(nc.attributes,'stormname');  
+        Instance=value4key(nc.attributes,'id');  
+        AdvCyc=value4key(nc.attributes,'advisory_or_cycle');
+        
+       set(Handles.StormNumberName,'String',StormName);
+       set(Handles.AdvisoryNumber, 'String',AdvCyc)
+       set(Handles.ModelGridName,  'String',ModelGrid)
+       set(Handles.ModelGridNums,  'String',str)
+       set(Handles.ModelName,      'String',ModelName)
+       set(Handles.InstanceName,   'String',Instance)
     end
     
 
 %    set(Handles.UnitsString,   'String',Units)
 %    set(Handles.TimeOffsetString,   'String',LocalTimeOffset)
 
-    if isempty(Connections.Tracks{1})  && isempty(Connections.AtcfShape)
+    if (~isfield(Connections,'Tracks') || isempty(Connections.Tracks{1}))  && ( ~isfield(Connections,'AtcfShape') || isempty(Connections.AtcfShape))
         set(Handles.ShowTrackButton,'String','No Track to Show')
         set(Handles.ShowTrackButton,'Enable','off')
     else
@@ -3278,6 +3293,7 @@ function Handles=SetVariableControls(varargin)
         'SelectionChangeFcn',@SetNewField);
     
     dy2=1/11;
+    Handles.ScalarVarButtonHandles=[];
     for i=1:NVar
         Handles.ScalarVarButtonHandles(i)=uicontrol(...
             Handles.ScalarVarButtonHandlesGroup,...
@@ -3286,7 +3302,8 @@ function Handles=SetVariableControls(varargin)
             'Units','normalized',...
             'FontSize',FontSizes(2),...
             'Position', [.1 .975-dy2*i .9 dy2],...
-            'Tag','ScalarVariableMemberRadioButton');
+            'Tag','ScalarVariableMemberRadioButton',...
+            'TooltipString',VariableNames{Scalars(i)});
   
             set(Handles.ScalarVarButtonHandles(i),'Enable','on');
     end
@@ -3316,6 +3333,7 @@ function Handles=SetVariableControls(varargin)
         'Tag','VectorVariableMemberRadioButtonGroup',...
         'SelectionChangeFcn',@SetNewField);
     
+    Handles.VectorVarButtonHandles=[];
     for i=1:NVar
         Handles.VectorVarButtonHandles(i)=uicontrol(...
             Handles.VectorVarButtonHandlesGroup,...
@@ -3329,13 +3347,13 @@ function Handles=SetVariableControls(varargin)
             set(Handles.VectorVarButtonHandles(i),'Enable',Vecs);
     end
     
-    for i=1:length(Handles.VectorVarButtonHandles)
+    for i=1:NVar
         if isempty(Connections.members{1,Vectors(i)}.NcTBHandle)
             set(Handles.VectorVarButtonHandles(i),'Value',0)
             set(Handles.VectorVarButtonHandles(i),'Enable','off')
         end
     end
-    for i=1:length(Handles.VectorVarButtonHandles)
+    for i=1:NVar
         if ~isempty(Connections.members{1,Vectors(i)}.NcTBHandle)
             %set(Handles.VectorVarButtonHandles(i),'Value',1)
             break
@@ -3366,7 +3384,6 @@ function Handles=SetVariableControls(varargin)
         'CallBack','',...
         'Value',1);
     
-
     Handles.VectorAsScalarButton=uicontrol(...
         'Parent',Handles.VectorVarButtonHandlesGroup,...
         'Style','checkbox',...
@@ -3417,8 +3434,10 @@ function Handles=SetSnapshotControls(varargin)
     [a,b]=ismember(ThreeDVars,VariableNames);
     ThreeDvarsattached=false;
     for i=1:length(b)
+        if b>0
         if ~isempty(Connections.members{EnsIndex,b(i)}.NcTBHandle)
             ThreeDvarsattached=true;
+        end
         end
     end
  
@@ -3431,6 +3450,13 @@ function Handles=SetSnapshotControls(varargin)
         Handles=rmfield(Handles,'ScalarSnapshotButtonHandlePanel');
         Handles=rmfield(Handles,'ScalarSnapshotSliderHandle');
     end
+    
+    
+    Handles.ScalarSnapshotButtonHandle=[];
+    Handles.ScalarSnapshotSliderHandle=[];
+    Handles.VectorSnapshotButtonHandle=[];
+    Handles.VectorSnapshotSliderHandle=[];
+
     
     if ~any(a) || ~ThreeDvarsattached
         
@@ -4652,28 +4678,19 @@ function SetCLims(~,~)
 end
 
 %%  SetColorMap
-function SetColorMap(hObj,~) 
+function SetColorMap(hObj,~)
 
-    FigThatCalledThisFxn=gcbf;
+FigThatCalledThisFxn=gcbf;
+
     Handles=get(FigThatCalledThisFxn,'UserData');
     axes(Handles.MainAxes);
 
-    val = get(hObj,'Value');
-    if val==1
-        nc=size(colormap,1);
-        colormap(noaa_cmap(nc));
-    elseif val ==2
-        colormap(jet)
-    elseif val == 3
-        colormap(hsv)
-    elseif val == 4
-        colormap(hot)
-    elseif val == 5
-        colormap(cool)
-    elseif val == 6
-        colormap(gray)
-    end
-    
+    n= Handles.NCol.String;
+    val = hObj.Value;
+    maps=hObj.String;
+
+    com=sprintf('colormap(%s(%s))',maps{val},n);
+    eval(com)
 end
 
 %%  SetColors
@@ -4701,8 +4718,22 @@ end
 %      NumberOfColors=str2int(get(Handles.NCol));
 % end
 
+
 %%  SetTitle
-function SetTitle(RunProperties)
+function SetTitle(Connections) 
+
+    f=findobj(0,'Tag','MainVizAppFigure');
+    Handles=get(f,'UserData');
+
+    str{1}=Connections.members{1}.NcTBHandle.attribute('title');
+    str{2}=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
+
+    title(str,'FontWeight','bold','Interpreter','none') 
+    
+end
+
+%%  SetTitle
+function SetTitleOld(RunProperties)
     
     % SetTitle MUST be called AFTER the Handle struct is set back in the
     % caller:  I.e., it must be placed after
