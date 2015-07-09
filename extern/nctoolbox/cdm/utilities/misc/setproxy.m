@@ -1,6 +1,6 @@
 function setproxy(proxyname, port)
 % SETPROXY - Set the proxy to use when making all remote calls with
-% NCTOOLBOX (http://code.google.com/p/nctoolbox)
+% NCTOOLBOX (https://github.com/nctoolbox/nctoolbox)
 %
 % Use as: setproxy(proxyname, port)
 %
@@ -16,4 +16,5 @@ function setproxy(proxyname, port)
 % httpClient.getHostConfiguration().setProxy(proxyname, port);
 % ucar.nc2.dataset.NetcdfDataset.setHttpClient(httpClient);
 
-ucar.nc2.util.net.HTTPSession.setGlobalSimpleProxy(proxyname, port)
+%ucar.nc2.util.net.HTTPSession.setGlobalSimpleProxy(proxyname, port)
+ucar.nc2.util.net.HTTPSession.setGlobalProxy(proxyname, port)

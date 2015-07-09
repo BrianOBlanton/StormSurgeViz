@@ -142,7 +142,7 @@ switch SSVizOpts.Mode
         Url.Units=SSVizOpts.Units;
         
     case 'Url'
-        str={'Direct Url file access is not yet supported. Best of Luck!!'};
+        str={'Direct Url file access is not fully supported. Best of Luck!!'};
         UrlBase=SSVizOpts.Url;
         Url.ThisInstance='Url';
         Url.ThisStorm=NaN;

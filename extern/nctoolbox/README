@@ -1,20 +1,20 @@
-NCTOOLBOX - 20120109
+NCTOOLBOX - 20130305
 
-Full instructions and documentation at:
-http://code.google.com/p/nctoolbox/
+Full instructions and documentation are being ported from 
+http://code.google.com/p/nctoolbox/ to https://github.com/nctoolbox/nctoolbox/wiki/Documentation
+
+We are in the progress of moving the project hosting to github.com.
 
 Brief summary:
 
-  I. Prequisites
+    *Prequisites
 
-  1. Matlab R2008a+.  You can verify the version of Matlab by typing:
-       >> version
-  2. Java 6+.  You can verify the version of Java used by Matlab by typing: 
-       >>  version('-java'). 
-     The version returned should start with 'Java 1.6'. 
-     If it starts with 'Java 1.5' you can try updating the Matlab JVM:
-     http://www.mathworks.com/support/solutions/en/data/1-1812J/
-     or use the older nctoolbox-20091112 version of this toolbox.
+        *Matlab R2008a+.  You can verify the version of Matlab by typing:
+    version
+        *Java 6+.  You can verify the version of Java used by Matlab by typing: 
+    version('-java'). 
+
+        *The version returned should start with 'Java 1.6'. If it starts with 'Java 1.5' you can try updating the Matlab JVM: http://www.mathworks.com/support/solutions/en/data/1-1812J/ or use the older nctoolbox-20091112 version of this toolbox.
 
  II. Setup
 
@@ -26,8 +26,8 @@ Brief summary:
      You will need to add the follwing lines to your startup.m file if you would like 
      nctoolbox automatically when you start Matlab:
 
-        % Edit "/Path/to/nctoolbox" to correct nctoolbox directory
-        addpath("/Path/To/nctoolbox")
+        % Edit '/Path/to/nctoolbox' to correct nctoolbox directory
+        addpath('/Path/To/nctoolbox')
         setup_nctoolbox
       
 III. Demos

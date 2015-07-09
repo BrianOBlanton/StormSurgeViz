@@ -1,4 +1,4 @@
-% DEMO1 - Basic data access
+% DEMO1 - Basic ncdataset data access
 echo('on')
 % STARTING DEMO1 ----------------------------------------------------------
 % Basic usage of ncdataset
@@ -23,7 +23,8 @@ view(2);shading interp;...
 datetick('x', 2);set(gca, 'YDir', 'reverse');...
 grid('on');ch = colorbar;...
 set(get(ch, 'YLabel'), 'String', '^oC');...
-title('Temperature at M1 Mooring in Monterey Bay')
+title({'Temperature at M1 Mooring in Monterey Bay',ds.attribute('references'),ds.location},'interpreter','none')
+
 shg
 
 echo('off') % ENDING DEMO1 ------------------------------------------------

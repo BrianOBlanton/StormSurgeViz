@@ -4,26 +4,46 @@
 % NCGEOVARIABLE is used to retrieve data for a given variable as well as the
 % variables associated coordinate dimensions.
 %
+% Methods:
+%
+% For more information on the methods use 'help' or 'doc'.  For example:
+%   >> help ncgeovariable
+%   >> doc ncgeovariable
 %
 % Example of use:
-%  ds = cfdataset('http://dods.mbari.org/cgi-bin/nph-nc/data/ssdsdata/deployments/m1/200810/OS_M1_20081008_TS.nc');
-%  v = ds.variable('TEMP');
-%  t = v.data([1 1 1 1], [100 5 1 1]);
+%  ds = ncgeodataset('http://dods.mbari.org/cgi-bin/nph-nc/data/ssdsdata/deployments/m1/200810/OS_M1_20081008_TS.nc');
+%  vn = ds.variable('TEMP');    % returns an ncvariable
+%  vg = ds.geovariable('TEMP'); % returns an ncgeovariable
+%  tn = vn.data([1 1 1 1], [100 5 1 1]);
+%  tg = vg.data(1:100,1:5,1,1);
 %  % Look at properties
-%  v.name
-%  v.axes
+%  vg.name
+%  vg.axes
+%  vg.getaxesorder
+%  vg.extent
+%  datestr(vg.timeextent)
+%  vg.grid_interop
+%  tw = vg.timewindow([2008 10 10 0 0 0], [2008 20 11 0 0 0]);
+%  datestr(tw.time)
+%  vg.getlonname
+%  vg.getlatname
+%  
+%  vg.getxname
+%  vg.getyname
 %
-% NCTOOLBOX (http://code.google.com/p/nctoolbox)
+% NCTOOLBOX (https://github.com/nctoolbox/nctoolbox
+% https://github.com/nctoolbox/nctoolbox/wiki/ncgeovariable)
+% See also ncvariable, ncgeodataset, ncgeodataset.geovariable
 classdef ncgeovariable < ncvariable
     
     properties (SetAccess = private)
-        %         dataset          % ncdataset instance
+        %         dataset          % ncdataset instance.
     end
     
     properties (Dependent = true)
-        %         name            % The string variable name that this object represents
-        %         attributes\
-        %         axes
+        %         name            % The string variable name that this object represents.
+        %         attributes      % The attributes associated with this object.
+        %         axes            % The coordiante vaaibles associated with this object.
     end
     
     properties (SetAccess = private, GetAccess = protected)
@@ -45,14 +65,20 @@ classdef ncgeovariable < ncvariable
             % NCGEOVARIABLE.NCGEOVARIABLE  Constructor.
             %
             % Use as:
-            %    v = ncvariable(src, variableName)
-            %    v = ncvariable(src, variableName, axesVariableNames)
+            %    v = ncgeovariable(src, variableName, axesVariableNames)
             %
+            % Preffered Usage:
+            %    geo = ncgeodataset(...);
+            %    v = geo.geovariable(variableName); % uses ncgeodataset.geovariable 
+            % Alternate Usage:
+            %    geo = ncgeodataset(...);
+            %    v = ncgeovariable(geo,variableName,geo.axes(variableName))
             obj = obj@ncvariable(src, variableName, axesVariableNames);
             
             
         end % ncgeovariable end
         
+        %%
         function a = get.axes_info(src)
             switch length(src.size)
                 case 1
@@ -81,29 +107,63 @@ classdef ncgeovariable < ncvariable
             
         end
         
+        function e = top_bot(src)
+            % NCGEOVARIABLE.top_bot - Find top and bottom layers
+            % Usage e = var.top_bot;
+            % returns [top_index bottom_index]
+            s = src.size;
+            lens = length(s);
+            first = ones(1,lens);
+            if lens == 3
+                s(2) = 1;
+                s(3) = 1;
+            elseif lens==4
+                s(1) = 1;
+                s(3) = 1;
+                s(4) = 1;
+            else
+            end
+            stride = first;
+            %             switch length(s) % hopefully this speeds up the grid_interop call when time is involved
+            %                 case 1
+            %                     g = src.grid_interop(:);
+            %                 case 2
+            %                     g = src.grid_interop(:,:);
+            %                 case 3
+            %                     g = src.grid_interop(1,:,:);
+            %                 case 4
+            g = src.grid_interop(first, s, stride);
+            %             end
+            if g.z(1) <= g.z(2)
+                e=[length(g.z) 1];
+            else
+                e=[1 length(g.z)];
+            end
+        end
+        
         function e = extent(src)
             % NCGEOVARIABLE.extent - Function to find geographic bounding box coordinates.
             % Usage e = var.extent;
-             s = src.size;
-             lens = length(s);
-             first = ones(1,lens);
-             if lens > 1
-                 s(1) = 1;
-                 if lens > 3;
-                     s(2) = 1;
-                 end
-             end
-             stride = first;
-%             switch length(s) % hopefully this speeds up the grid_interop call when time is involved
-%                 case 1
-%                     g = src.grid_interop(:);
-%                 case 2
-%                     g = src.grid_interop(:,:);
-%                 case 3
-%                     g = src.grid_interop(1,:,:);
-%                 case 4
-                    g = src.grid_interop(first, s, stride);
-%             end
+            s = src.size;
+            lens = length(s);
+            first = ones(1,lens);
+            if lens > 1
+                s(1) = 1;
+                if lens > 3;
+                    s(2) = 1;
+                end
+            end
+            stride = first;
+            %             switch length(s) % hopefully this speeds up the grid_interop call when time is involved
+            %                 case 1
+            %                     g = src.grid_interop(:);
+            %                 case 2
+            %                     g = src.grid_interop(:,:);
+            %                 case 3
+            %                     g = src.grid_interop(1,:,:);
+            %                 case 4
+            g = src.grid_interop(first, s, stride);
+            %             end
             e.lon = [min(min(g.lon)) max(max(g.lon))];
             e.lat = [min(min(g.lat)) max(max(g.lat))];
         end % end extent
@@ -129,15 +189,15 @@ classdef ncgeovariable < ncvariable
                 error('NCGEOVARIABLE:TIMEEXTENT',...
                     'There appears to be no time axis associated with the variable.');
             end
-        
+            
         end % end timeextent
         
         function ig = grid_interop(src, first, last, stride, ignore)
             % NCGEOVARIABLE.GRID_INTEROP - Method to get the coordinate variables and their data as a
-            % a structure with standardized field names for lat, lon, time, and z. Other coordiante variables
+            % a structure with standardized field names for lat, lon, time, and z. Other coordinate variables
             % that are not recognized by netcdf-java as the previous four types have field names directly
             % taken from their variable names.
-            % Useage: >> gridstruct = geovar.grid_interop(1,:,:,1:2:50);
+            % Usage: >> gridstruct = geovar.grid_interop(1,:,:,1:2:50);
             if nargin < 5
                 ignore = {};
             end
@@ -147,7 +207,7 @@ classdef ncgeovariable < ncvariable
             for i = 1:length(names); % loop through fields returned by grid
                 tempname = names{i};
                 javaaxisvar  =   src.dataset.netcdf.findVariable(tempname);
-                try 
+                try
                     % Expecting a uvar.nc2.dataset.CoordinateAxis here
                     type = char(javaaxisvar.getAxisType());
                 catch me
@@ -192,8 +252,15 @@ classdef ncgeovariable < ncvariable
                                         %                          temp = src.variable.getCoordinateSystems();
                                         griddataset = ucar.nc2.dt.grid.GridDataset.open(src.dataset.location);
                                         grid = griddataset.findGridByName(src.name);
-                                        grid = grid.getCoordinateSystem();
-                                        subgrid = grid.getVerticalTransform();
+                                            if ( length(grid) ~= 0 )
+                                            grid = grid.getCoordinateSystem();
+                                            subgrid = grid.getVerticalTransform();
+                                        else
+                                            if ~ismember(tempname, ignore)
+                                                ig.(tempname) = g.(tempname);
+                                            end
+                                            continue % skip to next var
+                                        end
                                         subgrid = subgrid.subset(trange, zrange, yrange, xrange); %tempfortesting arc 10/18
                                         %
                                         % It looks like this dataset (http://geoport.whoi.edu/thredds/dodsC/usgs/vault0/models/examples/bora_feb.nc)
@@ -302,34 +369,38 @@ classdef ncgeovariable < ncvariable
                                 tempXY = [x; y];
                                 projection = grid.getProjection();
                                 tempLatLon = projection.projToLatLon(tempXY);
-                                if ~ismember('lat', ignore)
-                                    ig.lat = reshape(tempLatLon(1,:), s);
+                                if ~isfield(ig, 'lat')
+                                    if ~ismember('lat', ignore)
+                                        ig.lat = reshape(tempLatLon(1,:), s);
+                                    end
                                 end
-                                if ~ismember('lon', ignore)
-                                    ig.lon = reshape(tempLatLon(2,:), s);
+                                if ~isfield(ig, 'lon')
+                                    if ~ismember('lon', ignore)
+                                        ig.lon = reshape(tempLatLon(2,:), s);
+                                    end
                                 end
                             catch me
                             end
-
-%                         case 'GeoX'
-%                             ig.x = g.(tempname);
-%                             if exist('griddataset', 'var')
-%                                 grid = griddataset.findGridByName(src.name);
-%                                 grid = grid.getCoordinateSystem();
-%                             else
-%                                 griddataset = ucar.nc2.dt.grid.GridDataset.open(src.dataset.location);
-%                                 grid = griddataset.findGridByName(src.name);
-%                                 grid = grid.getCoordinateSystem();
-%                                 
-%                             end
-%                             try
-%                                 ig.x = grid.getXHorizAxis;
-%                                 projection = grid.getProjection();
-%                                 ig.lon = projection.projToLatLon();
-%                             catch me
-%                             end
-
-                
+                            
+                        case 'GeoX'
+                            %                             ig.x = g.(tempname);
+                            %                             if exist('griddataset', 'var')
+                            %                                 grid = griddataset.findGridByName(src.name);
+                            %                                 grid = grid.getCoordinateSystem();
+                            %                             else
+                            %                                 griddataset = ucar.nc2.dt.grid.GridDataset.open(src.dataset.location);
+                            %                                 grid = griddataset.findGridByName(src.name);
+                            %                                 grid = grid.getCoordinateSystem();
+                            %
+                            %                             end
+                            %                             try
+                            %                                 ig.x = grid.getXHorizAxis;
+                            %                                 projection = grid.getProjection();
+                            %                                 ig.lon = projection.projToLatLon();
+                            %                             catch me
+                            
+                            
+                            
                         otherwise
                             if ~ismember(tempname, ignore)
                                 ig.(tempname) = g.(tempname);
@@ -343,7 +414,7 @@ classdef ncgeovariable < ncvariable
         function tw = timewindow(src, varargin)
             % NCGEOVARIABLE.TIMEWINDOW - Function to pull the time coordinates within the specified
             % start and stop times from the variable object.
-            % Useage: >> time = geovar.timewindow([2004 1 1 0 0 0], [2005 12 31 0 0 0]);
+            % Usage: >> time = geovar.timewindow([2004 1 1 0 0 0], [2005 12 31 0 0 0]);
             %              >> time = geovar.timewindow(731947, 732677);
             if nargin < 3
                 d = src.timewindowij(varargin{1});
@@ -357,25 +428,35 @@ classdef ncgeovariable < ncvariable
         end
         
         function tv = gettimevar(src)
-            % NCGEOVARIABLE.gettimevar()
+            % NCGEOVARIABLE.gettimevar() gets the time variable associated with the ncgeovariable.
             tn = src.gettimename();
             tv = src.dataset.geovariable(tn);
         end
         
-        function lv = getlonvar(src)
-            % NCGEOVARIABLE.getlonvar()
+        function [lv, type] = getlonvar(src)
+            % NCGEOVARIABLE.getlonvar() gets the longitude variable assiciated with the ncgeovariable.
             tn = src.getlonname();
+            type = 'Lon';
+            if isempty(tn)
+                tn = src.getxname();
+                type = 'GeoX';
+            end
             lv = src.dataset.geovariable(tn);
         end
         
-        function lv = getlatvar(src)
-            % NCGEOVARIABLE.getlatvar()
+        function [lv, type] = getlatvar(src)
+            % NCGEOVARIABLE.getlatvar() gets the latitude variable associated with the ncgeovariable.
+            type = 'Lat';
             tn = src.getlatname();
+            if isempty(tn)
+                tn = src.getyname();
+                type = 'GeoY';
+            end
             lv = src.dataset.geovariable(tn);
         end
         
         function tn = gettimename(src)
-            % NCGEOVARIABLE.gettimename()
+            % NCGEOVARIABLE.gettimename() gets the name if the time variable associated with the ncgeovariable
             for i = 1:length(src.axes)
                 tempname = src.axes{i};
                 javaaxisvar  =   src.dataset.netcdf.findVariable(tempname);
@@ -386,7 +467,7 @@ classdef ncgeovariable < ncvariable
         end
         
         function ln = getlonname(src)
-            % NCGEOVARIABLE.getlonname()
+            % NCGEOVARIABLE.getlonname() gets the name of the longitude variable associated with the ncgeovariable.
             for i = 1:length(src.axes)
                 tempname = src.axes{i};
                 javaaxisvar  =   src.dataset.netcdf.findVariable(tempname);
@@ -397,13 +478,35 @@ classdef ncgeovariable < ncvariable
         end
         
         function ln = getlatname(src)
-            % NCGEOVARIABLE.gelatname()
+            % NCGEOVARIABLE.gelatname() gets the naem of the latitude variable associated with the ncgeovariable
             for i = 1:length(src.axes)
                 tempname = src.axes{i};
                 javaaxisvar  =   src.dataset.netcdf.findVariable(tempname);
                 type{i} = char(javaaxisvar.getAxisType());
             end
             match = strcmp('Lat', type);
+            ln = src.axes(match);
+        end
+        
+        function ln = getxname(src)
+            % NCGEOVARIABLE.getxname() gets the name of the x variable associated with the ncgeovariable.
+            for i = 1:length(src.axes)
+                tempname = src.axes{i};
+                javaaxisvar  =   src.dataset.netcdf.findVariable(tempname);
+                type{i} = char(javaaxisvar.getAxisType());
+            end
+            match = strcmp('GeoX', type);
+            ln = src.axes(match);
+        end
+        
+        function ln = getyname(src)
+            % NCGEOVARIABLE.getyname() gets the name of the y variable assoxiated with the ncgeovariable
+            for i = 1:length(src.axes)
+                tempname = src.axes{i};
+                javaaxisvar  =   src.dataset.netcdf.findVariable(tempname);
+                type{i} = char(javaaxisvar.getAxisType());
+            end
+            match = strcmp('GeoY', type);
             ln = src.axes(match);
         end
         
@@ -427,13 +530,13 @@ classdef ncgeovariable < ncvariable
             s = src.dataset.time(v.name, s);
         end
         
-        function s = getlondata(src, start, last, stride)
-            % NCGEOVARIABLE.getlondata()
-            v = src.getlonvar;
+        function [s, type] = getlondata(src, start, last, stride)
+            % NCGEOVARIABLE.getlondata() gets the longitude data associated with the ncgeovariable.
+            [v, type] = src.getlonvar;
             sz = src.size();
             lonsize = v.size();
             lonlocation = find(sz==lonsize(1));
-             if length(lonsize) == 1
+            if length(lonsize) == 1
                 lonstart = start(lonlocation);
                 lonlast = last(lonlocation);
                 lonstride = stride(lonlocation);
@@ -442,23 +545,23 @@ classdef ncgeovariable < ncvariable
                 lonlast = last(lonlocation:lonlocation+1);
                 lonstride = stride(lonlocation:lonlocation+1);
             end
-%             switch length(lonsize)
-%                   case 1
-%                     s = v.data(lonstart:lonstride:lonlast);
-%                   case 2
-%                     s = v.data(lonstart(1):lonstride(1):lonlast(1),lonstart(2):lonstride(2):lonlast(2));
-%                   case 3
-%                     s = v.data(lonstart(1):lonstride(1):lonlast(1), lonstart(2):lonstride(2):lonlast(2), lonstart(3):lonstride(3):lonlast(3));
-%                   case 4
-%                     s = v.data(lonstart(1):lonstride(1):lonlast(1), lonstart(2):lonstride(2):lonlast(2), lonstart(3):lonstride(3):lonlast(3),...
-%                       lonstart(4):lonstride(4):lonlast(4));
-%             end
-              s = v.data(lonstart, lonlast, lonstride);
+            switch length(lonsize)
+                case 1
+                    s = v.data(lonstart:lonstride:lonlast);
+                case 2
+                    s = v.data(lonstart(1):lonstride(1):lonlast(1),lonstart(2):lonstride(2):lonlast(2));
+                case 3
+                    s = v.data(lonstart(1):lonstride(1):lonlast(1), lonstart(2):lonstride(2):lonlast(2), lonstart(3):lonstride(3):lonlast(3));
+                case 4
+                    s = v.data(lonstart(1):lonstride(1):lonlast(1), lonstart(2):lonstride(2):lonlast(2), lonstart(3):lonstride(3):lonlast(3),...
+                        lonstart(4):lonstride(4):lonlast(4));
+            end
+            %               s = v.data(lonstart, lonlast, lonstride);
         end
         
-        function s = getlatdata(src, start, last, stride)
-            % NCGEOVARIABLE.gelatdata()
-            v = src.getlatvar;
+        function [s, type] = getlatdata(src, start, last, stride)
+            % NCGEOVARIABLE.gelatdata() gets the latitude data associated with the ncgeovariable.
+            [v, type] = src.getlatvar;
             sz = src.size();
             latsize = v.size();
             latlocation = find(sz==latsize(1));
@@ -471,18 +574,18 @@ classdef ncgeovariable < ncvariable
                 latlast = last(latlocation:latlocation+1);
                 latstride = stride(latlocation:latlocation+1);
             end
-%             switch length(latsize)
-%                   case 1
-%                     s = v.data(latstart:latstride:latlast);
-%                   case 2
-%                     s = v.data(latstart(1):latstride(1):latlast(1),latstart(2):latstride(2):latlast(2));
-%                   case 3
-%                     s = v.data(latstart(1):latstride(1):latlast(1), latstart(2):latstride(2):latlast(2), latstart(3):latstride(3):latlast(3));
-%                   case 4
-%                     s = v.data(latstart(1):latstride(1):latlast(1), latstart(2):latstride(2):latlast(2), latstart(3):latstride(3):latlast(3),...
-%                       latstart(4):latstride(4):latlast(4));
-%             end
-              s = v.data(latstart, latlast, latstride);
+            switch length(latsize)
+                case 1
+                    s = v.data(latstart:latstride:latlast);
+                case 2
+                    s = v.data(latstart(1):latstride(1):latlast(1),latstart(2):latstride(2):latlast(2));
+                case 3
+                    s = v.data(latstart(1):latstride(1):latlast(1), latstart(2):latstride(2):latlast(2), latstart(3):latstride(3):latlast(3));
+                case 4
+                    s = v.data(latstart(1):latstride(1):latlast(1), latstart(2):latstride(2):latlast(2), latstart(3):latstride(3):latlast(3),...
+                        latstart(4):latstride(4):latlast(4));
+            end
+            %                s = v.data(latstart, latlast, latstride);
         end
         
         function vec = getvectors(src, u, v, alpha)
@@ -490,7 +593,7 @@ classdef ncgeovariable < ncvariable
             % u and v ROMS vectors on to a common grid (grid is based on
             % the coordinates of the geovariable that "getvectors" is called
             % from.)
-            % Use: 
+            % Use:
             %     >> uvar = nc.geovariable('u');
             %     >> vvar = nc.geovariable('v');
             %     >> hvar = nc.geovariable('depth');
@@ -502,7 +605,7 @@ classdef ncgeovariable < ncvariable
                 vec = complex_ongrid(src, u, v, alpha);
             else
                 error(['NCTOOLBOX:ncgeovariable:getvectors'], ...
-                        'Incorrect number of arguments for getvectrs()');
+                    'Incorrect number of arguments for getvectrs()');
             end
         end
         
@@ -566,6 +669,9 @@ classdef ncgeovariable < ncvariable
             % s.lon=[117 123];
             % s.h_stride=[2 2]; % Can be omitted
             % s.z_index=[1 30]; % Can be omitted
+            % or 
+            % s.z_index='top'
+            % s.z_index='bottom'
             % s.v_stride=2; % Can be omitted
             %
             % Usage:
@@ -682,13 +788,24 @@ classdef ncgeovariable < ncvariable
                 order = obj.getaxesorder;
                 
                 if isfield(struct, 'z_index')
-                    switch length(struct.z_index)
-                        case 1
-                            zmin = struct.z_index;
-                            zmax = struct.z_index;
-                        case 2
-                            zmin = struct.z_index(1);
-                            zmax = struct.z_index(2);
+                    if length(struct.z_index)==1 || ischar(struct.z_index)
+                        if ischar(struct.z_index)
+                           e=obj.top_bot;
+                           switch struct.z_index
+                                case 'top'
+                                    struct.z_index=e(1);
+                                    struct.z_index=e(1);
+                                    
+                                case 'bottom'
+                                    struct.z_index=e(2);
+                                    struct.z_index=e(2);                         end
+                        end
+                        zmin = struct.z_index;
+                        zmax = struct.z_index;
+                        
+                    elseif length(struct.z_index)==2
+                        zmin = struct.z_index(1);
+                        zmax = struct.z_index(2);
                     end
                 else
                     if isfield(order, 'z')
@@ -700,7 +817,7 @@ classdef ncgeovariable < ncvariable
                         zmax = [];
                     end
                 end
-
+                
                 if length(nums) < 2
                     me = MException(['NCTOOLBOX:ncgeovariable:geosubset'], ...
                         ['Expected data of ', obj.name, ' to be at least rank 2.']);
@@ -710,11 +827,11 @@ classdef ncgeovariable < ncvariable
                     stride = ones([1, length(nums)]);
                     last = nums;
                     
-                    if order.lon ~= order.lat      
+                    if order.lon ~= order.lat
                         % pass
                     else
                         order.lat = order.lon;
-                        order.lon = order.lat+1;  
+                        order.lon = order.lat+1;
                     end
                     try
                         stride(order.time) = struct.t_stride;
@@ -756,7 +873,7 @@ classdef ncgeovariable < ncvariable
                 %           end % end of ugrid if
             else
                 me = MException(['NCTOOLBOX:ncgeovariable:geosubset'], ...
-                        ['No indices returned cooresponding to geographic subset.']);
+                    ['No indices returned cooresponding to geographic subset.']);
                 me.throw;
             end
         end % end of geosubset
@@ -782,19 +899,37 @@ classdef ncgeovariable < ncvariable
             warning off
             switch  length(obj.size)
                 case 1
-                    g.lon = obj.getlondata(1, obj.size, 1);
-                    g.lat = obj.getlatdata(1, obj.size, 1);
+                    [g.lon, typex] = obj.getlondata(1, obj.size, 1);
+                    [g.lat, typey] = obj.getlatdata(1, obj.size, 1);
                 case 2
-                    g.lon = obj.getlondata([1, 1], obj.size, [1, 1]);
-                    g.lat = obj.getlatdata([1, 1], obj.size, [1, 1]);
+                    [g.lon, typex] = obj.getlondata([1, 1], obj.size, [1, 1]);
+                    [g.lat, typey] = obj.getlatdata([1, 1], obj.size, [1, 1]);
                 case 3
-                    g.lon = obj.getlondata([1, 1, 1], obj.size, [1, 1, 1]);
-                    g.lat = obj.getlatdata([1, 1, 1], obj.size, [1, 1, 1]);
+                    [g.lon, typex] = obj.getlondata([1, 1, 1], obj.size, [1, 1, 1]);
+                    [g.lat, typey] = obj.getlatdata([1, 1, 1], obj.size, [1, 1, 1]);
                 case 4
-                    g.lon = obj.getlondata([1, 1, 1, 1], obj.size, [1, 1, 1, 1]);
-                    g.lat = obj.getlatdata([1, 1, 1, 1], obj.size, [1, 1, 1, 1]);
+                    [g.lon, typex] = obj.getlondata([1, 1, 1, 1], obj.size, [1, 1, 1, 1]);
+                    [g.lat, typey] = obj.getlatdata([1, 1, 1, 1], obj.size, [1, 1, 1, 1]);
             end
             warning on
+            if strcmp(typex, 'GeoX')
+                griddataset = ucar.nc2.dt.grid.GridDataset.open(obj.dataset.location);
+                grid = griddataset.findGridByName(obj.name);
+                grid = grid.getCoordinateSystem();
+                
+                %ig.y = grid.getYHorizAxis;
+                %ig.x = grid.getXHorizAxis;
+                [x, y] = meshgrid(g.lon,g.lat);
+                s = size(x);
+                x = reshape(x, [1 numel(x)]);
+                y = reshape(y, [1 numel(y)]);
+                tempXY = [x; y];
+                projection = grid.getProjection();
+                tempLatLon = projection.projToLatLon(tempXY);
+                
+                g.lat = reshape(tempLatLon(1,:), s);
+                g.lon = reshape(tempLatLon(2,:), s);
+            end
             
             g.lon = double(g.lon);
             g.lat = double(g.lat);
@@ -814,11 +949,11 @@ classdef ncgeovariable < ncvariable
             elseif max(g.lon) > 180
                 g.lon = g.lon - 360;
             end
-
-        %Unpack geosubset_structure
-        if isfield(struct, 'lat');
-            switch length(struct.lat)
-                case 1
+            
+            %Unpack geosubset_structure
+            if isfield(struct, 'lat');
+                switch length(struct.lat)
+                    case 1
                         flag = 1;
                     case 2
                         north_max = struct.lat(2);
@@ -826,8 +961,8 @@ classdef ncgeovariable < ncvariable
                 end
                 
             else
-                north_max = max(g.lat);
-                north_min = min(g.lat);
+                north_max = max(max(g.lat));
+                north_min = min(min(g.lat));
             end
             
             if isfield(struct,'lon');
@@ -840,8 +975,8 @@ classdef ncgeovariable < ncvariable
                 end
                 
             else
-                east_max = max(g.lon);
-                east_min = min(g.lon);
+                east_max = max(max(g.lon));
+                east_min = max(min(g.lon));
             end
             
             switch flag
@@ -917,6 +1052,8 @@ classdef ncgeovariable < ncvariable
         end % end geoij
         
         function order = getaxesorder(obj)
+            %  NCGEOVARIABLE.getaxesorder  gets the order of each axis of the ncgeovariable
+
             %             permute_nums = fliplr(obj.axes_info);
             ainfo = obj.axes_info;
             siz = obj.size;
@@ -927,6 +1064,7 @@ classdef ncgeovariable < ncvariable
         end
         
         function sref = subsref(obj,s)
+	    % NCGEOVARIABLE.subsref applies various .name and () methods to the ncgeovariable 
             switch s(1).type
                 % Use the built-in subsref for dot notation
                 case '.'
@@ -940,7 +1078,7 @@ classdef ncgeovariable < ncvariable
                                     [first last stride] = indexing(s(2).subs, double(nums));
                                     sref = obj.gettimedata(first, last, stride);
                             end
-                            case 'getlondata'
+                        case 'getlondata'
                             switch length(s)
                                 case 1
                                     sref = obj;
@@ -949,7 +1087,7 @@ classdef ncgeovariable < ncvariable
                                     [first last stride] = indexing(s(2).subs, double(nums));
                                     sref = obj.getlondata(first, last, stride);
                             end
-                            case 'getlatdata'
+                        case 'getlatdata'
                             switch length(s)
                                 case 1
                                     sref = obj;
@@ -1002,8 +1140,8 @@ classdef ncgeovariable < ncvariable
                             sref = builtin('subsref',obj,s);
                     end
                 case '()'
-                    warning(['NCTOOLBOX:ncgeovariable:subsref'], ...
-                        'Not a supported subscripted reference, "()" are not permitted to call variable object methods');
+                    [first last stride] = indexing(s(1).subs, double(size(obj)));
+                    sref = obj.data(first, last, stride);
                 case '{}'
                     warning(['NCTOOLBOX:ncgeovariable:subsref'], ...
                         'Not a supported subscripted reference, "{}" are not permitted to call variable object methods');

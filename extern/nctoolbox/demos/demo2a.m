@@ -1,8 +1,8 @@
-% DEMO2A - Subsetting data with Matlab style indexing
+% DEMO2A - Subsetting ncgeodataset data with Matlab style indexing
 
 echo('on')
 % STARTING DEMO2A ----------------------------------------------------------
-% An example of subsetting data using ncdataset
+% An example of subsetting data using ncgeodataset
 
 %% ---- Open the dataset
 ds = ncgeodataset('http://geoport.whoi.edu/thredds/dodsC/examples/OS_M1_20081008_TS.nc')
@@ -34,7 +34,7 @@ temp = ds{'TEMP'}(startIdx:stride:endIdx, 1, 1, 1);
 plot(t, temp, 'r.');...
 datetick('x', 2);grid;...
 legend('All Data', 'Decimated Data');...
-title('Surface Temperature at M1 Mooring in Monterey Bay');...
+title({'Surface Temperature at M1 Mooring in Monterey Bay',ds.attribute('references'),ds.location},'interpreter','none');...
 ylabel('Temperature [^oC]');
 hold('off');
 shg

@@ -18,6 +18,7 @@
 %       be tweaked as needed. (For example, to enable/disable
 %       data caching.) See
 %       http://www.unidata.ucar.edu/software/netcdf-java/v4.2/javadoc/index.html
+%       Examples: ds.netcdf.toString ; ds.netcdf.getLocation ; ds.netcdf.getDetailInfo 
 %   variables = A cell array of all variables in the ncdataset. These names
 %        are used as arguments into other ncdataset methods
 %
@@ -28,9 +29,10 @@
 %   ncdataset.size - returns the size of a variable in the data store
 %   ncdataset.time - Attempt to convert a variable to matlabs native time format (see datenum)
 %
-% For more information on the methods use help. For example:
+% For more information on the methods use help or doc. For example:
 %   >> help ncdataset.data
-%
+%   >> doc ncdataset
+%   
 % Example:
 %   ds = ncdataset('http://dods.mbari.org/cgi-bin/nph-nc/data/ssdsdata/deployments/m1/200810/m1_metsys_20081008_original.nc')
 %   ga = ds.attributes;       % Global Attributes
@@ -42,7 +44,7 @@
 % Brian Schlining (brian@mbari.org)
 % 2009-05-12
 % Alexander Crosby 2010, 2011
-% NCTOOLBOX (http://code.google.com/p/nctoolbox)
+% NCTOOLBOX (https://github.com/nctoolbox/nctoolbox  https://github.com/nctoolbox/nctoolbox/wiki/ncdataset)
 classdef ncdataset < handle
     
     properties (SetAccess = private)
@@ -66,6 +68,10 @@ classdef ncdataset < handle
             % If the argument is another instance of ncdataset or one of it's
             % subtypes, such as cfdataset or ncgeodataset then this creates
             % a new ncdataset that shares the underlying data.
+            %
+            % For documentation on the Java ncdataset.netcdf
+            % methods, see
+            % http://www.unidata.ucar.edu/software/thredds/current/netcdf-java/v4.2/javadoc/ucar/nc2/dataset/NetcdfDataset.html  
             if isa(url, 'ncdataset')
                 obj.location = url.location;
                 obj.netcdf = ucar.nc2.dataset.NetcdfDataset.openDataset(url.netcdf.getLocation());
@@ -266,7 +272,14 @@ classdef ncdataset < handle
                     if (at.isString())
                         a{i, 2} = char(at.getStringValue());
                     else
-                        a{i, 2} = at.getValues().copyToNDJavaArray();
+                        try 
+                            % Scalar (1-value arrays) will throw an
+                            % exception here. The catch should grab the
+                            % right value though.
+                            a{i, 2} = at.getValues().copyToNDJavaArray();
+                        catch
+                            a{i, 2} = at.getValues().copyTo1DJavaArray();
+                        end
                     end
                 end
             else
@@ -412,6 +425,7 @@ classdef ncdataset < handle
         function delete(obj)
             % NCDATASET.DELETE Closes netcdf files when object NCDATASET object is disposed or leaves scope
             try
+                %fprintf(1, 'Closed\n');
                 obj.netcdf.close()
             catch me
                 % Do nothing
@@ -454,7 +468,7 @@ classdef ncdataset < handle
                 try
                     d = array.copyToNDJavaArray(); % this fails if the variable has no java shape/no dimension was assigned
                 catch me1
-                    warning('NCTOOLBOX:ncdataset:readdata', ['An error occurred while reading "' variable ...
+                    warning('NCTOOLBOX:ncdataset:readdata', ['An error occurred while reading "' char(variable) ...
                         '" in ' obj.location '. Cause: \n' getReport(me1)]);
                     try
                         % TODO (Alex added this code) Where is a file where
@@ -463,7 +477,7 @@ classdef ncdataset < handle
                         d = d.toCharArray';  % must transpose
                         d = str2double(d);   % matlab string to matlab numeric
                     catch me2
-                        ex = MException('NCTOOLBOX:ncdataset:data', ['Failed to open "' variable '" in ' obj.location]);
+                        ex = MException('NCTOOLBOX:ncdataset:data', ['Failed to open "' char(variable) '" in ' obj.location]);
                         ex = ex.addCause(me2);
                         ex.throw;
                     end

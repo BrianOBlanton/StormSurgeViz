@@ -8,14 +8,24 @@
 % Example of use:
 %  ds = cfdataset('http://dods.mbari.org/cgi-bin/nph-nc/data/ssdsdata/deployments/m1/200810/OS_M1_20081008_TS.nc');
 %  v = ds.variable('TEMP');
-%  t = v.data([1 1 1 1], [100 5 1 1]);
+%
 %  % Look at properties
 %  v.name
 %  v.axes
 %
+%  % Data access example #1
+%  temp = v.data([1 1 1 1], [100 5 1 1]);
+%
+%  % Data access example #2
+%  t_end = v.size;
+%  t_start = t_end ./ t_end;
+%  t_stride = t_start;
+%  t_stride(1)=10;
+%  t = v.data(t_start, t_end, t_stride);
+%
 %
 % See also CFDATASET, SIZE, DATA
-% NCTOOLBOX (http://code.google.com/p/nctoolbox)
+% NCTOOLBOX (https://github.com/nctoolbox/nctoolbox)
 classdef ncvariable < handle
     
     properties (SetAccess = private)
@@ -24,9 +34,9 @@ classdef ncvariable < handle
     
     properties (Dependent = true)
         name            % The string variable name that this object represents
-        axes2
-        axes
-        attributes
+        axes2           %  ????
+        axes            % the coordinate variables associated with the object
+        attributes      % The attributes associated with the object.
     end
     
     properties (SetAccess = private, GetAccess = protected)
@@ -68,6 +78,7 @@ classdef ncvariable < handle
         end
         
         function a = get.attributes(obj)
+            % NCVARIABLE.ATTRIBUTES returns the attributes for the variable.
             a = obj.dataset.attributes(obj.name);
         end
         
@@ -85,13 +96,17 @@ classdef ncvariable < handle
         function v = get.name(obj)
             % NCVARIABLE.NAME Provides dynamic access to the underlying
             % netcdf datasets variable name
+            %
+            % Example:
+            %   vname=v.name % returns the name of the variable
+            %
             v = char(obj.variable.getName());
         end
         
         %%
         function n = size(obj)
             % NCVARIABLE.SIZE returns the size of the variable, including
-            % it's singleton dimensions
+            % its singleton dimensions
             n = obj.dataset.size(obj.name);
         end
         
@@ -204,7 +219,9 @@ classdef ncvariable < handle
             %
             %   ds = cfdataset('http://dods.mbari.org/cgi-bin/nph-nc/data/ssdsdata/deployments/m1/200810/OS_M1_20081008_TS.nc');
             %   v = ds.variable('TEMP');
-            %   t = v.data([1 1 1 1], [10 2 1 1]);
+            %   v.size  % 9043x11x1x1
+            %   g = v.grid
+            %   t = v.data([1 1 1 1], [10 2 1 1]); % is not like
             %
             
             if (nargin == 1)
@@ -226,49 +243,53 @@ classdef ncvariable < handle
                 g = somedata(obj, 0, first, last, stride);
             end
         end
-        
+       
         %%
-        % TODO this does not make valid assumption. Will not be included
-        %         function t = gettime(obj, varargin)
-        %             g = obj.grid;
-        %             if isfield(g, 'time')
-        %                 t_converted = g.time; % this is a bad assumption
-        %                 if nargin > 2
-        %                     t_index1 = t_converted > varargin{2};
-        %                     t_index2 = t_converted < varargin{3};
-        %                     t_index = find(t_index1==t_index2);
-        %                     t = t_converted(t_index);
-        %                 else
-        %                     t = t_converted;
-        %                 end
-        %             else
-        %                 error('gettime:ncvariable','No variable that netcdf-java recognizes as time.');
-        %             end
-        %         end
-        
-        
-        %%
-        
         function e = end(obj, k, n)
+            % NCVARIABLE.END the last index in an indexing
+            % expression.
+            % v.end(2) % returns the last index of the second dimension.
+            % e.g.: elevation.data(end-3:end,1,1)
             n = obj.dataset.size(obj.name);
             e = n(k);
         end % Added to deal with end indexing functionality,
         % otherwise the indexing arugment is ignored.
         
+        %%
         function sref = subsref(obj,s)
+            %                disp(s(2).subs{3})
+            % SUBSREF parses an object name for .name or ()
             switch s(1).type
                 % Use the built-in subsref for dot notation
                 case '.'
                     switch s(1).subs
                         case 'data'
+                            %% .data
                             nums = size(obj);
                             if ~isempty(nums)
                                 switch length(s)
                                     case 1
                                         sref = obj;
                                     case 2
-                                        [first last stride] = indexing(s(2).subs, double(nums));
-                                        sref = obj.data(first, last, stride);
+                                        idx = s(2).subs;
+                                        nidx = length(idx);
+                                        % Fill in missing arguments
+                                        % default stride is 1
+                                        if (nidx < 3)
+                                            stride = ones(1, length(nums));
+                                        else
+                                            stride = idx{3};
+                                        end
+
+                                        % Default last is the end
+                                        if (nidx < 2)
+                                            last = nums;
+                                        else
+                                            last = idx{2};
+                                        end
+                                        
+                                        first = idx{1};
+                                        sref = obj.somedata(1, first, last, stride);
                                 end
                                 
                             else
@@ -276,14 +297,32 @@ classdef ncvariable < handle
                                 warning('NCTOOLBOX:ncvariable:subsref', ...
                                     ['Variable "' obj.name '" has no netcdf dimension associated with it. Errors may result from non CF compliant files.'])
                             end
+                        
                         case 'grid'
+                            %% .grid
                             nums = size(obj);
                             if ~isempty(nums)
                                 switch length(s)
                                     case 1
                                         sref = obj;
                                     case 2
-                                        [first last stride] = indexing(s(2).subs, double(nums));
+                                        idx = s(2).subs;
+                                        nidx = length(idx);
+                                        % Fill in missing arguments
+                                        % default stride is 1
+                                        if (nidx < 3)
+                                            stride = ones(1, length(nums));
+                                        else
+                                            stride = idx{3};
+                                        end
+
+                                        % Default last is the end
+                                        if (nidx < 2)
+                                            last = nums;
+                                        else
+                                            last = idx{2};
+                                        end
+                                        first = idx{1};
                                         sref = obj.grid(first, last, stride);
                                 end
                                 
@@ -316,8 +355,10 @@ classdef ncvariable < handle
         
         %%
         function data = alldata(obj, withData)
-            
-            % ---- Step 2: Add the data
+            % NCVARIABLE.ALLDATA -- extract the data or the axes
+            % v.alldata(1) % returns the data
+            % v.alldata()  % returns a structure with the axesVariables
+            %              % and their data
             if withData == 1
                 name = char(obj.variable.getName());
                 data = obj.dataset.data(name);
@@ -333,7 +374,19 @@ classdef ncvariable < handle
         
         %%
         function data = somedata(obj, withData, first, last, stride)
-            
+            % NCGEOVARIABLE.SOMEDATA -- extract a hyperslab of data
+            % SOMEDATA can extract a subset of data from an NCVARIABLE or
+            % the subset of the corresponding axis variables.
+            % 
+            % Example:
+            %  first=ones(length(v.size));
+            %  last=v.size;
+            %       stride=first;
+            % vd = v.somedata(1,first,last,stride); % returns data
+            % vg = v.somedata(0,first,last,stride); % returns struct w/grid
+            % 
+            % See also NCVARIABLE, NCVARIABLE.ALLDATA,
+            % NCVARIABLE.DATA, NCVARIABLE.GRID
             s = obj.dataset.size(obj.name);
             
             % Fill in missing arguments

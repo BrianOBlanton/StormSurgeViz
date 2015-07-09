@@ -29,7 +29,7 @@ function [data,grd]=nj_subsetGrid(ncRef,var,lonLatRange,dn1,dn2)
 %   dn2 = [2003 2 16 14 0 0];
 %   [data, grd]=nj_subsetGrid(url,var,lonLatRange,dn1, dn2);%time range
 %
-% NCTOOLBOX (http://code.google.com/p/nctoolbox)
+% NCTOOLBOX (https://github.com/nctoolbox/nctoolbox)
 if nargin < 2, help(mfilename), return, end
 if (isa(ncRef, 'ncgeodataset')) %check for ncgeodataset Object
     nc = ncRef;
@@ -66,7 +66,7 @@ switch nargin
             structure.lat=lonLatRange(2);
             structure.lon=lonLatRange(1);
         end
-        structure.time = [datenum(dn1) datenum(dn1)];
+        structure.time = [datenum(dn1)];
         subs = geoGridVar.geosubset(structure);
         data = squeeze(subs.data);
         grd_temp = subs.grid;
