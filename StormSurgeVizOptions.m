@@ -34,7 +34,7 @@ p.LocalTimeOffset=0;
 p.UseStrTree=false;
 p.UseGoogleMaps=true;
 p.UseShapeFiles=true;
-p.UseNcml=false;
+p.UseNcml=true;
 p.KeepScalarsAndVectorsInSync=true;
 
 p.Mode={'Network','Local', 'Url'}; 
@@ -49,7 +49,6 @@ p.ColorMin=NaN;
 p.ColorMap='noaa_cmap';
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
 
-
 % GUI options
 %ScreenTake=100; % percent of screen width to take up
 p.AppWidthPercent=90;
@@ -61,4 +60,4 @@ p.SendDiagnosticsToCommandWindow=true;
 p.ForkAxes=false;
 p.UITest=false;
 
-p.BoundingBox=[-100 -60 7 47];
+p.BoundingBox=NaN;

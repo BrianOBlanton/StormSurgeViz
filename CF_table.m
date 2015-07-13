@@ -1,19 +1,55 @@
 function CF=CF_table
 
-    CF.StandardNames={'maximum_sea_surface_height_above_geoid_xyz'
+    m2f= 3.280839895;   %meters to feet;
+    mps2mph= 2.2369;    %meters/sec to miles/hour;
+
+    CF.StandardNames={
+        'maximum_sea_surface_height_above_geoid'
         'sea_surface_height_above_geoid'
         'maximum_sea_surface_wave_significant_height'
+        'sea_surface_wave_significant_height'
         'eastward_wind'
         'northward_wind'
-        'air_pressure_at_sea_level'};
-
-    CF.VectorCombinations={[4 5]};
-    
-    CF.DisplayNames={'Max Water Level'
+        'air_pressure_at_sea_level'
+        'depth_below_geoid'
+        };
+   
+    CF.DisplayNames={
+        'Max Water Level'
         'Water Level'
         'Max Sig Wave Height'
+        'Sig Wave Height'
         'East Wind'
         'North Wind'
-        'Sea Level Pressure'};
+        'Sea Level Pressure'
+        'Bathy/Topo'
+        };
 
+    CF.UnitsConversion={
+        m2f
+        m2f
+        m2f
+        m2f
+        mps2mph
+        mps2mph
+        1
+        m2f
+        };
+     
+    CF.Vectors(1).u='eastward_wind';
+    CF.Vectors(1).v='northward_wind';
+    CF.Vectors(1).name='Wind Velocity';
+    CF.Vectors(1).units='m/s';
+
+%      
+%     CF.StandardNamesVectors={
+%         {'eastward_wind','northward_wind'}
+%         };
+%     CF.DisplayNamesVectors={
+%         'Wind'
+%         };     
+%     CF.UnitsConversionVectors={
+%         mps2mph
+%         };
+    
 end

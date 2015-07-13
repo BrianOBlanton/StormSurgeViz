@@ -128,55 +128,45 @@ end
 
 %%
 % get remote copy of InstanceDefaults.m
-if isunix
-    mvcom='mv';
-    cpcom='cp';
-else
-    mvcom='move';
-    cpcom='copy';
-end
+% if isunix
+%     mvcom='mv';
+%     cpcom='cp';
+% else
+%     mvcom='move';
+%     cpcom='copy';
+% end
 
-switch SSVizOpts.Mode
+SSVizOpts.DefaultBoundingBox=NaN;
+switch lower(SSVizOpts.Mode)
     
-    case {'Local','Url'}
+    case 'local'
         
-        fprintf('SSViz++ Mode is Local/Url.\n')
-        fprintf('SSViz++ Local/Url Mode not yet fully supported. Best of Luck... \n')
+        fprintf('SSViz++ Mode is Local.\n')
+        fprintf('SSViz++ Local Mode not yet fully supported. Best of Luck... \n')
         
-        [status,result]=system([cpcom ' private/run.properties.fake ' TempDataLocation '/run.properties']);
-        SSVizOpts.DefaultBoundingBox=NaN;
         
-    otherwise
+    case 'url'
         
+        if isempty(SSVizOpts.Url)
+            error('No URL specified in Url Mode.  Terminal.')
+        end
+        
+        fprintf('SSViz++ Mode is Url.\n')
+        fprintf('SSViz++ Url Mode not yet fully supported. Best of Luck... \n')
+                
+    case 'network'
+       
         SSVizOpts.Mode='Network';
         fprintf('SSViz++ Mode is Network.\n')
         
-        % get InstanceDefaults.m file from thredds server
-        try
-            fprintf('SSViz++ Retrieving remote InstanceDefaults.m file ...\n')
-            urlwrite(InstanceDefaultsFileLocation,'temp.m');
-            if exist('InstanceDefaults.m','file')
-                [status,result]=system([mvcom ' InstanceDefaults.m InstanceDefaults.m.backup']);
-            end
-            [status,result]=system([mvcom ' temp.m InstanceDefaults.m']);
-            InstanceDefaults;
-        catch ME1
-            fprintf('*SSViz++ Failed to get InstanceDefaults.m.  Looking for previous version ...\n')
-            try
-                if exist('InstanceDefaults.m','file')
-                    fprintf('* Found it.\n')
-                    InstanceDefaults;
-                end
-            catch ME2
-                % set a big default view
-                fprintf('SSViz++   No local InstanceDefaults.m found. Setting a wide default view.\n')
-                SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
-                %error('\nNo local InstanceDefaults.m found. This is Terminal.\n')
-            end
-        end
+        SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
+
+    otherwise
+        error('Mode %s unknown.  Modes are {''Local'',''Url'',''Network''}',SSVizOpts.Mode)
+
 end
 
-if ~isempty(SSVizOpts.BoundingBox),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
+if (~isempty(SSVizOpts.BoundingBox) | isnan(SSVizOpts.BoundingBox)),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
 
 %SetVectorOptions('Stride',100,'ScaleFac',25,'Color','k')
 VectorOptions.Stride=100;

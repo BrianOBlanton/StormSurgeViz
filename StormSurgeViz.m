@@ -105,15 +105,12 @@ end
 %% Initialize StormSurgeViz
 fprintf('\nSSViz++ Initializing application.\n')
 
-StormSurgeViz_Init;  % this sets defaults and processes vars
+% this sets defaults and processes vars
+StormSurgeViz_Init;  
+SSVizOpts.VectorOptions=VectorOptions;
 
-% Storm
-% Advisory
-% Grid
-% Instance
-% CatalogName
-switch SSVizOpts.Mode
-    case 'Network'
+switch lower(SSVizOpts.Mode)
+    case 'network'
         UrlBase=SSVizOpts.ThreddsServer;  %  ThreddsList{1}; %#ok<USENS>
         
         %% Test for the catalog existence
@@ -141,8 +138,10 @@ switch SSVizOpts.Mode
         Url.UseShapeFiles=SSVizOpts.UseShapeFiles;
         Url.Units=SSVizOpts.Units;
         
-    case 'Url'
-        str={'Direct Url file access is not fully supported. Best of Luck!!'};
+    case 'url'
+        str='Direct Url file access is not fully supported. Best of Luck!!';
+        fprintf('%s \n',str);
+
         UrlBase=SSVizOpts.Url;
         Url.ThisInstance='Url';
         Url.ThisStorm=NaN;
@@ -152,7 +151,7 @@ switch SSVizOpts.Mode
         Url.StormType='other';
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
-        Url.FullFileServer= UrlBase;
+        Url.FullFileServer=strrep(Url.FullDodsC,'dodsC','fileServer');
         Url.Ens={''};
         Url.CurrentSelection=NaN;
         Url.Base=UrlBase;
@@ -165,7 +164,9 @@ switch SSVizOpts.Mode
 %        errordlg(str)
 %        return
         
-    otherwise
+    case 'local' 
+        str='Local file access is not fully supported. Best of Luck!!';
+        fprintf('%s \n',str);
         %% Set up for Local Files
         UrlBase='file://';
         Url.ThisInstance='Local';
@@ -187,6 +188,9 @@ switch SSVizOpts.Mode
         TheCatalog.CatalogHash=NaN;
         TheCatalog.CurrentSelection=[];
         
+   otherwise
+        error('Mode %s unknown.  Modes are {''Local'',''Url'',''Network''}',SSVizOpts.Mode)
+
 end
 
 %% InitializeUI
@@ -202,7 +206,6 @@ setappdata(Handles.MainFigure,'DateStringFormatInput',DateStringFormatInput);
 setappdata(Handles.MainFigure,'DateStringFormatOutput',DateStringFormatOutput);
 setappdata(Handles.MainFigure,'TempDataLocation',TempDataLocation);
 setappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow',SSVizOpts.SendDiagnosticsToCommandWindow);
-
 
 set(Handles.MainFigure,'UserData',Handles);
     
@@ -258,7 +261,7 @@ Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
 
 VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
 if ~isempty(VectorVariableClicked)
-    WindVecIndex=find(strcmp(Connections.VariableNames,VectorVariableClicked));  
+    WindVecIndex=find(strcmp(Connections.VariableDisplayNames,VectorVariableClicked));  
     Connections=GetDataObject(Connections,EnsIndex,WindVecIndex,TimIndex);
     setappdata(Handles.MainFigure,'Connections',Connections);
 end
@@ -316,7 +319,7 @@ if exist('timer','file')
     end
 end
 
-SetUIStatusMessage('Done Done.\n')
+SetUIStatusMessage('* Done Done.\n')
 set(Handles.MainFigure,'Pointer',CurrentPointer);
 
 if nargout>0, varargout{1}=Handles; end
@@ -585,7 +588,7 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
    global Debug 
    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-   v=Connections.members{EnsIndex,VarIndex}.FileNetcdfVariableName;
+   v=Connections.members{EnsIndex,VarIndex}.VariableName;
    if ~iscell(v)
        v={v};
    end
@@ -600,66 +603,67 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
 
    fac=Connections.VariableUnitsFac{VarIndex};
    h=Connections.members{EnsIndex,VarIndex}.NcTBHandle;
-   
-%    if isempty(h)
-%        % connection was not made.  Disable the variable and return
-%    end
-   
-   MandN=h.size(v{1});
-   
+   NNodes=Connections.members{EnsIndex,VarIndex}.NNodes;
+   NTimes=Connections.members{EnsIndex,VarIndex}.NTimes;
+
    if ~exist('TimIndex','var')
        TimIndex=1;
    else
        str=[str ' at time level ' int2str(TimIndex) ' ... \n'];
    end  % first time level if TimIndex not passed in
+   
    SetUIStatusMessage(str);
 
    if ~isfield(Connections.members{EnsIndex,VarIndex},'TheData')
 
-      if length(MandN)>1  && ~any(MandN==1)  % must be a time-dependent var...
+       % the struct field that contains the data (TheData) does not exist
+       % yet.  This will create the first time-level (or only time level if
+       % the variable is a "max" variable since NTimes==1).
+       
+      if NTimes>1 % must be a time-dependent var...
           %disp(' ')
-          m=MandN(2);n=MandN(1);
           hh=h.geovariable(v{1});
-          temp=hh.data(TimIndex,:);
-          temp=temp';
+          temp=squeeze(hh.data(TimIndex,:));
+          % this adds the v-component to a vector field, for which v will
+          % have 2 values
           if length(v)==2
               hh=h.geovariable(v{2});
-              temp2=hh.data(TimIndex,:);
-              temp2=temp2';
+              temp2=squeeze(hh.data(TimIndex,:));
               inan=abs(temp)<eps & abs(temp2)<eps;
               temp=temp+sqrt(-1)*temp2;
               temp(inan)=NaN;
           end
-          if isfield(Connections.members{EnsIndex,VarIndex},'TheData')
-              TheData=Connections.members{EnsIndex,VarIndex}.TheData;
-          else
-              TheData=temp*fac;
-          end
-          
+   
+          TheData=temp*fac;
+       
       else
-          m=max(MandN);n=1;
+          % time-independent field, like a Max field
+          %m=max(MandN);n=1;
           TheData=h.data(v{1})*fac;
       end
-      TheData=cast(TheData(:),'double');  % just in case  ...
-      Connections.members{EnsIndex,VarIndex}.TheData{1}=TheData;
+      % just in case  ...
+      TheData=cast(TheData,'double');  
+      % make sure TheData is a column vector!
+      Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
       
    else
        
-      % Hopefully, this is a time-dependent var that just needs
-      % adding/inserting into
+      % Hopefully, this is a time-dependent var for which TheData field 
+      % already exists and that just needs adding/inserting into
      
       hh=h.geovariable(v{1});
-      temp=hh.data(TimIndex,:);
-      temp=temp';
+      temp=squeeze(hh.data(TimIndex,:));
       if length(v)==2
           hh=h.geovariable(v{2});
-          temp2=hh.data(TimIndex,:);
-          temp2=temp2';
+          temp2=squeeze(hh.data(TimIndex,:));
           inan=abs(temp)<eps & abs(temp2)<eps;
           temp=temp+sqrt(-1)*temp2;
           temp(inan)=NaN;
       end
-      Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=temp*fac;
+      
+      TheData=temp*fac;
+      TheData=cast(TheData,'double');  
+      Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
    end
    
    SetUIStatusMessage('* Got it.\n\n')
@@ -794,7 +798,7 @@ function InstanceUrl(varargin)
    SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
   
    set(Handles.MainFigure,'UserData',Handles);
-   SetTitle(Connections.RunProperties);
+   SetTitle(Connections);
 
    UpdateUI(Handles.MainFigure);
    
@@ -841,7 +845,7 @@ function SetNewField(varargin)
     VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
 
     EnsembleNames=Connections.EnsembleNames; 
-    VariableNames=Connections.VariableNames; 
+    VariableNames=Connections.VariableDisplayNames; 
     VariableTypes=Connections.VariableTypes; 
 
     %Scalars= find(strcmp(VariableTypes,'Scalar'));
@@ -859,7 +863,7 @@ function SetNewField(varargin)
         Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex);
     end
      
-    SetUIStatusMessage(sprintf('Setting/Drawing New Field to ens=%s, var=%s...',EnsembleClicked,ScalarVariableClicked),false)
+    SetUIStatusMessage(sprintf('Setting/Drawing New Field to ens=%s, var=%s...\n',EnsembleClicked,ScalarVariableClicked),false)
 
     Member=Connections.members{EnsIndex,ScalarVarIndex};
     ThisData=Member.TheData{1};
@@ -939,7 +943,7 @@ function SetNewField(varargin)
 
     RendererKludge;
 
-    SetUIStatusMessage('Done. \n')
+    %SetUIStatusMessage('Done. \n')
 
     
 end
@@ -950,14 +954,13 @@ end
 function SetBaseMap(~,~,~)
 
     global Debug
-   if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
     GoogleMapsApiKey=getappdata(Handles.MainFigure,'GoogleMapsApiKey');
-    %EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     MapTypeClicked=get(get(Handles.BaseMapButtonGroup,'SelectedObject'),'string');
-    
+    if Debug,fprintf('SSViz++ Function = %s (%s)\n',ThisFunctionName,MapTypeClicked);end
+
     if strcmp(MapTypeClicked,'none')
         delete(findobj(Handles.MainAxes,'Type','image','Tag','gmap'))
     else
@@ -1044,8 +1047,10 @@ function Handles=MakeTheAxesMap(Handles)
         Handles.BathyContours=lcontour(TheGrid,TheGrid.z,DepthContours,'Color','k');
         
         for i=1:length(Handles.BathyContours)
+            if Handles.BathyContours(i) > 0 
             nz=2*ones(size(get(Handles.BathyContours(i),'XData')));
             set(Handles.BathyContours(i),'ZData',nz)
+            end
         end
         set(Handles.BathyContours,'Tag','BathyContours');
     else
@@ -1192,7 +1197,11 @@ function Handles=DrawVectors(Handles,Member,Field)
     global TheGrids Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end 
     
-    TheGrid=TheGrids{Member.GridId};
+    if ~isfield(Member,'GridId')
+        TheGrid=TheGrids{1};
+    else
+        TheGrid=TheGrids{Member.GridId};
+    end
     
     %VectorOptions=getappdata(Handles.MainFigure,'VectorOptions');
     Stride=get(Handles.VectorOptionsStride,'String');
@@ -1244,12 +1253,13 @@ function RedrawVectors(varargin)
     VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
 
     EnsembleNames=Connections.EnsembleNames; 
+    VariableDisplayNames=Connections.VariableDisplayNames; 
     VariableNames=Connections.VariableNames; 
     VariableTypes=Connections.VariableTypes; 
     
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
-    ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableNames));
-    VectorVarIndex=find(strcmp(VectorVariableClicked,VariableNames));
+    ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableDisplayNames));
+    VectorVarIndex=find(strcmp(VectorVariableClicked,VariableDisplayNames));
 
     % Delete the current vector set
     if isfield(Handles,'Vectors')
@@ -1261,9 +1271,9 @@ function RedrawVectors(varargin)
             SetUIStatusMessage('No vectors to redraw.\n')
             return
         end
-    else
-        SetUIStatusMessage('No vectors to redraw.\n')
-        return
+     else
+         SetUIStatusMessage('No vectors to redraw.\n')
+         return
     end
     
     Member=Connections.members{EnsIndex,VectorVarIndex}; %#ok<FNDSB>
@@ -1821,11 +1831,12 @@ BackgroundMapsContainerContents;
                 'Style','Radiobutton',...
                 'String',buttonnames{i},...
                 'Units','normalized',...
-                'Value',1,...
+                'Value',0,...
                 'FontSize',fs2,...
                 'Position', [.1 ytemp(i) .9 .15],...
                 'Tag','BaseMapRadioButton');
         end
+        set(Handles.BaseMapButtonHandles(1),'Value',1);
         
         uicontrol(...
             'Parent',Handles.CenterContainerMiddle,...
@@ -2517,7 +2528,7 @@ BackgroundMapsContainerContents;
             'FontSize',fs1,...
             'HorizontalAlignment','left',...
             'Tag','VectorOptionsStride',...
-            'String','1000');
+            'String',SSVizOpts.VectorOptions.Stride);
         
         % ScaleFac
         % ScaleFac
@@ -2540,7 +2551,7 @@ BackgroundMapsContainerContents;
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
             'Tag','VectorOptionsScaleFactor',...
-            'String','25');
+            'String',SSVizOpts.VectorOptions.ScaleFac);
         
         % Color
         % Color
@@ -2562,7 +2573,7 @@ BackgroundMapsContainerContents;
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
             'Tag','VectorOptionsColor',...
-            'String','k');
+            'String',SSVizOpts.VectorOptions.Color);
         
         % ScaleLabel
         % ScaleLabel
@@ -2615,7 +2626,7 @@ BackgroundMapsContainerContents;
             'Position',[.25 .22 .50 .1],...
             'Tag','RedrawVectorsButton',...
             'FontSize',fs1,...
-            'String','(Re)Draw Vectors',...
+            'String','ReDraw Vectors',...
             'CallBack',@RedrawVectors);
         
         Handles.VectorOptionsDeleteButton=uicontrol(...
@@ -2625,6 +2636,7 @@ BackgroundMapsContainerContents;
             'Position',[.25 .12 .50 .1],...
             'Tag','DeleteVectorsButton',...
             'FontSize',fs1,...
+            'Interruptible','off',...
             'String','Delete Vectors',...
             'CallBack',@DeleteVectors);
         
@@ -2969,7 +2981,6 @@ end
 %%% SetVariableControls
 function Handles=SetVariableControls(varargin)
     
-
     global Connections Debug Vecs SSVizOpts
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
@@ -2982,6 +2993,7 @@ function Handles=SetVariableControls(varargin)
     panelColor = get(0,'DefaultUicontrolBackgroundColor');
     KeepInSync=SSVizOpts.KeepScalarsAndVectorsInSync;
 
+    VariableDisplayNames=Connections.VariableDisplayNames; 
     VariableNames=Connections.VariableNames; 
     VariableTypes=Connections.VariableTypes; 
 
@@ -3021,7 +3033,7 @@ function Handles=SetVariableControls(varargin)
         Handles.ScalarVarButtonHandles(i)=uicontrol(...
             Handles.ScalarVarButtonHandlesGroup,...
             'Style','Radiobutton',...
-            'String',VariableNames{Scalars(i)},...
+            'String',VariableDisplayNames{Scalars(i)},...
             'Units','normalized',...
             'FontSize',FontSizes(2),...
             'Position', [.1 .975-dy2*i .9 dy2],...
@@ -3061,7 +3073,7 @@ function Handles=SetVariableControls(varargin)
         Handles.VectorVarButtonHandles(i)=uicontrol(...
             Handles.VectorVarButtonHandlesGroup,...
             'Style','Radiobutton',...
-            'String',VariableNames{Vectors(i)},...
+            'String',VariableDisplayNames{Vectors(i)},...
             'Units','normalized',...
             'FontSize',FontSizes(2),...
             'Position', [.1 .975-dy2*i .9 dy2],...
@@ -3151,15 +3163,17 @@ function Handles=SetSnapshotControls(varargin)
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     EnsembleNames=Connections.EnsembleNames; 
     VariableNames=Connections.VariableNames; 
+    VariableDisplayNames=Connections.VariableDisplayNames; 
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     VarIndex=find(strcmp(VariableClicked,VariableNames));
    
-    [a,b]=ismember(ThreeDVars,VariableNames);
+    [a,b]=ismember(ThreeDVars,VariableDisplayNames);
     ThreeDvarsattached=false;
     for i=1:length(b)
         if b>0
         if ~isempty(Connections.members{EnsIndex,b(i)}.NcTBHandle)
             ThreeDvarsattached=true;
+            continue
         end
         end
     end
@@ -3191,20 +3205,23 @@ function Handles=SetSnapshotControls(varargin)
     else
                
         % base the times on the variables selected in the UI. 
+        h=Connections.members{EnsIndex,b(1)}.NcTBHandle;
+        timevar=h{'time'};
+        time_datenum=h.time('time');
         
-        time=Connections.members{EnsIndex,b(1)}.NcTBHandle.geovariable('time');
-        basedate=time.attribute('base_date');
-        if isempty(basedate)
-            s=time.attribute('units');
-            p=strspl(s);
-            basedate=datestr(datenum([p{3} ' ' p{4}],DateStringFormatInput));
-        end
-        timebase_datenum=datenum(basedate,DateStringFormatInput);
-        t=cast(time.data(:),'double');
-        snapshotlist=cell(length(t),1);
-        time_datenum=time.data(:)/86400+timebase_datenum;
-        for i=1:length(t)
-            snapshotlist{i}=datestr(t(i)/86400+timebase_datenum+LocalTimeOffset/24,DateStringFormatOutput);
+        %time=Connections.members{EnsIndex,b(1)}.NcTBHandle.geovariable('time');
+        basedate=timevar.attribute('base_date');
+        %timebase_datenum=datenum(basedate,DateStringFormatInput);
+
+%         if isempty(basedate)
+%             s=time.attribute('units');
+%             p=strspl(s);
+%             basedate=datestr(datenum([p{3} ' ' p{4}],DateStringFormatInput));
+%         end
+%         timebase_datenum=datenum(basedate,DateStringFormatInput);
+        snapshotlist=cell(length(time_datenum),1);
+        for i=1:length(time_datenum)
+            snapshotlist{i}=datestr(time_datenum(i)+LocalTimeOffset/24,DateStringFormatOutput);
         end
         [m,~]=size(snapshotlist);
         
@@ -3238,6 +3255,8 @@ function Handles=SetSnapshotControls(varargin)
                 'FontSize',FontSizes(3),...
                 'Position', [.05 .75 .9 .1],...
                 'Tag','ScalarSnapshotButton',...
+                'Interruptible','off',...
+                'BusyAction','queue',...
                 'Callback',@ViewSnapshot);
             
             Handles.ScalarSnapshotSliderHandle=uicontrol(...
@@ -3250,6 +3269,8 @@ function Handles=SetSnapshotControls(varargin)
                 'Max',m,...
                 'SliderStep',[1/(m-1) 1/(m-1)],...
                 'Tag','ScalarSnapshotSlider',...
+                'Interruptible','off',...
+                'BusyAction','queue',...
                 'UserData',time_datenum,...
                 'Callback',@ViewSnapshot);
             
@@ -3261,6 +3282,8 @@ function Handles=SetSnapshotControls(varargin)
                 'FontSize',FontSizes(3),...
                 'Position', [.05 .75 .9 .1],...
                 'Tag','VectorSnapshotButton',...
+                'Interruptible','off',...
+                'BusyAction','queue',...
                 'Callback',@ViewSnapshot);
             
             Handles.VectorSnapshotSliderHandle=uicontrol(...
@@ -3273,22 +3296,24 @@ function Handles=SetSnapshotControls(varargin)
                 'Max',m,...
                 'SliderStep',[1/(m-1) 1/(m-1)],...
                 'Tag','VectorSnapshotSlider',...
+                'Interruptible','off',...
+                'BusyAction','queue',...
                 'UserData',time_datenum,...
                 'Callback',@ViewSnapshot); 
             
         end
         
-%        if ~ThreeDvarsattached
+        if ~ThreeDvarsattached
             set(Handles.ScalarSnapshotButtonHandle,'Enable','off');
             set(Handles.ScalarSnapshotSliderHandle,'Enable','off');
             set(Handles.VectorSnapshotButtonHandle,'Enable','off');
             set(Handles.VectorSnapshotSliderHandle,'Enable','off');
-%        else
-%            set(Handles.ScalarSnapshotButtonHandle,'Enable','on');
-%            set(Handles.ScalarSnapshotSliderHandle,'Enable','on');
-%            set(Handles.VectorSnapshotButtonHandle,'Enable','on');
-%            set(Handles.VectorSnapshotSliderHandle,'Enable','on');
-%        end     
+        else
+            set(Handles.ScalarSnapshotButtonHandle,'Enable','on');
+            set(Handles.ScalarSnapshotSliderHandle,'Enable','on');
+            set(Handles.VectorSnapshotButtonHandle,'Enable','on');
+            set(Handles.VectorSnapshotSliderHandle,'Enable','on');
+        end     
         
     end
     
@@ -3354,7 +3379,7 @@ function ViewSnapshot(hObj,~)
     end
     
     EnsembleNames=Connections.EnsembleNames; 
-    VariableNames=Connections.VariableNames; 
+    VariableNames=Connections.VariableDisplayNames; 
     
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableNames));
@@ -3367,7 +3392,7 @@ function ViewSnapshot(hObj,~)
     %s=get(Handles.ScalarSnapshotButtonHandle,'string');
     time_datenum=get(Handles.ScalarSnapshotSliderHandle,'UserData');
 
-    SetUIStatusMessage(sprintf('date=%s',datestr(time_datenum(SnapshotClicked),DateStringFormatOutput)),false) 
+    SetUIStatusMessage(sprintf('date=%s\n',datestr(time_datenum(SnapshotClicked),DateStringFormatOutput)),false) 
 
     axes(Handles.MainAxes);
 
@@ -3457,7 +3482,7 @@ function ViewSnapshot(hObj,~)
     set(Handles.MainFigure,'UserData',Handles);
     setappdata(FigHandle,'Connections',Connections);
     UpdateUI(Handles.MainFigure);
-    SetTitle(Connections.RunProperties);
+    SetTitle(Connections);
 
     %SetUIStatusMessage('Done.')
     if ScalarClicked
