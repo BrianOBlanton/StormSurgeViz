@@ -1,5 +1,4 @@
 function TheCatalog=GetCatalogFromServer(UrlBase,CatalogName,TempDataLocation)
-
 % catalog=GetCatalogFromServer(url)
 % catalog=GetCatalogFromServer('http://opendap.renci.org:1935/thredds/')
 
@@ -23,7 +22,7 @@ end
 notFound=true;
 c=0;
 
-tlimit=4;
+tlimit=10;
 try
     while notFound
         c=c+1;
@@ -72,7 +71,13 @@ fgetl(fid);  % get the dashed line
 temp=textscan(fid,'%s%s%s%s%s%s%s%s%s','Delimiter','$');
 fclose(fid);
 
+
 nLines=length(temp{1});
+if nLines<1
+    str=sprintf('Catalog file on %s appears to be empty.  This is terminal.',UrlBase);
+    error(str)
+end
+
 for j=1:length(fields)
 for i=1:nLines
    data{i,j}=deblank(temp{j}(i));
