@@ -99,9 +99,17 @@ function Connections=OpenDataConnectionsUrl(Url)
         if isfield(CF,'Vectors')           
             NVecs=length(CF.Vectors);
             for jj=1:NVecs
-                 Connections.members{i,j+jj}=storm(j);  % copy last member...
+                
+               
                  uname=nc.standard_name(CF.Vectors(jj).u);
                  vname=nc.standard_name(CF.Vectors(jj).v);
+
+                 if isempty(uname) || isempty(vname)
+                    SetUIStatusMessage(sprintf('SSViz++ Variable not found for vector component %s or %s. Skipping ...\n',CF.Vectors(jj).u,CF.Vectors(jj).v))
+                    continue
+                 end
+                 
+                 Connections.members{i,j+jj}=storm(j);  % copy last member...
                  Connections.VariableNames{j+jj}=[uname,vname];
                  Connections.VariableTypes{j+jj}='Vector';
                  Connections.VariableDisplayNames{j+jj}=CF.Vectors(jj).name;

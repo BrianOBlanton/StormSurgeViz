@@ -84,10 +84,29 @@ switch lower(Member.CdmDataType)
         temp=Member.NcTBHandle.data(temp);
         TheGrid.y=cast(temp(:),'double');
         
+        % if both x and y are 1-D, assume rectangular grid and replicate
+        if ( size(TheGrid.x,1)==1 || size(TheGrid.x,2)==1 ) && ...
+           ( size(TheGrid.y,1)==1 || size(TheGrid.y,2)==1 ) 
+             disp('here')
+             m=length(TheGrid.y);
+             n=length(TheGrid.x);
+             x=repmat(TheGrid.x',[m 1]);
+             y=repmat(TheGrid.y,[1 n]);
+             TheGrid.x=x(:);
+             TheGrid.y=y(:);
+        else
+            
+        end
+             
         temp=Member.NcTBHandle.standard_name('depth_below_geoid');
-        temp=Member.NcTBHandle.data(temp);
-        TheGrid.z=cast(temp(:),'double');
-        
+        if isempty(temp)
+            SetUIStatusMessage('**** No depth variable found.  Setting depths to NaN...\n')
+            TheGrid.z=NaN(length(TheGrid.x),1);
+        else
+            temp=Member.NcTBHandle.data(temp);
+            TheGrid.z=cast(temp(:),'double');
+        end
+   
         TheGrid=el_areas(TheGrid);
         TheGrid=belint(TheGrid);
         

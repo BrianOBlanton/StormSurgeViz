@@ -624,11 +624,21 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
           %disp(' ')
           hh=h.geovariable(v{1});
           temp=squeeze(hh.data(TimIndex,:));
+          fv=hh.attribute('FillValue_');
+          if ~isempty(fv)
+              idx=temp==fv;
+              temp(idx)=NaN;
+          end
           % this adds the v-component to a vector field, for which v will
           % have 2 values
           if length(v)==2
               hh=h.geovariable(v{2});
               temp2=squeeze(hh.data(TimIndex,:));
+              fv=hh.attribute('FillValue_');
+              if ~isempty(fv)
+                  idx=temp2==fv;
+                  temp2(idx)=NaN;
+              end
               inan=abs(temp)<eps & abs(temp2)<eps;
               temp=temp+sqrt(-1)*temp2;
               temp(inan)=NaN;
