@@ -123,8 +123,6 @@ switch lower(SSVizOpts.Mode)
         %global TheCatalog
         fprintf('\nSSViz++ Getting Catalog.\n')
         TheCatalog=GetCatalogFromServer(UrlBase,SSVizOpts.CatalogEntryPoint,SSVizOpts.CatalogName,TempDataLocation);
-        %catalog=TheCatalog.Catalog;
-        %CatalogHash=TheCatalog.CatalogHash;
         
         %% Determine starting URL based on Instance
         Url=GetUrl2(SSVizOpts.Storm,...

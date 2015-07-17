@@ -412,7 +412,7 @@ uniImag =  myTurboInterp2(lonMesh,latMesh,imag,uniLonMesh,uniLatMesh);
 if nargout <= 1 % plot map
     % display image
     hold(axHandle, 'on');
-    h = image(lonVect,latVect,uniImag, 'Parent', axHandle);
+    h = image(lonVect,latVect,uniImag, 'Parent', axHandle,'cdatamapping','scaled');
     set(axHandle,'YDir','Normal')
     set(h,'tag','gmap')
     set(h,'AlphaData',alphaData)
