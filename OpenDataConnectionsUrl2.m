@@ -108,15 +108,15 @@ function Connections=OpenDataConnectionsUrl2(Url)
     else
         error('Required NC file global attribute "model" not found.  This is terminal.')
     end
-    if ~isempty(nc.attribute{'Conventions'})
-        Connections.Conventions=nc.attribute{'Conventions'};
-        if ~strcmp(Connections.Conventions(1:2),'CF')
-            error('Required NC file global attribute "Conventions" does not start with "CF". This is terminal.')
-        end
-    else
-        error('Required NC file global attribute "Conventions" not found.  This is terminal.')
-    end
-        
+%     if ~isempty(nc.attribute{'Conventions'})
+%         Connections.Conventions=nc.attribute{'Conventions'};
+%         if ~strcmp(Connections.Conventions(1:2),'CF')
+%             error('Required NC file global attribute "Conventions" does not start with "CF". This is terminal.')
+%         end
+%     else
+%         error('Required NC file global attribute "Conventions" not found.  This is terminal.')
+%     end
+%         
     if ~isempty(nc.attribute{'institution'})
         Connections.Institution=nc.attribute{'institution'};
     else
@@ -148,20 +148,22 @@ function Connections=OpenDataConnectionsUrl2(Url)
               'sea_surface_height_above_geoid',...
               'sea_surface_elevation_anomaly',...
               'sea_surface_height_above_reference_ellipsoid',...
-              'sea_surface_height'};
+              'sea_surface_height',...
+              'water_surface_elevation'};
     
     str=GetVariableName(nc,stdnames);
     if isempty(str)
-        error('No water level variable found in %s.\n\nWhat''s the point!!\n\n',url)
+        error('No water level variable found in %s.\n\nWhat''s the point!!\n\n',Url.FullDodsC)
     end
     v=nc{str};
     c=c+1;
-    VariableNames{c}=str;
+    VariableNames(c)=str;
     VariableLongNames{c}=v.attribute('long_name');
     VariableUnits{c}=v.attribute('units');
     VariableStandardNames{c}=v.attribute('standard_name'); 
-    VariableDisplayNames{c}=v.attribute('long_name');
-    VariableTypes{c}='scalar';
+%    VariableDisplayNames{c}=v.attribute('long_name');
+    VariableDisplayNames{c}='Water Level';
+    VariableTypes{c}='Scalar';
     VariableUnitsFac{c}=1.;
     VariableDimensions{c}=3;  % meaning x,y,t
 
@@ -171,7 +173,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
     stdnames={'air_pressure_at_sea_level'};
     str=GetVariableName(nc,stdnames);
     if isempty(str)
-        fprintf('No atmospheric pressure variable found in %s.\n\nContinuing without it...!!\n\n',url)
+        fprintf('No atmospheric pressure variable found in %s.\n\nContinuing without it...!!\n\n',Url.FullDodsC)
     else
         c=c+1;
         v=nc{str};
@@ -180,7 +182,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
-        VariableTypes{c}='scalar';
+        VariableTypes{c}='Scalar';
         VariableUnitsFac{c}=1.;
         VariableDimensions{c}=3;  % meaning x,y,t
     end
@@ -191,16 +193,16 @@ function Connections=OpenDataConnectionsUrl2(Url)
     stdnames={'depth','depth below geoid'};
     str=GetVariableName(nc,stdnames);
     if isempty(str)
-        fprintf('No depth/bahtymetry variable found in %s.\n\nContinuing without it...!!\n\n',url)
+        fprintf('No depth/bahtymetry variable found in %s.\n\nContinuing without it...!!\n\n',Url.FullDodsC)
     else
         c=c+1;
         v=nc{str};
-        VariableNames{c}=str;
+        VariableNames(c)=str;
         VariableLongNames{c}=v.attribute('long_name');
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
-        VariableTypes{c}='scalar';
+        VariableTypes{c}='Scalar';
         VariableUnitsFac{c}=1.;
         VariableDimensions{c}=2;  % meaning x,y (no time-dependence)
     end
@@ -211,7 +213,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
     stdnames={'eastward_wind'};
     str=GetVariableName(nc,stdnames);
     if isempty(str)
-        fprintf('No eastward_wind variable found in %s.\n\nContinuing without it...!!\n\n',url)
+        fprintf('No eastward_wind variable found in %s.\n\nContinuing without it...!!\n\n',Url.FullDodsC)
     else
         c=c+1;
         v=nc{str};
@@ -220,7 +222,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
-        VariableTypes{c}='scalar';
+        VariableTypes{c}='Scalar';
         VariableUnitsFac{c}=1.;
         VariableDimensions{c}=3;  % meaning x,y,t
     end
@@ -231,7 +233,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
     stdnames={'northward_wind'};
     str=GetVariableName(nc,stdnames);
     if isempty(str)
-        fprintf('No northward_wind variable found in %s.\n\nContinuing without it...!!\n\n',url)
+        fprintf('No northward_wind variable found in %s.\n\nContinuing without it...!!\n\n',Url.FullDodsC)
     else
         c=c+1;
         v=nc{str};
@@ -240,12 +242,10 @@ function Connections=OpenDataConnectionsUrl2(Url)
         VariableUnits{c}=v.attribute('units');
         VariableStandardNames{c}=v.attribute('standard_name');
         VariableDisplayNames{c}=v.attribute('long_name');
-        VariableTypes{c}='scalar';
+        VariableTypes{c}='Scalar';
         VariableUnitsFac{c}=1.;
         VariableDimensions{c}=3;  % meaning x,y,t
     end
-    
-    
     
     Connections.EnsembleNames=Url.Ens;
     Connections.VariableNames=VariableNames;
@@ -275,19 +275,18 @@ function Connections=OpenDataConnectionsUrl2(Url)
             storm(ii).NcTBHandle=nc;
             storm(ii).Units=ThisUnits;
             storm(ii).VariableDisplayName=ThisVariableDisplayName;
-            storm(ii).FileNetcdfVariableName=TopDodsCUrl;
+            storm(ii).FileNetcdfVariableName=ThisVariable;
             
-            if strcmp(Connections.Conventions,'UGRID')
+            %if strcmp(Connections.Conventions,'UGRID')
                 a=prod(double(size(nc.variable{'element'})));
                 b=prod(double(size(nc.variable{'x'})));
                 storm(ii).GridHash=DataHash2(a*b);
-            end
+            %end
             
             SZ=size(nc{ThisVariable});
-            if strcmp(Connections.Conventions,'UGRID')
-                if numel(SZ)~=2
-                    error('Variable dimension for UGRID variable %s does not equal 2. Terminal.',ThisVariable)
-                end
+               % if numel(SZ)~=2
+               %     error('Variable dimension for UGRID variable %s does not equal 2. Terminal.',ThisVariable)
+               % end
                 if (length(SZ)>1  && ~any(SZ==1))
                     m=SZ(2);
                     n=SZ(1);
@@ -304,21 +303,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
 %                                
                 storm(ii).NNodes=m;
                 storm(ii).NTimes=n;
-                % create regular grid
-            else
-                
-                switch numel(SZ)
-                    case 2  %  probably depth/bathy
-                         storm(ii).NNodes=SZ;     % number of computational points
-                         storm(ii).NTimes=1;      % length of time 
-                    case 3    
-                         storm(ii).NNodes=[SZ(2) SZ(3)];     % number of computational points
-                         storm(ii).NTimes=SZ(1);      % length of time 
-                    otherwise
-                        error('Variable dimension (%d) for CGRID variable %s not supported. Terminal.',ThisVariable,numel(SZ))
-                end
-            
-            end
+          
             
             for j=1:NVars
                 Connections.members{i,j}=storm(i);
@@ -367,12 +352,12 @@ function Connections=OpenDataConnectionsUrl2(Url)
 %         end
         
     % check the grids on which the variables are defined
-    if strcmp(Connections.Conventions,'UGRID')
+%    if strcmp(Connections.Conventions,'UGRID')
         
         NumberOfGridNodes=NaN*ones(NEns*NVars,1);
         GridId=0;
         for i=1:NEns
-            for j=1:NVars+1        % +1 for the added grid depth
+            for j=1:NVars  % +1        % +1 for the added grid depth
                 Member=Connections.members{i,j};
                 if ~isempty(Member) && ~isempty(Member.NcTBHandle)
                     nnodes=Member.NNodes;
@@ -394,7 +379,7 @@ function Connections=OpenDataConnectionsUrl2(Url)
                 end
             end
         end
-    end
+ %   end
     
     SetUIStatusMessage('* Done.\n\n')
 

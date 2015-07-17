@@ -111,8 +111,8 @@ StormSurgeViz_Init;  % this sets defaults and processes vars
 % Grid
 % Instance
 % CatalogName
-switch SSVizOpts.Mode
-    case 'Network'
+switch lower(SSVizOpts.Mode)
+    case 'network'
         UrlBase=SSVizOpts.ThreddsServer;  %  ThreddsList{1}; %#ok<USENS>
         
         %% Test for the catalog existence
@@ -139,7 +139,7 @@ switch SSVizOpts.Mode
         Url.UseShapeFiles=SSVizOpts.UseShapeFiles;
         Url.Units=SSVizOpts.Units;
         
-    case 'Url'
+    case 'url'
         str={'Direct Url file access is not fully supported. Best of Luck!!'};
         UrlBase=SSVizOpts.Url;
         Url.ThisInstance='Url';
@@ -290,10 +290,10 @@ set(Handles.TimeOffsetString,'String',SSVizOpts.LocalTimeOffset)
 set(Handles.MainFigure,'UserData',Handles);
 
 UpdateUI(Handles.MainFigure);
-SetTitle(Connections.RunProperties);
+SetTitle(Connections);
 
 % Final UI tweaks; based on availible files
-if isempty(Connections.Tracks{1})
+if isfield(Connections,'Tracks') && isempty(Connections.Tracks{1})
     set(Handles.ShowTrackButton,'String','No Track to Show')
     set(Handles.ShowTrackButton,'Enable','off')
 end
@@ -2913,11 +2913,13 @@ function UpdateUI(varargin)
     EnsembleNames=Connections.EnsembleNames; 
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     
+    if isfield(Handles,'ScalarVarButtonHandles')
     for i=1:length(Handles.ScalarVarButtonHandles)
         if ~isfield(Connections.members{EnsIndex,Scalars(i)},'NcTBHandle') || ... 
                 isempty(Connections.members{EnsIndex,Scalars(i)}.NcTBHandle)
             set(Handles.ScalarVarButtonHandles(i),'Enable','off')
         end
+    end
     end
 %     for i=1:length(Handles.ScalarVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Scalars(i)}.NcTBHandle)
@@ -2925,13 +2927,15 @@ function UpdateUI(varargin)
 %             break
 %         end
 %     end
-    
+    if isfield(Handles,'VectorVarButtonHandles')
     for i=1:length(Handles.VectorVarButtonHandles)
         if isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle) || ... 
                 isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
             set(Handles.VectorVarButtonHandles(i),'Enable','off')
         end
     end
+    end
+    
 %     for i=1:length(Handles.VectorVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
 %             set(Handles.VectorVarButtonHandles(i),'Value',1)
@@ -3004,12 +3008,14 @@ function UpdateUI(varargin)
 %    set(Handles.UnitsString,   'String',Units)
 %    set(Handles.TimeOffsetString,   'String',LocalTimeOffset)
 
-    if isempty(Connections.Tracks{1})
-        set(Handles.ShowTrackButton,'String','No Track to Show')
-        set(Handles.ShowTrackButton,'Enable','off')
-    else
-        set(Handles.ShowTrackButton,'String','Show Track')
-        set(Handles.ShowTrackButton,'Enable','on')
+    if isfield(Connections,'Tracks')
+        if isempty(Connections.Tracks{1})
+            set(Handles.ShowTrackButton,'String','No Track to Show')
+            set(Handles.ShowTrackButton,'Enable','off')
+        else
+            set(Handles.ShowTrackButton,'String','Show Track')
+            set(Handles.ShowTrackButton,'Enable','on')
+        end
     end
 
     set(FigHandle,'UserData',Handles);
@@ -3360,7 +3366,7 @@ function Handles=SetSnapshotControls(varargin)
     DateStringFormatInput=getappdata(Handles.MainFigure,'DateStringFormatInput');
     DateStringFormatOutput=getappdata(Handles.MainFigure,'DateStringFormatOutput');
 
-    ThreeDVars={'Water Level', 'Wind Velocity','Elevation'};
+    ThreeDVars={'Water Level', 'Wind Velocity','Elevation','zeta'};
     
     EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
@@ -3374,9 +3380,12 @@ function Handles=SetSnapshotControls(varargin)
     [a,b]=ismember(ThreeDVars,VariableNames);
     ThreeDvarsattached=false;
     for i=1:length(b)
+        if (b(i)>0)
         if ~isempty(Connections.members{EnsIndex,b(i)}.NcTBHandle)
             ThreeDvarsattached=true;
-            break
+            iThreeDvar=i;
+            continue
+        end
         end
     end
  
@@ -3421,7 +3430,7 @@ function Handles=SetSnapshotControls(varargin)
                
         % base the times on the variables selected in the UI. 
         
-        time=Connections.members{EnsIndex,b(1)}.NcTBHandle.geovariable('time');
+        time=Connections.members{EnsIndex,b(iThreeDvar)}.NcTBHandle.geovariable('time');
         basedate=time.attribute('base_date');
         if isempty(basedate)
             s=time.attribute('units');
@@ -4675,7 +4684,7 @@ end
 % end
 
 %%  SetTitle
-function SetTitle(RunProperties)
+function SetTitle(Connections)
     
     % SetTitle MUST be called AFTER the Handle struct is set back in the
     % caller:  I.e., it must be placed after
@@ -4687,6 +4696,7 @@ function SetTitle(RunProperties)
         
     LocalTimeOffset=SSVizOpts.LocalTimeOffset;
     DateStringFormat=getappdata(Handles.MainFigure,'DateStringFormatOutput');
+    RunProperties=Connections.RunProperties;
     
     advisory=GetRunProperty(RunProperties,'advisory');
     if strcmp(advisory,'0'),advisory=[];end
@@ -4728,6 +4738,9 @@ function SetTitle(RunProperties)
     else    
         %titlestr={sprintf('%s',stormname),[LowerString ' ']};
         titlestr=[sprintf('%s',stormname),[' ' LowerString ' ']];
+    end
+    if isfield(Connections,'Institution')
+        titlestr={titlestr,Connections.Institution};
     end
     title(titlestr,'FontWeight','bold') 
 end

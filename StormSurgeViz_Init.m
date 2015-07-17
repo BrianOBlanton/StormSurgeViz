@@ -123,9 +123,9 @@ else
     cpcom='copy';
 end
 
-switch SSVizOpts.Mode
+switch lower(SSVizOpts.Mode)
     
-    case {'Local','Url'}
+    case {'local','url'}
         
         fprintf('SSViz++ Mode is Local/Url.\n')
         fprintf('SSViz++ Local/Url Mode not fully supported. Best of Luck... \n')
