@@ -21,8 +21,8 @@ cd(PWD)
 global SSVizOpts
 
 ThreddsList={
-             'http://opendap.renci.org:1935/thredds'
-             'http://coastalmodeldev.data.noaa.gov/thredds'
+             'http://opendap.renci.org:1935/thredds'   'RENCI/UNC/ASGS'
+             'http://coastalmodeldev.data.noaa.gov/thredds' 'CSDL/NOAA/ASGS'
             };
 %            'http://workhorse.europa.renci.org:8080/thredds'
 %            'http://thredds.crc.nd.edu/thredds'
@@ -71,8 +71,10 @@ opts=parseargs(opts,varargin{:});
 SSVizOpts=opts;
 SSVizOpts.Storm=lower(SSVizOpts.Storm);
 
+SSVizOpts.ThreddsServerProvider='Unknown';
 if isempty(SSVizOpts.ThreddsServer)
-    SSVizOpts.ThreddsServer=ThreddsList{1};
+    SSVizOpts.ThreddsServer=ThreddsList{1,1};
+    SSVizOpts.ThreddsServerProvider=ThreddsList{1,2};
 end
 
 %scc=get(0,'ScreenSize');
