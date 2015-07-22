@@ -1,7 +1,7 @@
 %%  GetRunProperty
 function retval=GetRunProperty(RP,key)
 
-    idx=find(strcmp(RP{1},key));
+    idx=find(strcmpi(RP{1},key));
     if ~isempty(idx)
         retval=RP{2}{idx};
     else
