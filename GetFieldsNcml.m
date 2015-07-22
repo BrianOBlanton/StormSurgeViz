@@ -23,7 +23,8 @@ for ii=1:length(VariableStandardNames)
     if isempty(ThisVariableName)
         if Debug,fprintf('SSViz++    Variable not found for StdName=%s\n',ThisVariableStandardName);end
     else
-        
+        if Debug,fprintf('SSViz++    Found variable for StdName=%s: %s\n',ThisVariableStandardName,ThisVariableName{:});end
+
         jj=jj+1;
         ncgvar=nctemp{ThisVariableName};
         
