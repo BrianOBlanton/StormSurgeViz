@@ -4675,22 +4675,13 @@ function SetColorMap(hObj,~)
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
     axes(Handles.MainAxes);
+    
+    n= Handles.NCol.String;    
+    val = hObj.Value;
+    maps=hObj.String; 
 
-    val = get(hObj,'Value');
-    if val==1
-        nc=size(colormap,1);
-        colormap(noaa_cmap(nc));
-    elseif val ==2
-        colormap(jet)
-    elseif val == 3
-        colormap(hsv)
-    elseif val == 4
-        colormap(hot)
-    elseif val == 5
-        colormap(cool)
-    elseif val == 6
-        colormap(gray)
-    end
+    com=sprintf('colormap(%s(%s))',maps{val},n);
+    eval(com)
     
 end
 
