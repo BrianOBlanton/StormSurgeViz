@@ -9,6 +9,7 @@ addpath([HOME '/extern'])
 if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
     cd([HOME '/extern/nctoolbox'])
     setup_nctoolbox;
+    fprintf('SSViz++ %s\n','NCTOOLBOX added to Matlab path')
     cd(HOME)
 end
 
@@ -166,7 +167,7 @@ switch lower(SSVizOpts.Mode)
 
 end
 
-if (~isempty(SSVizOpts.BoundingBox) | isnan(SSVizOpts.BoundingBox)),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
+if (~isempty(SSVizOpts.BoundingBox) || isnan(SSVizOpts.BoundingBox)),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
 
 %SetVectorOptions('Stride',100,'ScaleFac',25,'Color','k')
 VectorOptions.Stride=100;

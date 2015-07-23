@@ -4,7 +4,7 @@
 function TheGrid=GetGridStructure(Member,id)
 
 global Debug
-if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+if Debug,fprintf('SSViz++       Function = %s\n',ThisFunctionName);end
 
 SetUIStatusMessage(['* Getting Grid Structure for ' Member.VariableDisplayName ' ... \n']);
 

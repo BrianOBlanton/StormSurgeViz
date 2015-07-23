@@ -7,10 +7,10 @@ function Connections=OpenDataConnectionsUrl(Url)
 % server.  
 
     global TheGrids Debug 
-    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
-
-    msg='Opening Network OPeNDAP connections ...\n';
-    SetUIStatusMessage(msg)
+    
+    msg='Opening Network OPeNDAP connections ... ';
+    fprintf('SSViz++ %s\n',msg);
+    if Debug,fprintf('SSViz++   Function = %s\n',ThisFunctionName);end
     
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
@@ -27,19 +27,33 @@ function Connections=OpenDataConnectionsUrl(Url)
     TopDodsCUrl= [Url.FullDodsC];
     TopTextUrl= [Url.FullFileServer];
     
+    [~,~,ext]=fileparts(TopDodsCUrl);
+    if ~strcmpi(ext,'.ncml')
+        ME = MException('CheckForNcml:NotPresent', ...
+            ['Input URL does not end in .ncml: ',...
+            TopDodsCUrl]);
+        SetUIStatusMessage(ME.message)
+        throw(ME); 
+        
+    end
+    
     try
         websave([TempDataLocation '/test.retrieve.ncml'],TopTextUrl);
     catch
-        SetUIStatusMessage('Could not connect to an ncml file. This is terminal.\n')
         ME = MException('CheckForNcml:NotPresent', ...
             ['Could not connect to an ncml file. ',...
             TopTextUrl]);
+        SetUIStatusMessage(ME.message)
         throw(ME);
     end
        
+    msg='Opening Network OPeNDAP connections ... ';
+    SetUIStatusMessage(msg)
+    
     % open up connection to ncml file
     nc=ncgeodataset(TopDodsCUrl);
-    
+    if Debug,fprintf('SSViz++   nc.location=%s\n',nc.location);end  
+
     % look for required attributes
     if ~isempty(nc.attribute{'model'})
         Connections.Model=nc.attribute{'model'};
@@ -99,8 +113,7 @@ function Connections=OpenDataConnectionsUrl(Url)
         if isfield(CF,'Vectors')           
             NVecs=length(CF.Vectors);
             for jj=1:NVecs
-                
-               
+                               
                  uname=nc.standard_name(CF.Vectors(jj).u);
                  vname=nc.standard_name(CF.Vectors(jj).v);
 
@@ -206,7 +219,6 @@ function Connections=OpenDataConnectionsUrl(Url)
                            TheGrids{GridId}.z=TheGrids{GridId}.z*3.2808;
                        end
                    end
-                   
                    Connections.members{i,j}.GridId=GridId;
                else
                    Connections.members{i,j}.GridId=gridid;

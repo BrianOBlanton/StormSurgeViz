@@ -17,4 +17,4 @@ catch me
     ex.throw
 end
 warning on
-disp('NCTOOLBOX added to Matlab path')
+%disp('NCTOOLBOX added to Matlab path')
