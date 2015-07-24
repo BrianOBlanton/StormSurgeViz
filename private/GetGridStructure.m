@@ -17,7 +17,6 @@ fig=findobj(0,'Tag','MainVizAppFigure');
 TempDataLocation=getappdata(fig,'TempDataLocation');
 SSVizOpts=getappdata(fig,'SSVizOpts');
 
-
 switch lower(Member.CdmDataType)
     case 'ugrid'
         if ~exist([TempDataLocation '/' Member.GridHash '_FGS.mat'],'file')
@@ -78,11 +77,11 @@ switch lower(Member.CdmDataType)
         
         temp=Member.NcTBHandle.standard_name('longitude');
         temp=Member.NcTBHandle.data(temp);
-        TheGrid.x=cast(temp(:),'double');
+        TheGrid.x=cast(temp,'double');
         
         temp=Member.NcTBHandle.standard_name('latitude');
         temp=Member.NcTBHandle.data(temp);
-        TheGrid.y=cast(temp(:),'double');
+        TheGrid.y=cast(temp,'double');
         
         % if both x and y are 1-D, assume rectangular grid and replicate
         if ( size(TheGrid.x,1)==1 || size(TheGrid.x,2)==1 ) && ...
@@ -94,7 +93,8 @@ switch lower(Member.CdmDataType)
              TheGrid.x=x(:);
              TheGrid.y=y(:);
         else
-            
+            TheGrid.x=TheGrid.x(:);
+            TheGrid.y=TheGrid.y(:);
         end
              
         temp=Member.NcTBHandle.standard_name('depth_below_geoid');
@@ -113,9 +113,7 @@ switch lower(Member.CdmDataType)
         
     
 end
-    
         %    set(Handles.MainFigure,'Pointer',CurrentPointer);
-        SetUIStatusMessage('** Got it. \n')
-        
+        SetUIStatusMessage('** Got it. \n')     
 end
 
