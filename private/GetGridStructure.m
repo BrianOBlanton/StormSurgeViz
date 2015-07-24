@@ -6,7 +6,7 @@ function TheGrid=GetGridStructure(Member,id)
 global Debug
 if Debug,fprintf('SSViz++       Function = %s\n',ThisFunctionName);end
 
-SetUIStatusMessage(['* Getting Grid Structure for ' Member.VariableDisplayName ' ... \n']);
+SetUIStatusMessage(['* Getting Grid Structure for ' Member.VariableDisplayName ' ... ']);
 
 %HOME=fileparts(which(mfilename));
 
@@ -62,14 +62,14 @@ switch lower(Member.CdmDataType)
             save([TempDataLocation '/' Member.GridHash '_FGS.mat'],'TheGrid')
             
         else
-            SetUIStatusMessage('** Loading cached copy of grid structure ...\n')
+            SetUIStatusMessage('** Loading cached copy of grid structure ...')
             load([TempDataLocation '/' Member.GridHash '_FGS.mat']);
         end
         
     case 'cgrid'
         
         % build triangluar grid for cgrid...
-        SetUIStatusMessage('** Generating grid for cgrid ...\n')
+        SetUIStatusMessage('** Generating grid for cgrid ...')
         TheGrid.name=['GridID.eq.xyz'];
         
         TheGrid.e=elgen(Member.NNodes(2),Member.NNodes(1));
@@ -96,10 +96,15 @@ switch lower(Member.CdmDataType)
             TheGrid.x=TheGrid.x(:);
             TheGrid.y=TheGrid.y(:);
         end
-             
+        
+        % an attempt to put grid in west-is-negative ...
+        if max(TheGrid.x>0) && min(TheGrid.x)>0
+            TheGrid.x=TheGrid.x-360;
+        end
+        
         temp=Member.NcTBHandle.standard_name('depth_below_geoid');
         if isempty(temp)
-            SetUIStatusMessage('**** No depth variable found.  Setting depths to NaN...\n')
+            SetUIStatusMessage('**** No depth variable found.  Setting depths to NaN...')
             TheGrid.z=NaN(length(TheGrid.x),1);
         else
             temp=Member.NcTBHandle.data(temp);
@@ -114,6 +119,6 @@ switch lower(Member.CdmDataType)
     
 end
         %    set(Handles.MainFigure,'Pointer',CurrentPointer);
-        SetUIStatusMessage('** Got it. \n')     
+        SetUIStatusMessage('** Got it.')     
 end
 

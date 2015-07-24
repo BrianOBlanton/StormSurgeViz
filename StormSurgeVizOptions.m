@@ -56,7 +56,7 @@ p.FontOffset=2;
 p.CanOutputShapeFiles=true;
 p.DefaultShapeBinWidth=.5;  
 p.GoogleMapsApiKey='';
-p.SendDiagnosticsToCommandWindow=false;
+p.SendDiagnosticsToCommandWindow=true;
 p.ForkAxes=false;
 p.UITest=false;
 

@@ -9,8 +9,10 @@ function Connections=OpenDataConnectionsUrl(Url)
     global TheGrids Debug 
     
     msg='Opening Network OPeNDAP connections ... ';
-    fprintf('SSViz++ %s\n',msg);
-    if Debug,fprintf('SSViz++   Function = %s\n',ThisFunctionName);end
+    if Debug
+        fprintf('SSViz++   Function = %s\n',ThisFunctionName)
+        fprintf('SSViz++   %s\n',msg);
+    end
     
     fig=findobj(0,'Tag','MainVizAppFigure');
     TempDataLocation=getappdata(fig,'TempDataLocation');
@@ -22,7 +24,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     %Connections.VariableUnitsFac=VariableUnitsFac;
     %Connections.VariableTypes=VariableTypes;
     
-    if Debug,fprintf('SSViz++   Attempting to use NCML files on server.\n');end
+    if Debug,fprintf('SSViz++   Attempting to get to NCML file on server.\n');end
     i=1;
     TopDodsCUrl= [Url.FullDodsC];
     TopTextUrl= [Url.FullFileServer];
@@ -47,9 +49,6 @@ function Connections=OpenDataConnectionsUrl(Url)
         throw(ME);
     end
        
-    msg='Opening Network OPeNDAP connections ... ';
-    SetUIStatusMessage(msg)
-    
     % open up connection to ncml file
     nc=ncgeodataset(TopDodsCUrl);
     if Debug,fprintf('SSViz++   nc.location=%s\n',nc.location);end  
@@ -79,7 +78,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     if ~isempty(nc.attribute{'title'})
         Connections.Title=nc.attribute{'title'};
     else
-        error('Optional NC file global attribute "title" not found.  Setting to NaN ...')
+        fprintf('SSViz++    Optional NC file global attribute "title" not found.  Setting to NaN ...\n')
     end
     
     % set SubConvention according to existence of "element" variable
@@ -118,7 +117,8 @@ function Connections=OpenDataConnectionsUrl(Url)
                  vname=nc.standard_name(CF.Vectors(jj).v);
 
                  if isempty(uname) || isempty(vname)
-                    SetUIStatusMessage(sprintf('SSViz++ Variable not found for vector component %s or %s. Skipping ...\n',CF.Vectors(jj).u,CF.Vectors(jj).v))
+                    msg=sprintf('         Variable not found for vector component %s or %s. Skipping ...',CF.Vectors(jj).u,CF.Vectors(jj).v);
+                    SetUIStatusMessage(msg)
                     continue
                  end
                  
@@ -161,24 +161,8 @@ function Connections=OpenDataConnectionsUrl(Url)
             end
         end
         
-        
-%         % attach extra stuff if available.
-%         f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
-%         f22Location=[TempDataLocation '/fort.22'];
-%         Connections.Tracks{i}='';
-%         try
-%             SetUIStatusMessage('* Connecting to fort.22 file\n')
-%             urlwrite(f22url,f22Location);
-%             temp=read_adcirc_nws19(f22Location);
-%             Connections.Tracks{i}=temp;
-%             if DeleteTempFiles
-%                 delete(f22Location) %#ok<UNRCH>
-%             end
-%         catch ME
-%             SetUIStatusMessage('* Could not open remote fort.22 file. \n')
-%         end
-%         
-        SetUIStatusMessage(sprintf('SSViz++ Successfully retrieved %s forecast links ...\n',Url.Ens{i}))
+        msg=sprintf('Successfully retrieved %s forecast links ...',Url.Ens{i});
+        SetUIStatusMessage(msg)
     end
      
     % try to get the nhc shapefile
@@ -198,8 +182,9 @@ function Connections=OpenDataConnectionsUrl(Url)
         end
     end
     
-    SetUIStatusMessage(sprintf('SSViz++ %d ensemble members found. \n\n',i))
-    
+    msg=sprintf('%d ensemble members found.',i);
+    SetUIStatusMessage(msg)
+ 
     % check the grids on which the variables are defined
     NumberOfGridNodes=NaN*ones(NEns*NVars,1);
     NVars=length(Connections.VariableTypes);
@@ -226,7 +211,5 @@ function Connections=OpenDataConnectionsUrl(Url)
            end
         end
     end
-             
-    SetUIStatusMessage('Done.\n')
-        
+                     
 end

@@ -109,6 +109,7 @@ end
 %% Initialize StormSurgeViz
 fprintf('\nSSViz++ Initializing application.\n')
 
+global Debug
 % this sets defaults and processes vars
 StormSurgeViz_Init;  
 SSVizOpts.VectorOptions=VectorOptions;
@@ -194,6 +195,8 @@ switch lower(SSVizOpts.Mode)
 end
 
 %% InitializeUI
+if Debug,fprintf('SSViz++ Setting up GUI ... \n'),end
+
 Handles=SetupUI(SSVizOpts);
 
 setappdata(Handles.MainFigure,'SSVizOpts',SSVizOpts);
@@ -224,6 +227,8 @@ CurrentPointer=get(Handles.MainFigure,'Pointer');
 set(Handles.MainFigure,'Pointer','watch');
 
 %% OpenDataConnections 
+msg='Opening OPeNDAP connections ... ';
+SetUIStatusMessage(msg)
 global Connections
 if strcmpi(SSVizOpts.Mode,'Local')
     set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
@@ -236,24 +241,32 @@ else
     Connections=OpenDataConnections(Url);
 end
 setappdata(Handles.MainFigure,'Connections',Connections);
+SetUIStatusMessage('* Done.')
+
 
 %%
 global TheGrids
 
 %% SetEnsembleControls
+SetUIStatusMessage('Setting up Ensemble controls ...')
 Handles=SetEnsembleControls(Handles.MainFigure);
 set(Handles.MainFigure,'UserData',Handles);
+SetUIStatusMessage('* Done.')
 
 %% SetVariableControls
+SetUIStatusMessage('Setting up Variable controls ...')
 Handles=SetVariableControls(Handles.MainFigure,Handles.MainAxes);
 set(Handles.MainFigure,'UserData',Handles);
+SetUIStatusMessage('* Done.')
 
 %% SetSnapshotControls 
+SetUIStatusMessage('Setting up Snapshot controls ...')
 Handles=SetSnapshotControls(Handles.MainFigure,Handles.MainAxes);
 set(Handles.MainFigure,'UserData',Handles);
+SetUIStatusMessage('* Done.')
 
 %% GetDataObject 
-SetUIStatusMessage('Getting initial data set links...\n');
+SetUIStatusMessage('Getting initial data set links...');
 EnsIndex=1;
 VarIndex=1;
 TimIndex=1;
@@ -267,7 +280,7 @@ if ~isempty(VectorVariableClicked)
 end
 
 %% MakeTheAxesMap
-SetUIStatusMessage('Making default plot ... \n')
+SetUIStatusMessage('Making default plot ...')
 Handles=MakeTheAxesMap(Handles);  
 
 ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
@@ -289,7 +302,7 @@ Max=min([MaxTemp SSVizOpts.ColorMax]);
 Min=max([MinTemp SSVizOpts.ColorMin]);
 SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
 
-SetUIStatusMessage('* Done.\n\n');
+SetUIStatusMessage('* Done.');
 
 %% Finalize Initializations
 set(Handles.UnitsString,'String',SSVizOpts.Units);
@@ -319,7 +332,7 @@ if exist('timer','file')
     end
 end
 
-SetUIStatusMessage('* Done Done.\n')
+SetUIStatusMessage('* Done Done.')
 set(Handles.MainFigure,'Pointer',CurrentPointer);
 
 if nargout>0, varargout{1}=Handles; end
@@ -609,7 +622,7 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
    if ~exist('TimIndex','var')
        TimIndex=1;
    else
-       str=[str ' at time level ' int2str(TimIndex) ' ... \n'];
+       str=[str ' at time level ' int2str(TimIndex) ' ...'];
    end  % first time level if TimIndex not passed in
    
    SetUIStatusMessage(str);
@@ -683,7 +696,7 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
       Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
    end
    
-   SetUIStatusMessage('* Got it.\n\n')
+   SetUIStatusMessage('* Got it.')
 
 end
 
@@ -747,7 +760,7 @@ function InstanceUrl(varargin)
        disp('Url not found in catalog.');
        return
    end
-   SetUIStatusMessage('Url match found in catalog.\n')
+   SetUIStatusMessage('Url match found in catalog.')
    
    % parse out ensemble member names
    %idx_ens=strcmp(Advisories,ThisAdv);
@@ -825,7 +838,7 @@ function InstanceUrl(varargin)
    setappdata(Handles.MainFigure,'Url',Url);
    setappdata(Handles.MainFigure,'TheCatalog',TheCatalog);
 
-   SetUIStatusMessage('Done.\n')
+   SetUIStatusMessage('Done.')
 
    RendererKludge;
    
@@ -1016,7 +1029,7 @@ function DrawDepthContours(hObj,~)
             end
             set(Handles.BathyContours,'Tag','BathyContours');
         end
-        SetUIStatusMessage('Done. \n')
+        SetUIStatusMessage('Done.')
 
     else
         SetUIStatusMessage(sprintf('Contouring routine contmex5 not found for arch=%s.  Skipping depth contours.\n',computer))
@@ -1058,7 +1071,7 @@ function Handles=MakeTheAxesMap(Handles)
     view(2)
     
     if ~isempty(which('contmex5'))  && ~DisableContouring
-        SetUIStatusMessage('** Drawing depth contours ... \n')
+        SetUIStatusMessage('** Drawing depth contours ...')
         DepthContours=get(Handles.DepthContours,'String');
         DepthContours=sscanf(DepthContours,'%d');
         Handles.BathyContours=lcontour(TheGrid,TheGrid.z,DepthContours,'Color','k');
@@ -1071,7 +1084,7 @@ function Handles=MakeTheAxesMap(Handles)
         end
         set(Handles.BathyContours,'Tag','BathyContours');
     else
-        SetUIStatusMessage(sprintf('Contouring routine contmex5 not found for arch=%s.  Skipping depth contours.\n',computer))
+        SetUIStatusMessage(sprintf('Contouring routine contmex5 not found for arch=%s.  Skipping depth contours.',computer))
         set(Handles.DepthContours,'Enable','off')
     end
  
@@ -1091,7 +1104,7 @@ function Handles=MakeTheAxesMap(Handles)
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
     set(Handles.AxisLimits,'String',num2str(axx))
 
-    SetUIStatusMessage('** Done.\n')
+    SetUIStatusMessage('** Done.')
 
     
 end
@@ -1341,7 +1354,6 @@ function Handles=SetupUI(SSVizOpts)
 
 global Debug
 
-fprintf('SSViz++ Setting up GUI ... \n')
 if Debug,fprintf('SSViz++    Function = %s\n',ThisFunctionName);end
 
 FontOffset=SSVizOpts.FontOffset;
@@ -2187,49 +2199,49 @@ BackgroundMapsContainerContents;
         %                     'Tag','ModelInitTime',...
         %                     'String',sprintf('Model Init = NaN'))
         
-        % ForecastStartTime
-        % ForecastStartTime
-        % ForecastStartTime
-        % % uicontrol('Parent',Handles.InformationPanel,...
-        % %     'Style','text',...
-        % %     'Units','normalized',...
-        % %     'Position',[.01 .11 Width Height],...
-        % %     'BackGroundColor','w',...
-        % %     'FontSize',fs2,...
-        % %     'HorizontalAlignment','right',...
-        % %     'String',sprintf('Forecast Start = '));
-        % % Handles.ForecastStartTime=...
-        % %     uicontrol('Parent',Handles.InformationPanel,...
-        % %     'Style','text',...
-        % %     'Units','normalized',...
-        % %     'Position',[.50 .11 Width Height],...
-        % %     'BackGroundColor','w',...
-        % %     'FontSize',fs2,...
-        % %     'HorizontalAlignment','left',...
-        % %     'Tag','ForecastStartTime',...
-        % %     'String','NaN');
+        %ForecastStartTime
+        %ForecastStartTime
+        %ForecastStartTime
+        uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'Position',[Start1 YStartVec(end-10) Width1 Height],...
+            'BackGroundColor','w',...
+            'FontSize',fs2,...
+            'HorizontalAlignment','right',...
+            'String',sprintf('Start Time = '));
+        Handles.ForecastStartTime=...
+            uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'Position',[Start2 YStartVec(end-10) Width1 Height],...
+            'BackGroundColor','w',...
+            'FontSize',fs2,...
+            'HorizontalAlignment','left',...
+            'Tag','ForecastStartTime',...
+            'String','NaN');
         
         % ForecastEndTime
         % ForecastEndTime
         % ForecastEndTime
-        % % uicontrol('Parent',Handles.InformationPanel,...
-        % %     'Style','text',...
-        % %     'Units','normalized',...
-        % %     'FontSize',fs2,...
-        % %     'BackGroundColor','w',...
-        % %     'Position',[.01 .01 Width Height],...
-        % %     'HorizontalAlignment','right',...
-        % %     'String','Forecast End   = ');
-        % % Handles.ForecastEndTime=...
-        % %     uicontrol('Parent',Handles.InformationPanel,...
-        % %     'Style','text',...
-        % %     'Units','normalized',...
-        % %     'FontSize',fs2,...
-        % %     'BackGroundColor','w',...
-        % %     'Position',[.50 .01 Width Height],...
-        % %     'HorizontalAlignment','left',...
-        % %     'Tag','ForecastEndTime',...
-        % %     'String','NaN');
+        uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'FontSize',fs2,...
+            'BackGroundColor','w',...
+            'Position',[Start1 YStartVec(end-11) Width1 Height],...
+            'HorizontalAlignment','right',...
+            'String','End Time  = ');
+        Handles.ForecastEndTime=...
+            uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'FontSize',fs2,...
+            'BackGroundColor','w',...
+            'Position',[Start2 YStartVec(end-11) Width1 Height],...
+            'HorizontalAlignment','left',...
+            'Tag','ForecastEndTime',...
+            'String','NaN');
         
     end
             
@@ -2717,7 +2729,7 @@ BackgroundMapsContainerContents;
         
         
     end
-    fprintf('SSViz++    Done.\n')
+    %fprintf('SSViz++    Done.\n')
 
 end
 
@@ -2729,7 +2741,7 @@ function UpdateUI(varargin)
     global Connections Debug TheGrids
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    SetUIStatusMessage('Updating GUI ... \n')
+    SetUIStatusMessage('Updating GUI ...')
 
     if nargin==1
         %disp('UpdateUI called as a function')
@@ -2810,70 +2822,34 @@ function UpdateUI(varargin)
     
     windsource='unknown';
 
-%     if isfield(Connections,'RunProperties')
-%        rp=Connections.RunProperties;
-%        windsource=GetRunProperty(rp,'windmodel');
-%        stormnumber=GetRunProperty(rp,'stormnumber');
-%        stormname=GetRunProperty(rp,'stormname');
-%        advnumber=GetRunProperty(rp,'advisory');
-%        ModelGrid=GetRunProperty(rp,'ADCIRCgrid');
-%        ModelName=GetRunProperty(rp,'Model');
-%        %Instance=GetRunProperty(rp,'instance');
-%        Instance=getappdata(FigHandle,'Instance');
-%        if strcmp(stormname,'STORMNAME')
-%            stormname='Nam-Driven';
-%            stormnumber='00';
-%            advnumber='N/A';
-%        end
-% 
-%        set(Handles.Provider,'String',provider);
-%        set(Handles.WindPreSource,'String',windsource);
-%        set(Handles.StormNumberName,'String',sprintf('%s/%s',stormnumber,stormname));
-%        set(Handles.AdvisoryNumber, 'String',advnumber)
-%        set(Handles.ModelGridName,  'String',ModelGrid)
-%        set(Handles.ModelGridNums,  'String',str)
-%        set(Handles.ModelName,      'String',ModelName)
-%        set(Handles.InstanceName,   'String',Instance)
-% 
-% %        temp=GetRunProperty(rp,'RunStartTime');
-% %        yyyy=str2double(temp(1:4));
-% %        mm=str2double(temp(5:6));
-% %        dd=str2double(temp(7:8));
-% %        hr=str2double(temp(9:10));
-% %        t1=datenum(yyyy,mm,dd,hr,0,0);
-% %        set(Handles.ForecastStartTime,'String',sprintf('%s',datestr(t1+LocalTimeOffset/24,0)))
-% %        
-% %        temp=GetRunProperty(rp,'RunEndTime');
-% %        yyyy=str2double(temp(1:4));
-% %        mm=str2double(temp(5:6));
-% %        dd=str2double(temp(7:8));
-% %        hr=str2double(temp(9:10));
-% %        t2=datenum(yyyy,mm,dd,hr,0,0);
-% %        set(Handles.ForecastEndTime,'String',sprintf('%s',datestr(t2+LocalTimeOffset/24,0)))
-
-%    else
-        nc=Connections.members{1}.NcTBHandle;
-        provider=value4key(nc.attributes,'institution');
-        ModelGrid=value4key(nc.attributes,'grid');
-        if isempty(ModelGrid)
-            ModelGrid=value4key(nc.attributes,'agrid');
-        end    
-        ModelName=value4key(nc.attributes,'model');  
-        StormName=value4key(nc.attributes,'stormname');  
-        Instance=value4key(nc.attributes,'id');  
-        AdvCyc=value4key(nc.attributes,'advisory_or_cycle');
-        
-       set(Handles.Provider,       'String',provider);
-       set(Handles.WindPreSource,  'String',windsource);
-       set(Handles.StormNumberName,'String',StormName);
-       set(Handles.AdvisoryNumber, 'String',AdvCyc)
-       set(Handles.ModelGridName,  'String',ModelGrid)
-       set(Handles.ModelGridNums,  'String',str)
-       set(Handles.ModelName,      'String',ModelName)
-       set(Handles.InstanceName,   'String',Instance)
-       
-%    end
+    nc=Connections.members{1}.NcTBHandle;
+    provider=value4key(nc.attributes,'institution');
+    ModelGrid=value4key(nc.attributes,'grid');
+    if isempty(ModelGrid)
+        ModelGrid=value4key(nc.attributes,'agrid');
+    end
+    ModelName=value4key(nc.attributes,'model');
+    StormName=value4key(nc.attributes,'stormname');
+    Instance=value4key(nc.attributes,'id');
+    AdvCyc=value4key(nc.attributes,'advisory_or_cycle');
     
+    set(Handles.Provider,       'String',provider);
+    set(Handles.WindPreSource,  'String',windsource);
+    set(Handles.StormNumberName,'String',StormName);
+    set(Handles.AdvisoryNumber, 'String',AdvCyc)
+    set(Handles.ModelGridName,  'String',ModelGrid)
+    set(Handles.ModelGridNums,  'String',str)
+    set(Handles.ModelName,      'String',ModelName)
+    set(Handles.InstanceName,   'String',Instance)
+    
+    % set time window
+    if any(strcmpi(nc.variables,'time'))
+        time=nc.time{'time'};
+        t1=time(1);
+        t2=time(end);
+        set(Handles.ForecastStartTime,   'String',datestr(t1))
+        set(Handles.ForecastEndTime,     'String',datestr(t2))
+    end
 
 %    set(Handles.UnitsString,   'String',Units)
 %    set(Handles.TimeOffsetString,   'String',LocalTimeOffset)
@@ -2887,7 +2863,7 @@ function UpdateUI(varargin)
     end
 
     set(FigHandle,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.')
     set(Handles.MainFigure,'Pointer','arrow');
 
 end
@@ -2942,7 +2918,7 @@ function ShutDownUI(~,~)
     global Debug
     if Debug,fprintf('SSViz++ Function = %s',ThisFunctionName);end
     
-    fprintf('\nSSViz++ Shutting Down StormSurgeViz GUI.');
+    fprintf('\nSSViz++ Shutting Down StormSurgeViz GUI.\n\n\n');
    
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
@@ -3002,8 +2978,6 @@ function Handles=SetEnsembleControls(varargin)
     global Connections Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    SetUIStatusMessage('Setting up Ensemble controls ...\n')
-
     FigHandle=varargin{1};     
     Handles=get(FigHandle,'UserData');  
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
@@ -3050,7 +3024,7 @@ function Handles=SetEnsembleControls(varargin)
             set(Handles.EnsButtonHandles(i),'Enable','on');
     end
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.')
 
 end
 
@@ -3061,8 +3035,6 @@ function Handles=SetVariableControls(varargin)
     
     global Connections Debug Vecs SSVizOpts
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
-
-    SetUIStatusMessage('Setting up Variable controls ...\n')
 
     FigHandle=varargin{1};     
     AxesHandle=varargin{2};  
@@ -3209,7 +3181,7 @@ function Handles=SetVariableControls(varargin)
         'CallBack','');
     
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.')
 
 end
 
@@ -3220,8 +3192,6 @@ function Handles=SetSnapshotControls(varargin)
 
     global Connections Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
-
-    SetUIStatusMessage('Setting up Snapshot Controls ... \n')
 
     FigHandle=varargin{1};     
     AxesHandle=varargin{2};  
@@ -3266,12 +3236,10 @@ function Handles=SetSnapshotControls(varargin)
         Handles=rmfield(Handles,'ScalarSnapshotSliderHandle');
     end
     
-    
     Handles.ScalarSnapshotButtonHandle=[];
     Handles.ScalarSnapshotSliderHandle=[];
     Handles.VectorSnapshotButtonHandle=[];
     Handles.VectorSnapshotSliderHandle=[];
-
     
     if ~any(a) || ~ThreeDvarsattached
         
@@ -3396,7 +3364,7 @@ function Handles=SetSnapshotControls(varargin)
     end
     
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.')
 
 end
     
@@ -4552,6 +4520,10 @@ function SetTitle(Connections)
     Handles=get(f,'UserData');
 
     str{1}=Connections.members{1}.NcTBHandle.attribute('title');
+    if isempty(str{1})
+        str{1}=Connections.members{1}.NcTBHandle.attribute('id');
+    end
+
     str{2}=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
 
     title(str,'FontWeight','bold','Interpreter','none') 
@@ -4600,12 +4572,10 @@ function SetTitleOld(RunProperties)
     
     end
     
-    
 %    LowerString=datestr((datenum(currentdate,'yymmdd')+...
 %        (NowcastForecastOffset)/24+LocalTimeOffset/24),'ddd, dd mmm, HH PM');
     LowerString=datestr(t,DateStringFormat);
-
-    
+   
     if ~isempty(advisory)
         %titlestr={sprintf('%s  Advisory=%s  ',stormname, advisory),[LowerString ' ']};
         titlestr=[sprintf('%s  Advisory=%s  ',stormname, advisory),[' ' LowerString ' ']];
