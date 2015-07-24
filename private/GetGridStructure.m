@@ -87,7 +87,6 @@ switch lower(Member.CdmDataType)
         % if both x and y are 1-D, assume rectangular grid and replicate
         if ( size(TheGrid.x,1)==1 || size(TheGrid.x,2)==1 ) && ...
            ( size(TheGrid.y,1)==1 || size(TheGrid.y,2)==1 ) 
-             disp('here')
              m=length(TheGrid.y);
              n=length(TheGrid.x);
              x=repmat(TheGrid.x',[m 1]);
@@ -119,3 +118,4 @@ end
         SetUIStatusMessage('** Got it. \n')
         
 end
+
