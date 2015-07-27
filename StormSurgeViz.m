@@ -596,7 +596,6 @@ function DisplayCatalog(~,~)
     
 end
 
-
 %%  GetDataObject
 %%% GetDataObject
 %%% GetDataObject
@@ -2506,7 +2505,7 @@ BackgroundMapsContainerContents;
         Handles.ElementsToggleButton=uicontrol(...
             'Parent',Handles.ControlPanel,...
             'Style','togglebutton',...
-            'String', 'Show Elements',...
+            'String', 'Show Grid',...
             'Units','normalized',...
             'FontSize',fs2,...
             'Position', [.01 .10 Width Height],...
@@ -2794,6 +2793,14 @@ function UpdateUI(varargin)
             set(Handles.VectorVarButtonHandles(i),'Enable','off')
         end
     end
+    
+    
+      if isempty(Vectors)
+          set(Handles.VectorAsScalarButton,'Enable','off')
+          set(Handles.VectorKeepInSyncButton,'Enable','off')
+          set(Handles.VectorOptionsOverlayButton,'Enable','off')
+      end
+      
 %     for i=1:length(Handles.VectorVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
 %             set(Handles.VectorVarButtonHandles(i),'Value',1)
@@ -2935,8 +2942,8 @@ function ShutDownUI(~,~)
         end
     end
 
-    parent=get(get(Handles.MainAxes,'Parent'),'Parent');
-    delete(parent)
+%    parent=get(get(Handles.MainAxes,'Parent'),'Parent');
+%    delete(parent)
         
     TempDataLocation=getappdata(Handles.MainFigure,'TempDataLocation');       
     if exist([TempDataLocation '/run.properties'],'file')
@@ -3030,7 +3037,6 @@ function Handles=SetEnsembleControls(varargin)
             set(Handles.EnsButtonHandles(i),'Enable','on');
     end
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.')
 
 end
 
@@ -3156,7 +3162,7 @@ function Handles=SetVariableControls(varargin)
         'Style','checkbox',...
         'Units','normalized',...
         'Position',[.1 .24 .8 .1],...
-        'Tag','OverlayVectorsButton',...
+        'Tag','KeepInSyncVectorsButton',...
         'FontSize',FontSizes(2),...
         'String','Keep in Sync',...
         'Enable','off',...
@@ -3187,7 +3193,6 @@ function Handles=SetVariableControls(varargin)
         'CallBack','');
     
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.')
 
 end
 
@@ -3370,7 +3375,6 @@ function Handles=SetSnapshotControls(varargin)
     end
     
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.')
 
 end
     
@@ -4377,7 +4381,6 @@ function ToggleElements(hObj,~)
     end
     
 end
-
 
 
 %%% Utility functions
