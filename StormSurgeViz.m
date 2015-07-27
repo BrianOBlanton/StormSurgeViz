@@ -1402,8 +1402,8 @@ if ~ForkAxes
         'NumberTitle','off',...
         'Name',AppName,...
         'Resize','off');
-        Handles.panHandle=pan(Handles.MainFigure); %#ok<*NASGU>
-        Handles.zoomHandle=zoom(Handles.MainFigure);
+    Handles.panHandle=pan(Handles.MainFigure); %#ok<*NASGU>
+    Handles.zoomHandle=zoom(Handles.MainFigure);
         
     Positions.CenterContainerUpper      = [.50 .45 .24 .54];
     Positions.CenterContainerMiddle     = [.50 .21 .12 .23];
@@ -2527,9 +2527,9 @@ BackgroundMapsContainerContents;
             'Tag','ShowFullDomainToggleButton',...
             'Callback', @ShowFullDomain);
         
-        % FindHydrograph
-        % FindHydrograph
-        % FindHydrograph
+        % SetupHydrograph
+        % SetupHydrograph
+        % SetupHydrograph
         Handles.HydrographButton=uicontrol(...
             'Parent',Handles.ControlPanel,...
             'Style','togglebutton',...
@@ -2538,7 +2538,7 @@ BackgroundMapsContainerContents;
             'FontSize',fs2,...
             'Position', [.51 .03 Width Height],...
             'Tag','HydrographButton',...
-            'Callback', @FindHydrograph,...
+            'Callback', @SetupHydrograph,...
             'Enable','on');
         
         % Water Level as Inundation
@@ -4062,13 +4062,15 @@ function InterpField(hObj,~)
     
 end
 
-%%  FindHydrograph
-%%% FindHydrograph
-%%% FindHydrograph
-function FindHydrograph(hObj,~)
+%%  SetupHydrograph
+%%% SetupHydrograph
+%%% SetupHydrograph
+function SetupHydrograph(hObj,~)
 
-    global Connections
-
+    global Connections Debug
+    
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+    
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
     
@@ -4088,17 +4090,16 @@ function FindHydrograph(hObj,~)
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     
     HyAvail=false;
-        if ismember('Water Level',Connections.VariableNames)
-            HyAvail=true;
-        end
+    if ismember('Water Level',Connections.VariableDisplayNames)
+        HyAvail=true;
+    end
     if ~HyAvail
         SetUIStatusMessage('No hydrographs for this solution.');
         return
     end
     
     fac=getappdata(Handles.MainFigure,'UnitsScaleFactor');
-            
-    
+                
     % make sure there is a trisurf obj to attach the callback to
     if ~isfield(Handles,'TriSurf')
         SetUIStatusMessage('No TriSurf Object found. Draw a surface first.')
@@ -4140,6 +4141,8 @@ function FindHydrograph(hObj,~)
         global TheGrids
         TheGrid=TheGrids{1};
         
+        if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+            
         Vizfs=getappdata(Handles.MainFigure,'FontSizes');
         LinestyleList={'-','--','-','-','-','-','-','-','-',':','-','-p','-.','-.','-.'};
         MarkerList   ={'none','none','*','d','o','s','>','<','v','none','+','p','*','o','d'}; 
@@ -4150,11 +4153,12 @@ function FindHydrograph(hObj,~)
         VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
         EnsembleNames=Connections.EnsembleNames;
         VariableNames=Connections.VariableNames;
+        VariableDisplayNames=Connections.VariableDisplayNames;
         EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames));
-        VarIndex=find(strcmp(VariableClicked,VariableNames));
+        VarIndex=find(strcmp(VariableClicked,VariableDisplayNames));
         
         if ismember(VariableClicked,{'Max Water Level','Water Level'})
-            VarIndexTimeDep=find(strcmp(VariableNames,'Water Level'));
+            VarIndexTimeDep=find(strcmp(VariableDisplayNames,'Water Level'));
         elseif ismember(VariableClicked,{'Max Sig Wave Height','Sig Wave Height'})
             VarIndexTimeDep=find(strcmp(VariableNames,'Sig Wave Height'));
         else
@@ -4232,7 +4236,9 @@ function FindHydrograph(hObj,~)
             xwin=.35;ywin=.07;
             titlename=titlenamebase;
             figurename=['Hydrograph of ',titlenamebase];
-            SetUIStatusMessage(['\nDrawing hydrograph at ( ',num2str(xx,'% 10.2f'),', ',num2str(yy,'% 10.2f'),' ), Node: ',num2str(NodeNumber,'%10d')])
+            
+            str=sprintf('Drawing hydrograph at %10.2f, %10.2f  Node: %10d',xx,yy,NodeNumber);
+            SetUIStatusMessage(str)
             
             if isempty(findobj(0,'Tag','HydrographFigure'))
                 HyFig=figure('Units','normalized',...
@@ -4281,7 +4287,8 @@ function FindHydrograph(hObj,~)
                 'FontWeight','bold','EdgeColor',c)
         end
         dt=toc;
-        SetUIStatusMessage(sprintf('\nTook %.1f secs.  Click on another location or enter another node number ...\n',dt))
+        str=sprintf('Took %.1f secs.  Click on another location or enter another node number ...\n',dt);
+        SetUIStatusMessage(str)
         axes(cax)
     end
 
@@ -4315,7 +4322,7 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
 
         SetUIStatusMessage(sprintf('Getting nodal timeseries at node %d for ens=%s ...',NodeNumber,Connections.EnsembleNames{i}))
         
-        varnameinfile=Connections.members{i,VarIndex}.FileNetcdfVariableName;
+        varnameinfile=Connections.members{i,VarIndex}.VariableName;
         
         h=Connections.members{i,VarIndex}.NcTBHandle;
                 
@@ -4402,7 +4409,7 @@ function RecordAxisLimits(~,arg2)
     Handles=get(MainFig,'UserData');
     axx=axis;
     setappdata(Handles.MainFigure,'BoundingBox',axx);
-    set(Handles.AxisLimits,'String',sprintf('%.2f  ',axx))
+    set(Handles.AxisLimits,'String',sprintf('%.3f  ',axx))
     RendererKludge;
 
 end
