@@ -297,10 +297,14 @@ RendererKludge;  %% dont ask...
 
 temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
 if ~isreal(temp),temp=abs(temp);end
-[MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
-Max=min([MaxTemp SSVizOpts.ColorMax]);
-Min=max([MinTemp SSVizOpts.ColorMin]);
-SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+if ~SSVizOpts.Colors.Fixed && (~isnan(SSVizOpts.Colors.Min) || ~isnan(SSVizOpts.Colors.Max))
+    SetColors(Handles,SSVizOpts.Colors.Min,SSVisOpts.Colors.Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+else
+    [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
+    Max=min([MaxTemp SSVizOpts.ColorMax]);
+    Min=max([MinTemp SSVizOpts.ColorMin]);
+    SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+end
 
 SetUIStatusMessage('* Done.');
 
@@ -822,11 +826,13 @@ function InstanceUrl(varargin)
    ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
    Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
       
-   [Min,Max]=GetMinMaxInView(TheGrid,Connections.members{EnsIndex,VarIndex}.TheData{1});
-   NumberOfColors=str2double(get(Handles.NCol,'String'));
-   ColorIncrement=SSVizOpts.ColorIncrement;
-   SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
-  
+   if ~SSVizOpts.FixColors
+       [Min,Max]=GetMinMaxInView(TheGrid,Connections.members{EnsIndex,VarIndex}.TheData{1});
+       NumberOfColors=str2double(get(Handles.NCol,'String'));
+       ColorIncrement=SSVizOpts.ColorIncrement;
+       SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
+   end
+   
    set(Handles.MainFigure,'UserData',Handles);
    SetTitle(Connections);
 
@@ -918,13 +924,14 @@ function SetNewField(varargin)
     
     % only reset colors if the variable is changing
     if strcmp(ButtonGroupThatCalled,'ScalarVariableMemberRadioButtonGroup')
-        
-        NumberOfColors=str2double(get(Handles.NCol,'String'));
-        ColorIncrement=SSVizOpts.ColorIncrement;
-        [Min,Max]=GetMinMaxInView(TheGrid,ThisData);
-        SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
-        
+        if ~SSVizOpts.Colors.Fixed
+            NumberOfColors=str2double(get(Handles.NCol,'String'));
+            ColorIncrement=SSVizOpts.ColorIncrement;
+            [Min,Max]=GetMinMaxInView(TheGrid,ThisData);
+            SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
+        end
     end
+    
     set(get(Handles.ColorBar,'ylabel'),'String',Connections.members{EnsIndex,ScalarVarIndex}.Units,'FontSize',FontSizes(1));
     drawnow
     
@@ -1102,7 +1109,7 @@ function Handles=MakeTheAxesMap(Handles)
     Handles.ColorBar=colorbar('Location',ColorBarLocation);
     set(Handles.ColorBar,'FontSize',FontSizes(2))
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
-    set(Handles.AxisLimits,'String',num2str(axx))
+    set(Handles.AxisLimits,'String',num2str(axx,3))
 
     SetUIStatusMessage('** Done.')
 
@@ -2321,7 +2328,6 @@ BackgroundMapsContainerContents;
             'Tag','NCol',...
             'CallBack',@SetCLims);
         
-        
         % Color Minimum
         % Color Minimum
         % Color Minimum
@@ -2405,7 +2411,7 @@ BackgroundMapsContainerContents;
         Handles.AxisLimits=uicontrol(...
             'Parent',Handles.ControlPanel,...
             'Style', 'edit',...
-            'String',num2str(BoundingBox),...
+            'String',num2str(BoundingBox,3),...
             'Units','normalized',...
             'BackGroundColor','w',...
             'HorizontalAlignment','left',...
@@ -3797,7 +3803,7 @@ function ResetAxes(~,~)
     axx=SSVizOpts.DefaultBoundingBox;
     
     axis(axx)
-    set(Handles.AxisLimits,'String',sprintf('%.2f  ',axx));
+    set(Handles.AxisLimits,'String',num2str(axx,3));
     setappdata(Handles.MainFigure,'BoundingBox',axx);
 
 end

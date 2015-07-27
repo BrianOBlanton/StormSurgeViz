@@ -48,6 +48,9 @@ p.ColorMax=NaN;
 p.ColorMin=NaN;
 p.ColorMap='noaa_cmap';
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
+p.Colors.Fixed=true;
+p.Colors.Min=NaN;
+p.Colors.Max=NaN;
 
 % GUI options
 %ScreenTake=100; % percent of screen width to take up

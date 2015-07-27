@@ -36,8 +36,6 @@ CatalogEntryPoint={
 %                   'SSV'
                   };
 
-InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/ASGS/InstanceDefaults_SS.m';
-
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])
 %end
@@ -160,7 +158,7 @@ switch lower(SSVizOpts.Mode)
         SSVizOpts.Mode='Network';
         fprintf('SSViz++ Mode is Network.\n')
         
-        SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
+        %SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
 
     otherwise
         error('Mode %s unknown.  Modes are {''Local'',''Url'',''Network''}',SSVizOpts.Mode)
