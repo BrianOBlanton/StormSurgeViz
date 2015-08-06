@@ -75,10 +75,11 @@ function Connections=OpenDataConnectionsUrl(Url)
     end
    
     % look for optional attributes
+    Connections.Title='unspecified';
     if ~isempty(nc.attribute{'title'})
         Connections.Title=nc.attribute{'title'};
     else
-        fprintf('SSViz++    Optional NC file global attribute "title" not found.  Setting to NaN ...\n')
+        fprintf('SSViz++    Optional NC file global attribute "title" not found.  Setting to unspecified ...\n')
     end
     
     % set SubConvention according to existence of "element" variable
@@ -89,10 +90,6 @@ function Connections=OpenDataConnectionsUrl(Url)
 %         Connections.SubConvention='UGRID';
 %         Connections.SubConventionVersion='0.9';
 %     end
-    
-    % now, add storm parts
-    
-%    Connections.members=cell(length(Connections.EnsembleNames),length(Connections.VariableNames));
     
     NEns=length(Url.Ens);
     
@@ -107,6 +104,7 @@ function Connections=OpenDataConnectionsUrl(Url)
             Connections.VariableDisplayNames{j}=storm(j).VariableDisplayName;
             Connections.VariableUnitsFac{j}=1.0;
             Connections.VariableTypes{j}=storm(j).VariableType;
+            
         end
         
         if isfield(CF,'Vectors')           
@@ -211,5 +209,5 @@ function Connections=OpenDataConnectionsUrl(Url)
            end
         end
     end
-                     
+             
 end

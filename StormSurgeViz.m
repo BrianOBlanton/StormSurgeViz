@@ -169,7 +169,7 @@ switch lower(SSVizOpts.Mode)
         str='Local file access is not fully supported. Best of Luck!!';
         fprintf('%s \n',str);
         %% Set up for Local Files
-        UrlBase='file://';
+        UrlBase=['file://' SSVizOpts.File];
         Url.ThisInstance='Local';
         Url.ThisStorm=NaN;
         Url.ThisAdv=NaN;
@@ -446,14 +446,17 @@ function BrowseFileSystem(~,~)
     Handles=get(FigThatCalledThisFxn,'UserData');
     Url=getappdata(FigThatCalledThisFxn,'Url');
     
-    directoryname = uigetdir(LocalStartingDirectory,'Navigate to a dir containing a maxele.63.nc file');
+    [filename, pathname] = uigetfile('*.ncml','Navigate to an ncml file.');
     
-    if directoryname==0 % cancel was pressed
+    if filename==0 % cancel was pressed
        return
     end
     
-    set(Handles.ServerInfoString,'String',['file://' directoryname]);
+    
+    url=sprintf('file://%s',fullfile(pathname,filename));
+    set(Handles.ServerInfoString,'String',url);
     ClearUI(FigThatCalledThisFxn);
+    InstanceUrl;
     
 end
 
@@ -647,32 +650,49 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
               SetUIStatusMessage('Failed to get data from url.  Possibly missing coordinate information.');
               throw(ME);
           end
-          fv=hh.attribute('FillValue_');
-          if ~isempty(fv)
-              idx=temp==fv;
+          
+          FillVal=[];
+          v=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
+          if ~isempty(v)
+              FillVal=hh.attribute(v);
+              idx=temp==FillVal;
               temp(idx)=NaN;
           end
+          
           % this adds the v-component to a vector field, for which v will
           % have 2 values
           if length(v)==2
               hh=h.geovariable(v{2});
               temp2=squeeze(hh.data(TimIndex,:));
-              fv=hh.attribute('FillValue_');
-              if ~isempty(fv)
-                  idx=temp2==fv;
-                  temp2(idx)=NaN;
-              end
+              FillVal=[];
+              v=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
+              if ~isempty(v)
+                  FillVal=hh.attribute(v);
+                  idx=temp==FillVal;
+                  temp(idx)=NaN;
+              end             
               inan=abs(temp)<eps & abs(temp2)<eps;
               temp=temp+sqrt(-1)*temp2;
               temp(inan)=NaN;
           end
-   
+          
           TheData=temp*fac;
        
       else
           % time-independent field, like a Max field
-          %m=max(MandN);n=1;
-          TheData=h.data(v{1})*fac;
+   
+          hh=h.geovariable(v{1});
+          temp=squeeze(hh.data(TimIndex,:));
+          
+          FillVal=[];
+          v=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
+          if ~isempty(v)
+              FillVal=ncgvar.attribute(v);
+              idx=temp==FillVal;
+              temp(idx)=NaN;
+          end
+          
+          TheData=temp*fac;
       end
       % just in case  ...
       TheData=cast(TheData,'double');  
@@ -729,6 +749,8 @@ function InstanceUrl(varargin)
    TempDataLocation=getappdata(FigThatCalledThisFxn,'TempDataLocation');
 
    url=get(hObj,'String');
+   
+   if strcmpi(SSVizOpts.Mode,'Network')
    
    temp = textscan(url, '%s','Delimiter','/','MultipleDelimsAsOne',1);
    urlparts = temp{1};
@@ -800,6 +822,33 @@ function InstanceUrl(varargin)
    Connections=OpenDataConnections(Url);
    setappdata(Handles.MainFigure,'Instance',ThisInstance);
 
+   elseif strcmpi(SSVizOpts.Mode,'Url')
+       
+        UrlBase=url;
+        Url.ThisInstance='Url';
+        Url.ThisStorm=NaN;
+        Url.ThisAdv=NaN;
+        Url.ThisGrid=NaN;
+        Url.Basin=NaN;
+        Url.StormType='other';
+        Url.ThisStormNumber=NaN;
+        Url.FullDodsC= UrlBase;
+        Url.FullFileServer=strrep(Url.FullDodsC,'dodsC','fileServer');
+        Url.Ens={''};
+        Url.CurrentSelection=NaN;
+        Url.Base=UrlBase;
+        Url.UseShapeFiles=SSVizOpts.UseShapeFiles;
+        Url.Units=SSVizOpts.Units;
+        
+        TheCatalog.Catalog='Local';
+        TheCatalog.CatalogHash=NaN;
+        TheCatalog.CurrentSelection=[];
+        
+        Connections=OpenDataConnectionsUrl(Url); 
+   else   % mode is local
+       
+   end
+       
    TheGrid=TheGrids{1};
    
    EnsIndex=1;

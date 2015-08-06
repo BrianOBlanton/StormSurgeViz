@@ -40,8 +40,8 @@ for ii=1:length(VariableStandardNames)
         storm(jj).VariableName=ThisVariableName;
         storm(jj).VariableDisplayName=ThisVariableDisplayName;
         storm(jj).VariableType=ThisVariableType;
-        storm(jj).CdmDataType=ThisCdmDataType;
-
+        storm(jj).CdmDataType=ThisCdmDataType;      
+        
         if ~isempty(nctemp)  && strcmp(ThisCdmDataType,'ugrid')
             % generate a hash value based on lengths of element and "x"
             % array
