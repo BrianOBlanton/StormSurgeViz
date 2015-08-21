@@ -1044,7 +1044,7 @@ function InstanceUrl(varargin)
    SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
   
    set(Handles.MainFigure,'UserData',Handles);
-   SetTitle(Connections.RunProperties);
+   SetTitle(Connections);
 
    UpdateUI(Handles.MainFigure);
    
@@ -1181,7 +1181,7 @@ function SetNewField(varargin)
     set(Handles.MainFigure,'UserData',Handles);
     UpdateUI(Handles.MainFigure);
     % doesnt matter which Connection is passed in.
-    SetTitle(Connections.RunProperties);  
+    SetTitle(Connections);  
     
     set(FigHandle,'Pointer','arrow');
 
@@ -3761,7 +3761,7 @@ function ViewSnapshot(hObj,~)
     set(Handles.MainFigure,'UserData',Handles);
     setappdata(FigHandle,'Connections',Connections);
     UpdateUI(Handles.MainFigure);
-    SetTitle(Connections.RunProperties);
+    SetTitle(Connections);
 
     %SetUIStatusMessage('Done.')
     if ScalarClicked
