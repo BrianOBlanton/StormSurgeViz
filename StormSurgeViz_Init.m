@@ -38,7 +38,7 @@ set(0,'DefaultAxesTickDir','out')
 set(0,'DefaultFigureRenderer','zbuffer');
 
 LocalDirectory='./';
-TempDataLocation=[PWD '/TempData']; 
+TempDataLocation=[HOME '/TempData']; 
 DateStringFormatInput='yyyy-mm-dd HH:MM:SS';
 DateStringFormatOutput='ddd, dd mmm, HH:MM PM';
 

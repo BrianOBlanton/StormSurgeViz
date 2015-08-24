@@ -1,8 +1,6 @@
 function varargout=StormSurgeViz(varargin)
 %
-%
 %  MASTER VERSION !!!
-%
 %
 % StormSurgeViz - Visualization Application for Storm Surge Model Output
 % 
@@ -349,23 +347,34 @@ end
 %%% CheckForUpdateFromTimer
 %%% CheckForUpdateFromTimer
 function CheckForUpdateFromTimer(~,~) 
-
+  
+    global Debug 
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+    
     SetUIStatusMessage('Checking for Updates via Timer ...')
 
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
+    
+    SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
+    OldCatalog=getappdata(Handles.MainFigure,'Catalog');
+    OldCatalogHash=OldCatalog.CatalogHash;
+    OldCatalogName=SSVizOpts.CatalogName;
+    
     Url=getappdata(Handles.MainFigure,'Url');
     TempDataLocation=getappdata(Handles.MainFigure,'TempDataLocation');
-    OldCatalogName=getappdata(Handles.MainFigure,'CatalogName');
-    OldCatalogHash=Url.CatalogHash;
+    %OldCatalogName=getappdata(Handles.MainFigure,'CatalogName');
 
     % Get the current catalog...
-    [~,CatalogHash]=GetCatalogFromServer(Url.Base,OldCatalogName,TempDataLocation);
+    tempCat=GetCatalogFromServer(Url.Base,OldCatalogName,TempDataLocation);
+    CatalogHash=tempCat.CatalogHash;
+    
     timenow=datestr(fix(clock),'HH:MM PM');
     if strcmp(OldCatalogHash,CatalogHash)
         %update=[];
         %CatalogHash=[];
         SetUIStatusMessage(sprintf('No Catalog Updates yet at %s\n',timenow))
+        if Debug,fprintf('SSViz++ No Catalog Updates as of %s\n',timenow);end
     else
         if ~isempty(findobj(0,'Tag','StormSurgeVizUpdateMsgBox'))
             delete(findobj(0,'Tag','StormSurgeVizUpdateMsgBox'))
