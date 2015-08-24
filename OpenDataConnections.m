@@ -32,7 +32,7 @@ function Connections=OpenDataConnections(Url)
     try
         websave([TempDataLocation '/test.retrieve.ncml'],TopTextUrl);
     catch
-        SetUIStatusMessage('Could not connect to an ncml file. This is terminal.\n')
+        SetUIStatusMessage('Could not connect to an ncml file. This is terminal.')
         ME = MException('CheckForNcml:NotPresent', ...
             ['Could not connect to an ncml file. ',...
             TopTextUrl]);

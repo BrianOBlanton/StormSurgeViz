@@ -682,12 +682,13 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
           % time-independent field, like a Max field
    
           hh=h.geovariable(v{1});
-          temp=squeeze(hh.data(TimIndex,:));
+%          temp=squeeze(hh.data(TimIndex,:));
+          temp=squeeze(hh.data(:));
           
           FillVal=[];
           v=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
           if ~isempty(v)
-              FillVal=ncgvar.attribute(v);
+              FillVal=hh.attribute(v);
               idx=temp==FillVal;
               temp(idx)=NaN;
           end
@@ -3278,7 +3279,7 @@ function Handles=SetSnapshotControls(varargin)
     [a,b]=ismember(ThreeDVars,VariableDisplayNames);
     ThreeDvarsattached=false;
     for i=1:length(b)
-        if b>0
+        if b(i)>0
         if ~isempty(Connections.members{EnsIndex,b(i)}.NcTBHandle)
             ThreeDvarsattached=true;
             continue
