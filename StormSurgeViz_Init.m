@@ -36,6 +36,21 @@ CatalogEntryPoint={
 %                   'SSV'
                   };
 
+Providers.Tag={'RenciAsgs',...
+               'NOAA_CSDL',...
+               'NOAA_ESTOFS',...
+               'NYHOPS',...
+               'IrishSeaROMS',...
+               'NOAA_Psurge'};
+
+ Providers.Url={'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/RenciAsgs.ncml'
+                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/CSDL.ncml'
+                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/ESTOFS.ncml'
+                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/NYHOPS.ncml'
+                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/IrishSeaROMS.ncml'
+                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/SLOSH_Psurge.ncml'};
+Providers.Default=1;
+
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])
 %end
@@ -45,7 +60,7 @@ set(0,'DefaultAxesTickDir','out')
 set(0,'DefaultFigureRenderer','zbuffer');
 
 LocalDirectory='./';
-TempDataLocation=[PWD '/TempData']; 
+TempDataLocation=[HOME '/TempData']; 
 DateStringFormatInput='yyyy-mm-dd HH:MM:SS';
 DateStringFormatOutput='ddd, dd mmm, HH:MM PM';
 
@@ -79,6 +94,7 @@ opts.NcmlDefaultFileName='00_dir.ncml';
 
 SSVizOpts=opts;
 SSVizOpts.Storm=lower(SSVizOpts.Storm);
+SSVizOpts.Providers=Providers;
 
 cn=1;
 if isempty(SSVizOpts.ThreddsServer)
@@ -125,6 +141,7 @@ if ~exist(TempDataLocation,'dir')
     mkdir(TempDataLocation)
 end
 
+
 %%
 % get remote copy of InstanceDefaults.m
 % if isunix
@@ -147,7 +164,8 @@ switch lower(SSVizOpts.Mode)
     case 'url'
         
         if isempty(SSVizOpts.Url)
-            error('No URL specified in Url Mode.  Terminal.')
+            fprintf('SSViz++ No URL provided.  Using default...')
+            SSVizOpts.Url=Providers.Url{Providers.Default};
         end
         
         fprintf('SSViz++ Mode is Url.\n')

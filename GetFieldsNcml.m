@@ -1,4 +1,4 @@
-function storm=GetFieldsNcml(url1)
+function storm=GetFieldsNcml(url1,units)
 
 CF=CF_table;
 
@@ -29,8 +29,21 @@ for ii=1:length(VariableStandardNames)
         ncgvar=nctemp{ThisVariableName};
         
         ThisVariableDisplayName=CF.DisplayNames{ii};
-        ThisUnits=ncgvar.attribute('units');
-        
+        switch lower(units)
+            case {'meters','metric'}
+                ThisUnitsConvertFac=1.0;
+                ThisUnits=ncgvar.attribute('units');
+            case {'feet','english'}
+                ThisUnitsConvertFac=CF.UnitsConversion{ii};
+                ThisUnits=CF.EnglishUnits{ii};
+                if strcmp(ThisVariableStandardName,'air_pressure_at_sea_level')
+                    ThisUnitsConvertFac=1.0;
+                    ThisUnits=ncgvar.attribute('units');
+                end
+            otherwise
+                fprintf('SSViz++   Unrecognized units speficication.  Proceeding with Metric/MKS...\n')
+        end
+                
         ThisVariableType='Scalar';
         ThisFileNetcdfVariableName=ncgvar.name;
         ThisVariableName=ncgvar.name;
@@ -41,7 +54,8 @@ for ii=1:length(VariableStandardNames)
         storm(jj).VariableDisplayName=ThisVariableDisplayName;
         storm(jj).VariableType=ThisVariableType;
         storm(jj).CdmDataType=ThisCdmDataType;      
-        
+        storm(jj).UnitsConvertFac=ThisUnitsConvertFac;      
+
         if ~isempty(nctemp)  && strcmp(ThisCdmDataType,'ugrid')
             % generate a hash value based on lengths of element and "x"
             % array

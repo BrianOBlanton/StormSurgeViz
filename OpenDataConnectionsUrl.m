@@ -40,17 +40,28 @@ function Connections=OpenDataConnectionsUrl(Url)
     end
     
     try
-        websave([TempDataLocation '/test.retrieve.ncml'],TopTextUrl);
+        f=[TempDataLocation '/test.retrieve.ncml'];
+        delete(f)
+        websave(f,TopTextUrl);
     catch
         ME = MException('CheckForNcml:NotPresent', ...
-            ['Could not connect to an ncml file. ',...
+            ['Could not retrieve the ncml file. It is possible that the server is down. ',...
             TopTextUrl]);
         SetUIStatusMessage(ME.message)
         throw(ME);
     end
        
     % open up connection to ncml file
-    nc=ncgeodataset(TopDodsCUrl);
+    try 
+        nc=ncgeodataset(TopDodsCUrl);
+    catch
+         ME = MException('CheckForNcml:Broken', ...
+            ['Could not connect to the ncml file. It is possible that the server is down or that files referenced in the ncml file do not exist. ',...
+            TopDodsCUrl]);
+        SetUIStatusMessage(ME.message)
+        throw(ME);
+    end
+    
     if Debug,fprintf('SSViz++   nc.location=%s\n',nc.location);end  
 
     % look for required attributes
@@ -94,7 +105,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     NEns=length(Url.Ens);
     
     for i=1:NEns
-        storm=GetFieldsNcml(TopDodsCUrl);
+        storm=GetFieldsNcml(TopDodsCUrl,Url.Units);
         NVars=length(storm);
         
         % these are the scalar variables
@@ -102,9 +113,19 @@ function Connections=OpenDataConnectionsUrl(Url)
             Connections.members{i,j}=storm(j);
             Connections.VariableNames{j}=storm(j).VariableName;
             Connections.VariableDisplayNames{j}=storm(j).VariableDisplayName;
+
+            % set Units fac according to Url.Units
             Connections.VariableUnitsFac{j}=1.0;
+            switch lower(Url.Units)
+                case {'meters','metric'}
+                    Connections.VariableUnitsFac{j}=1.0;
+                    Connections.Units{j}=storm(j).Units;
+                case {'feet','english'}
+                    Connections.VariableUnitsFac{j}=storm(j).UnitsConvertFac;
+                otherwise
+                    fprintf('SSViz++   Unrecognized units speficication.  Proceeding with Metric/MKS...\n')
+            end            
             Connections.VariableTypes{j}=storm(j).VariableType;
-            
         end
         
         if isfield(CF,'Vectors')           

@@ -38,7 +38,7 @@ p.UseShapeFiles=true;
 p.UseNcml=true;
 p.KeepScalarsAndVectorsInSync=true;
 
-p.Mode={'Network','Local', 'Url'}; 
+p.Mode={'Url','Network','Local'}; 
 p.Units={'Meters','Metric','Feet','English'};
 p.DepthContours='10 50 100 500 1000 3000';  % depths must be enclosed in single quotes
 
@@ -48,10 +48,8 @@ p.NumberOfColors=32;
 p.ColorMax=NaN;
 p.ColorMin=NaN;
 p.ColorMap='noaa_cmap';
+p.ColorFixed={'0','1'};
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
-p.Colors.Fixed=true;
-p.Colors.Min=NaN;
-p.Colors.Max=NaN;
 
 % GUI options
 %ScreenTake=100; % percent of screen width to take up

@@ -6,7 +6,7 @@ function Connections=OpenDataConnections(Url)
     global TheGrids Debug 
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    msg='Opening Network OPeNDAP connections ...\n';
+    msg='Opening Network OPeNDAP connections ...';
     SetUIStatusMessage(msg)
     
     fig=findobj(0,'Tag','MainVizAppFigure');

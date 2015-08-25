@@ -35,11 +35,23 @@ function CF=CF_table
         1
         m2f
         };
+    
+    CF.EnglishUnits={
+        'feet'
+        'feet'
+        'feet'
+        'feet'
+        'mph'
+        'mph'
+        'NaN'
+        'feet'
+        };
      
     CF.Vectors(1).u='eastward_wind';
     CF.Vectors(1).v='northward_wind';
     CF.Vectors(1).name='Wind Velocity';
     CF.Vectors(1).units='m/s';
+    CF.Vectors(1).Englistunits='mph';
 
 %      
 %     CF.StandardNamesVectors={
