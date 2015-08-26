@@ -8,6 +8,7 @@ function CF=CF_table
         'sea_surface_height_above_geoid'
         'maximum_sea_surface_wave_significant_height'
         'sea_surface_wave_significant_height'
+        'maximum_wind'
         'eastward_wind'
         'northward_wind'
         'air_pressure_at_sea_level'
@@ -19,6 +20,7 @@ function CF=CF_table
         'Water Level'
         'Max Sig Wave Height'
         'Sig Wave Height'
+        'Max Wind Speed'
         'East Wind'
         'North Wind'
         'Sea Level Pressure'
@@ -32,6 +34,7 @@ function CF=CF_table
         m2f
         mps2mph
         mps2mph
+        mps2mph
         1
         m2f
         };
@@ -41,6 +44,7 @@ function CF=CF_table
         'feet'
         'feet'
         'feet'
+        'mph'
         'mph'
         'mph'
         'NaN'

@@ -42,13 +42,18 @@ Providers.Tag={'RenciAsgs',...
                'NYHOPS',...
                'IrishSeaROMS',...
                'NOAA_Psurge'};
+           
+Providers.ThreddsServer{1}='http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/';
+Providers.ThreddsServer{2}='http://opendap.renci.org:1935/thredds/dodsC/SSV-Ncml/';
+idx=2;
 
- Providers.Url={'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/RenciAsgs.ncml'
-                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/CSDL.ncml'
-                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/ESTOFS.ncml'
-                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/NYHOPS.ncml'
-                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/IrishSeaROMS.ncml'
-                'http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/SLOSH_Psurge.ncml'};
+ Providers.Url={[Providers.ThreddsServer{idx} 'RenciAsgs.ncml']
+                [Providers.ThreddsServer{idx} 'CSDL.ncml']
+                [Providers.ThreddsServer{idx} 'ESTOFS.ncml']
+                [Providers.ThreddsServer{idx} 'NYHOPS.ncml']
+                [Providers.ThreddsServer{idx} 'IrishSeaROMS.ncml']
+                [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']};
+            
 Providers.Default=1;
 
 %if ~exist('varargin','var')
@@ -164,8 +169,8 @@ switch lower(SSVizOpts.Mode)
     case 'url'
         
         if isempty(SSVizOpts.Url)
-            fprintf('SSViz++ No URL provided.  Using default...')
             SSVizOpts.Url=Providers.Url{Providers.Default};
+            fprintf('SSViz++ No URL provided.  Using default of %s...\n',SSVizOpts.Url)
         end
         
         fprintf('SSViz++ Mode is Url.\n')
