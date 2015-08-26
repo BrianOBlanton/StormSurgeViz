@@ -48,10 +48,10 @@ p.ColorMin=NaN;
 p.ColorMap='parula';
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
 
-
 % GUI options
-%ScreenTake=100; % percent of screen width to take up
-p.AppWidthPercent=90;
+%AppWidthPercent=100; % percent of screen width to take up
+p.AppWidthPercent=100;
+p.AppHeightPercent=88;
 p.FontOffset=2;
 p.CanOutputShapeFiles=true;
 p.DefaultShapeBinWidth=.5;  
