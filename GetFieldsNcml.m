@@ -8,7 +8,6 @@ if Debug,fprintf('SSViz++       Function = %s\n',ThisFunctionName);end
 
 storm=struct('NcTBHandle',[],'CdmDataType',[],'Units',[],'VariableDisplayName',[],'VariableType',[],'GridHash',[]);
 
-
 VariableStandardNames=CF.StandardNames;
 nctemp=ncgeodataset(url1);
 
@@ -56,7 +55,7 @@ for ii=1:length(VariableStandardNames)
         storm(jj).CdmDataType=ThisCdmDataType;      
         storm(jj).UnitsConvertFac=ThisUnitsConvertFac;      
 
-        if ~isempty(nctemp)  && strcmp(ThisCdmDataType,'ugrid')
+        if ~isempty(nctemp) && strcmp(ThisCdmDataType,'ugrid')
             % generate a hash value based on lengths of element and "x"
             % array
             a=prod(double(size(nctemp.variable{'element'})));

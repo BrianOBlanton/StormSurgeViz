@@ -25,26 +25,30 @@ end
 if isfield(S,'pts')
     for i=1:length(S.pts)
         j=j+1;
-        h(j)=line(S.pts(i).X,S.pts(i).Y,2*ones(size(S.pts(i).Y)),'Color','k','Marker','o','LineStyle','none','Tag','AtcfTrackShape','Clipping','on');
+        h(j)=line(S.pts(i).X,S.pts(i).Y,2*ones(size(S.pts(i).Y)),'Color','r','Marker','o','LineStyle','none','Tag','AtcfTrackShape','Clipping','on');
+        j=j+1;
+        h(j)=text(S.pts(i).X,S.pts(i).Y,...
+            2*ones(size(S.pts(i).Y)),S.pts(i).DATELBL,'Color','r',...
+            'Tag','AtcfTrackShape','Clipping','on','FontWeight','bold');
     end
 end
 
 
-% if isfield(S,'ww')
-%     for i=1:length(S.ww)
-%         j=j+1;
-%         switch S.ww(i).TCWW
-%             case 'HWR'  %  Hurricane Warning
-%                 c='r';
-%             case 'HWA'  %  Hurricane Watch  
-%                 c=[251 216 201]/256;
-%             case 'TWR'  % Tropical Storm Warning
-%                 c='b';
-%             case 'TWA'  % Tropical Storm Watch
-%                 c='y';
-%         end
-%         h(j)=line(S.ww(i).X,S.ww(i).Y,2*ones(size(S.ww(i).Y)),'Color',c,'Linewidth',2,'Tag','AtcfTrackShape','Clipping','on');
-%     end
-% end
+if isfield(S,'ww')
+    for i=1:length(S.ww)
+        j=j+1;
+        switch S.ww(i).TCWW
+            case 'HWR'  %  Hurricane Warning
+                c='r';
+            case 'HWA'  %  Hurricane Watch  
+                c=[251 216 201]/256;
+            case 'TWR'  % Tropical Storm Warning
+                c='b';
+            case 'TWA'  % Tropical Storm Watch
+                c='y';
+        end
+        h(j)=line(S.ww(i).X,S.ww(i).Y,2*ones(size(S.ww(i).Y)),'Color',c,'Linewidth',2,'Tag','AtcfTrackShape','Clipping','on');
+    end
+end
 
 

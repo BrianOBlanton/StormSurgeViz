@@ -132,10 +132,10 @@ if ~isempty(which('almanac'))
     %set(0,'DefaultFigureRenderer','opengl');
 end
 
-SSVizOpts.UseShapeFiles=false;
-%if isempty(which('shaperead'))
-%    SSVizOpts.UseShapeFiles=false;
-%end
+%SSVizOpts.UseShapeFiles=false;
+if isempty(which('shaperead'))
+    SSVizOpts.UseShapeFiles=false;
+end
 
 if isempty(which('shapewrite'))
     disp('Can''t locate MATLAB''s shapewrite.  Disabling shape file output.')
@@ -145,7 +145,6 @@ end
 if ~exist(TempDataLocation,'dir')
     mkdir(TempDataLocation)
 end
-
 
 %%
 % get remote copy of InstanceDefaults.m

@@ -1,7 +1,6 @@
 function S=LoadAtcfShapefile(basin,stormnumber,year,advisory,destination)
 % S=LoadAtcfShapefile(basin,stormnumber,year,advisory,destination)
 
-
 HERE=pwd;
 
 if (nargin<4 || nargin>5)
@@ -40,7 +39,7 @@ end
 
 % for archived files:
 UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
-f=sprintf('%s%s%4d_5day_%03d.zip',basin,stormnumber,year,advisory);
+f=sprintf('%s%02d%4d_5day_%03d.zip',basin,stormnumber,year,advisory);
 
 try 
     urlwrite([UrlBase f],sprintf('%s/%s',destination,f));
@@ -57,7 +56,7 @@ catch ME
 end
 cd(HERE)
 
-fb=sprintf('%s/%s%s%4d-%03d',destination,basin,stormnumber,year,advisory);
+fb=sprintf('%s/%s%02d%4d-%03d',destination,basin,stormnumber,year,advisory);
 f=sprintf('%s_5day_lin',fb);
 if exist([f '.shp'],'file')
     s=shaperead(f);

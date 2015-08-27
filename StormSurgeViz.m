@@ -737,13 +737,11 @@ function InstanceUrl(varargin)
        FigThatCalledThisFxn=findobj(0,'Tag','MainVizAppFigure');
        Handles=get(FigThatCalledThisFxn,'UserData');
        hObj=Handles.ServerInfoString;
-
    else
-       hObj=varargin{1};
-       %event=varargin{2};
        FigThatCalledThisFxn=gcbf;
-       Handles=get(FigThatCalledThisFxn,'UserData');
+       hObj=varargin{1};
    end
+   Handles=get(FigThatCalledThisFxn,'UserData');
 
    SSVizOpts=getappdata(FigThatCalledThisFxn,'SSVizOpts');
    TempDataLocation=getappdata(FigThatCalledThisFxn,'TempDataLocation');
@@ -982,7 +980,8 @@ function SetNewField(varargin)
         end
     end
     
-    set(get(Handles.ColorBar,'ylabel'),'String',Connections.members{EnsIndex,ScalarVarIndex}.Units,'FontSize',FontSizes(1));
+    set(get(Handles.ColorBar,'ylabel'),...
+        'String',Connections.members{EnsIndex,ScalarVarIndex}.Units,'FontSize',FontSizes(1));
     drawnow
     
     % redraw track if already present in axes
@@ -1224,8 +1223,11 @@ function Handles=DrawTriSurf(Handles,Member,Field)
 end
 
 %%  DrawTrack
+%%% DrawTrack 
 %%% DrawTrack
-%%% DrawTrack
+%%% This draws fort.22 tracks if available. In this ncml
+%%% version, these are NOT available since they can't easily be encoded in
+%%% the ncml files, so this will eventually get removed...
 function h=DrawTrack(track)
     
     global Debug
@@ -1234,7 +1236,7 @@ function h=DrawTrack(track)
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
-        LocalTimeOffset=SSVizOpts.LocalTimeOffset;
+    LocalTimeOffset=SSVizOpts.LocalTimeOffset;
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
 
     %fmtstr=' mmmdd@HH PM';
@@ -3014,7 +3016,9 @@ function UpdateUI(varargin)
 %    set(Handles.UnitsString,   'String',Units)
 %    set(Handles.TimeOffsetString,   'String',LocalTimeOffset)
 
-    if (~isfield(Connections,'Tracks') || isempty(Connections.Tracks{1}))  && ( ~isfield(Connections,'AtcfShape') || isempty(Connections.AtcfShape))
+    if (~isfield(Connections,'Tracks') || isempty(Connections.Tracks{1})) ...
+            && ...
+       ( ~isfield(Connections,'AtcfShape') || isempty(Connections.AtcfShape))
         set(Handles.ShowTrackButton,'String','No Track to Show')
         set(Handles.ShowTrackButton,'Enable','off')
     else
@@ -3967,7 +3971,6 @@ function ShowTrack(hObj,~)
     global Connections Debug 
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
     
-
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
   
@@ -3978,7 +3981,7 @@ function ShowTrack(hObj,~)
     temp=findobj(Handles.MainAxes,'Tag','Storm_Track');
     temp2=findobj(Handles.MainAxes,'Tag','AtcfTrackShape');
     if isempty(temp) && isempty(temp2)
-        SetUIStatusMessage('Drawing Track ... \n')
+        SetUIStatusMessage('Drawing Track ... ')
 
         % get the current ens member
         temp=get(Handles.EnsButtonHandles,'Value');
@@ -4001,7 +4004,7 @@ function ShowTrack(hObj,~)
             set(hObj,'String','Hide Track')
         end
     else
-        SetUIStatusMessage('Hiding Track ... \n')
+        SetUIStatusMessage('Hiding Track ... ')
         delete(temp);
         delete(temp2);
         Handles.Storm_Track=[];
@@ -4010,7 +4013,7 @@ function ShowTrack(hObj,~)
     end
     drawnow
     set(Handles.MainFigure,'Pointer','arrow');
-    SetUIStatusMessage('Done. \n')
+    SetUIStatusMessage('Done. ')
 
 end
 

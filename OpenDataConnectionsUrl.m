@@ -15,14 +15,13 @@ function Connections=OpenDataConnectionsUrl(Url)
     end
     
     fig=findobj(0,'Tag','MainVizAppFigure');
+    Handles=get(fig,'UserData');
     TempDataLocation=getappdata(fig,'TempDataLocation');
     %SSVizOpts=getappdata(fig,'SSVizOpts');
 
     CF=CF_table;
     
     Connections.EnsembleNames=Url.Ens;
-    %Connections.VariableUnitsFac=VariableUnitsFac;
-    %Connections.VariableTypes=VariableTypes;
     
     if Debug,fprintf('SSViz++   Attempting to get to NCML file on server.\n');end
     i=1;
@@ -35,8 +34,7 @@ function Connections=OpenDataConnectionsUrl(Url)
             ['Input URL does not end in .ncml: ',...
             TopDodsCUrl]);
         SetUIStatusMessage(ME.message)
-        throw(ME); 
-        
+        throw(ME);  
     end
     
     try
@@ -48,9 +46,10 @@ function Connections=OpenDataConnectionsUrl(Url)
             TopTextUrl
             'could not be connected to.  It is possible that the server is down, '
             'or that there are firewall issues on the client side.'}; 
-            msgbox(str)
+        msgbox(str)
         ME = MException('CheckForNcml:NotPresent', ...
-            ['Could not retrieve the ncml file. It is possible that the server is down, or that there are firewall issues on the client side. ',... 
+            ['Could not retrieve the ncml file. It is possible that the server is down, ',...
+             'or that there are firewall issues on the client side. ',... 
             TopTextUrl]);
         SetUIStatusMessage(ME.message)
         throw(ME);
@@ -64,12 +63,13 @@ function Connections=OpenDataConnectionsUrl(Url)
             TopDodsCUrl
             'could not be connected to.  It is possible that it references '
             'a remote TDS catalog on a server that is s down.'}; 
-            msgbox(str)
-         ME = MException('CheckForNcml:Broken', ...
-            ['Could not connect to the ncml file. It is possible that the server is down or that files referenced in the ncml file do not exist. ',...
+        msgbox(str)
+        ME = MException('CheckForNcml:Broken', ...
+           ['Could not connect to the ncml file. It is possible that the ',...
+            'server is down or that files referenced in the ncml file do not exist. ',...
             TopDodsCUrl]);
-        SetUIStatusMessage(ME.message)
-        throw(ME);
+       SetUIStatusMessage(ME.message)
+       throw(ME);
     end
     
     if Debug,fprintf('SSViz++   nc.location=%s\n',nc.location);end  
@@ -193,18 +193,35 @@ function Connections=OpenDataConnectionsUrl(Url)
         msg=sprintf('Successfully retrieved %s forecast links ...',Url.Ens{i});
         SetUIStatusMessage(msg)
     end
+    
+    urltemp=Url;
+    
+    urltemp.StormType=nc.attribute{'stormtype'};
+    if any(strcmp(urltemp.StormType,{'TC','Hurricane'}))
+        urltemp.ThisAdv=str2double(nc.attribute{'advisory_or_cycle'});
+        urltemp.ThisStorm=nc.attribute{'stormname'};
+        urltemp.StormYear=str2double(nc.attribute{'stormyear'});
+        
+        startingnameletters={'a','b','c','d','e','f','g','h','i','j',...
+            'k','l','m','n','o','p','r','s','t','u',...
+            'v','w','x','y','z'};
+        urltemp.ThisStormNumber=find(strcmpi(urltemp.ThisStorm(1),startingnameletters));
+        urltemp.Basin='al';
+    end
      
+    setappdata(Handles.MainFigure,'Url',urltemp);
+    
     % try to get the nhc shapefile
     if Url.UseShapeFiles
-        if strcmp(Url.StormType,'TC')
-            adv=str2double(Url.ThisAdv);
+        if any(strcmp(urltemp.StormType,{'TC','Hurricane'}))
             UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
-            yr=GetRunProperty(RunProperties,'year');
-            Url.StormNumber=GetRunProperty(RunProperties,'stormnumber');
-            f=sprintf('%s%s%s_5day_%03d.zip',Url.Basin,Url.StormNumber,yr,adv);
+            f=sprintf('%s%02d%4d_5day_%03d.zip',urltemp.Basin,...
+                urltemp.ThisStormNumber,urltemp.StormYear,urltemp.ThisAdv);
             try
                 urlwrite([UrlBase f],sprintf('%s/%s',TempDataLocation,f));
-                Connections.AtcfShape=LoadAtcfShapefile(Url.Basin,Url.StormNumber,yr,adv,TempDataLocation);
+                Connections.AtcfShape=LoadAtcfShapefile(urltemp.Basin,...
+                    urltemp.ThisStormNumber,urltemp.StormYear,...
+                    urltemp.ThisAdv,TempDataLocation);
             catch ME
                 SetUIStatusMessage(sprintf('Failed to get %s/%s.  Check arguments to %s.\n',UrlBase,f,mfilename));
             end

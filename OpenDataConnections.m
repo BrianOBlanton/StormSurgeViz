@@ -15,15 +15,8 @@ function Connections=OpenDataConnections(Url)
 
     CF=CF_table;
     
-    %VariableStandardNames=CF.StandardNames;
-    
-    %NVars=length(FilesToOpen);
-    %DeleteTempFiles=false;
-    
     Connections.EnsembleNames=Url.Ens;
-    %Connections.VariableUnitsFac=VariableUnitsFac;
-    %Connections.VariableTypes=VariableTypes;
-    
+
     if Debug,fprintf('SSViz++   Attempting to use NCML files on server.\n');end
     i=1;
     TopDodsCUrl= [Url.FullDodsC '/' Url.Ens{i} '/' SSVizOpts.NcmlDefaultFileName];
@@ -118,7 +111,7 @@ function Connections=OpenDataConnections(Url)
     
     % try to get the nhc shapefile
     if Url.UseShapeFiles
-        if strcmp(Url.StormType,'TC')
+        if any(strcmp(Url.StormType,{'TC','Hurricane'}))
             adv=str2double(Url.ThisAdv);
             UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
             yr=GetRunProperty(RunProperties,'year');
