@@ -38,7 +38,7 @@ p.KeepScalarsAndVectorsInSync=true;
 
 p.Mode={'Network','Local', 'Url'}; 
 p.Units={'Meters','Metric','Feet','English'};
-p.DepthContours='10 50 100 500 1000 3000';  % depths must be enclosed in single quotes
+p.DepthContours='0 10 50 100 500 1000 3000';  % depths must be enclosed in single quotes
 
 % color options
 p.ColorIncrement=.25;    % in whatever units
