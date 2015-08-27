@@ -36,7 +36,8 @@ CatalogEntryPoint={
 %                   'SSV'
                   };
 
-Providers.Tag={'RenciAsgs',...
+Providers.Tag={'RenciAsgs-Tropical',...
+               'RenciAsgs-Daily',...
                'NOAA_CSDL',...
                'NOAA_ESTOFS',...
                'NYHOPS',...
@@ -47,7 +48,8 @@ Providers.ThreddsServer{1}='http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV
 Providers.ThreddsServer{2}='http://opendap.renci.org:1935/thredds/dodsC/SSV-Ncml/';
 idx=2;
 
- Providers.Url={[Providers.ThreddsServer{idx} 'RenciAsgs.ncml']
+ Providers.Url={[Providers.ThreddsServer{idx} 'RenciAsgs_LatestTropical.ncml']
+                [Providers.ThreddsServer{idx} 'RenciAsgs_LatestDaily.ncml']
                 [Providers.ThreddsServer{idx} 'CSDL.ncml']
                 [Providers.ThreddsServer{idx} 'ESTOFS.ncml']
                 [Providers.ThreddsServer{idx} 'NYHOPS.ncml']
