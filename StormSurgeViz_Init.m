@@ -38,7 +38,7 @@ CatalogEntryPoint={
 
 Providers.Tag={'RenciAsgs-Tropical',...
                'RenciAsgs-Daily',...
-               'NOAA_CSDL',...
+               'NOAA_CSDL-Tropical',...
                'NOAA_ESTOFS',...
                'NYHOPS',...
                'IrishSeaROMS',...
@@ -50,12 +50,13 @@ idx=2;
 
  Providers.Url={[Providers.ThreddsServer{idx} 'RenciAsgs_LatestTropical.ncml']
                 [Providers.ThreddsServer{idx} 'RenciAsgs_LatestDaily.ncml']
-                [Providers.ThreddsServer{idx} 'CSDL.ncml']
-                [Providers.ThreddsServer{idx} 'ESTOFS.ncml']
+                [Providers.ThreddsServer{idx} 'CSDL_Tropical.ncml']
+                ['http://coastalmodeldev.data.noaa.gov/thredds/dodsC/dailyESTOFS/latest/ssv.ncml']
                 [Providers.ThreddsServer{idx} 'NYHOPS.ncml']
                 [Providers.ThreddsServer{idx} 'IrishSeaROMS.ncml']
                 [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']};
-            
+                            %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
+
 Providers.Default=1;
 
 %if ~exist('varargin','var')
