@@ -201,7 +201,8 @@ function Connections=OpenDataConnectionsUrl(Url)
     urltemp=Url;
     
     urltemp.StormType=nc.attribute{'stormtype'};
-    if any(strcmp(urltemp.StormType,{'TC','Hurricane'}))
+    
+    if any(strcmp(urltemp.StormType,{'TS','TC','Hurricane'}))
         urltemp.ThisAdv=str2double(nc.attribute{'advisory_or_cycle'});
         urltemp.ThisStorm=nc.attribute{'stormname'};
         urltemp.StormYear=str2double(nc.attribute{'stormyear'});
@@ -217,7 +218,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     
     % try to get the nhc shapefile
     if Url.UseShapeFiles
-        if any(strcmp(urltemp.StormType,{'TC','Hurricane'}))
+        if any(strcmp(urltemp.StormType,{'TS','TC','Hurricane'}))
             UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
             f=sprintf('%s%02d%4d_5day_%03d.zip',urltemp.Basin,...
                 urltemp.ThisStormNumber,urltemp.StormYear,urltemp.ThisAdv);
@@ -260,6 +261,5 @@ function Connections=OpenDataConnectionsUrl(Url)
                end
            end
         end
-    end
-             
+    end    
 end
