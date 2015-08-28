@@ -4,6 +4,6 @@ s(end)=[];
 [r2,s2]=system('git status | sed  1q | awk ''{print $3}''');
 s2(end)=[];
 fid=fopen('ThisVersion','w');
-fprintf(fid,'JHT StormSurgeViz %s - %s',s,s2);
+fprintf(fid,'JHT StormSurgeViz-master %s - %s',s,s2);
 fclose(fid);
 
