@@ -163,6 +163,7 @@ end
 % end
 
 SSVizOpts.DefaultBoundingBox=NaN;
+%SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
 switch lower(SSVizOpts.Mode)
     
     case 'local'
@@ -186,7 +187,7 @@ switch lower(SSVizOpts.Mode)
         SSVizOpts.Mode='Network';
         fprintf('SSViz++ Mode is Network.\n')
         
-        %SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
+       
 
     otherwise
         error('Mode %s unknown.  Modes are {''Local'',''Url'',''Network''}',SSVizOpts.Mode)

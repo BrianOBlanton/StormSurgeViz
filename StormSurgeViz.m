@@ -1073,7 +1073,7 @@ function DrawDepthContours(hObj,~)
     axes(Handles.MainAxes);
     if ~(isempty(which('contmex5')) && DisableContouring)
         DepthContours=get(hObj,'String');
-        SetUIStatusMessage('** Drawing depth contours ... \n')
+        SetUIStatusMessage('** Drawing depth contours ...')
         if isempty(DepthContours) || strcmp(DepthContours,'none')
            delete(findobj(Handles.MainAxes,'Tag','BathyContours'))
         else
@@ -1107,15 +1107,22 @@ function Handles=MakeTheAxesMap(Handles)
     
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');    
     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
-        ColorBarLocation=SSVizOpts.ColorBarLocation;
-        HOME=SSVizOpts.HOME;
-        DisableContouring=SSVizOpts.DisableContouring;
+    ColorBarLocation=SSVizOpts.ColorBarLocation;
+    HOME=SSVizOpts.HOME;
+    DisableContouring=SSVizOpts.DisableContouring;
 
-    axx=SSVizOpts.BoundingBox;
-    if isnan(axx),axx=[min(TheGrid.x) max(TheGrid.x) min(TheGrid.y) max(TheGrid.y)];end
+%     axx=axis;
+	axx=getappdata(Handles.MainFigure,'BoundingBox');
+    if isempty(axx) || isnan(axx(1))
+        axx=SSVizOpts.BoundingBox;
+    end
+    if isempty(axx) || isnan(axx(1))
+        axx=[min(TheGrid.x) max(TheGrid.x) min(TheGrid.y) max(TheGrid.y)];
+    end    
+
     cla
     
-    Handles.GridBoundary=plotbnd(TheGrid,'Color','k');
+    Handles.GridBoundary=plotbnd(TheGrid,'Color','k','LineWidth',2);
     set(Handles.GridBoundary,'Tag','GridBoundary');
     nz=2*ones(size(get(Handles.GridBoundary,'XData')));
     set(Handles.GridBoundary,'ZData',nz)
