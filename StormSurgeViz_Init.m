@@ -55,8 +55,11 @@ idx=2;
                 [Providers.ThreddsServer{idx} 'NYHOPS.ncml']
                 [Providers.ThreddsServer{idx} 'IrishSeaROMS.ncml']
                 [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']};
+            
                             %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
 
+                            
+                            
 Providers.Default=1;
 
 %if ~exist('varargin','var')

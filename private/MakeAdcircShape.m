@@ -1,4 +1,4 @@
-function [SS,edges,spec]=MakeShape(fgs,q,bin_centers,varargin)
+function [SS,edges,spec]=MakeAdcircShape(fgs,q,bin_centers,varargin)
 % [SS,spec,edges]=MakeShape(fgs,q,bin_centers,p1,v1,p2,v2,...);
 %
 %   WriteShape(SS,OutName)
@@ -35,9 +35,12 @@ while k<length(varargin),
   end;
 end;
 
-if length(varargin)<2
-   varargin={};
-end
+% if length(varargin)<2
+%    varargin={};
+% end
+
+% get rid of whitespace and special characters 
+FeatureName(regexp(FeatureName,'[^a-zA-Z0-9]'))=[];
 
 %Threshold=1e-10;
 %Fuzz=0;  % percent slop in nodal values
@@ -45,7 +48,7 @@ end
 x=fgs.x;
 y=fgs.y;
 e=fgs.e;
-[m,n]=size(x);
+[m,~]=size(x);
 %origq=q;
 
 if length(bin_centers)==1  % spec's the bin center interval

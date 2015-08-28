@@ -3757,7 +3757,7 @@ function ExportShapeFile(~,~)
     ScalarVariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     
     EnsembleNames=Connections.EnsembleNames; 
-    VariableNames=Connections.VariableNames; 
+    VariableNames=Connections.VariableDisplayNames; 
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames));
     ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableNames));
 
@@ -3829,7 +3829,8 @@ function GraphicOutputPrint(~,~)
     SelectedType=strtrim(SelectedType(end-3:end));
        
     EnsembleNames=Connections.EnsembleNames; 
-    VariableNames=Connections.VariableNames; 
+    VariableNames=Connections.VariableDisplayNames; 
+    
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     VarIndex=find(strcmp(VariableClicked,VariableNames));
     

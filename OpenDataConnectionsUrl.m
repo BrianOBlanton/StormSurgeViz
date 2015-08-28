@@ -46,13 +46,14 @@ function Connections=OpenDataConnectionsUrl(Url)
             TopTextUrl
             'could not be connected to.  It is possible that the server is down, '
             'or that there are firewall issues on the client side.'}; 
-        msgbox(str)
+        msgbox(str,'Remote Ncml File Error','warn')
         ME = MException('CheckForNcml:NotPresent', ...
             ['Could not retrieve the ncml file. It is possible that the server is down, ',...
              'or that there are firewall issues on the client side. ',... 
             TopTextUrl]);
         SetUIStatusMessage(ME.message)
-        throw(ME);
+        %throw(ME);
+        return
     end
        
     % open up connection to ncml file
@@ -62,14 +63,17 @@ function Connections=OpenDataConnectionsUrl(Url)
         str={'The ncml file ' 
             TopDodsCUrl
             'could not be connected to.  It is possible that it references '
-            'a remote TDS catalog on a server that is s down.'}; 
-        msgbox(str)
+            'a remote TDS catalog on a server that is unavailable/down/offline.'
+            'Contact the provider.'}; 
+        msgbox(str,'Remote Ncml File Error','warn')
         ME = MException('CheckForNcml:Broken', ...
            ['Could not connect to the ncml file. It is possible that the ',...
             'server is down or that files referenced in the ncml file do not exist. ',...
             TopDodsCUrl]);
        SetUIStatusMessage(ME.message)
-       throw(ME);
+       %throw(ME);
+       return
+
     end
     
     if Debug,fprintf('SSViz++   nc.location=%s\n',nc.location);end  
