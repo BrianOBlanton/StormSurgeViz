@@ -165,7 +165,7 @@ switch lower(SSVizOpts.Mode)
         end
 end
 
-if ~isempty(SSVizOpts.BoundingBox),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
+if isempty(SSVizOpts.BoundingBox),SSVizOpts.BoundingBox=SSVizOpts.DefaultBoundingBox;end
 
 %SetVectorOptions('Stride',100,'ScaleFac',25,'Color','k')
 VectorOptions.Stride=100;

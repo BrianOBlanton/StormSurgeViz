@@ -1280,7 +1280,7 @@ function Handles=MakeTheAxesMap(Handles)
         DisableContouring=SSVizOpts.DisableContouring;
 
     axx=SSVizOpts.BoundingBox;
-    if isnan(axx),axx=[min(TheGrid.x) max(TheGrid.x) min(TheGrid.y) max(TheGrid.y)];end
+    if isempty(axx)||any(isnan(axx)),axx=[min(TheGrid.x) max(TheGrid.x) min(TheGrid.y) max(TheGrid.y)];end
     cla
     
     Handles.GridBoundary=plotbnd(TheGrid,'Color','k');

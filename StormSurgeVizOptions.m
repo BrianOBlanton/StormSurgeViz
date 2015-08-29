@@ -60,4 +60,4 @@ p.SendDiagnosticsToCommandWindow=true;
 p.ForkAxes=false;
 p.UITest=false;
 
-p.BoundingBox=NaN;  %  [-100 -60 7 47];
+p.BoundingBox=[];  %  [-100 -60 7 47];

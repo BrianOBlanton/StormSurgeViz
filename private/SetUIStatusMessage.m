@@ -15,15 +15,16 @@ function SetUIStatusMessage(varargin)
     set(StatusBarHandle,'String',strrep(msg,'\n',''))
     drawnow
  
-    if getappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow')
-        if exist('sendtocomwin','var')
-            if sendtocomwin
-                fprintf(msg)
-            end
-        else
-            fprintf(msg)
-        end
-    end
-     
+%     if getappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow')
+%         if exist('sendtocomwin','var')
+%             if sendtocomwin
+%                 fprintf(msg)
+%             end
+%         else
+%             fprintf(msg)
+%         end
+%     end
+     fprintf([msg '\n'])
+
 end
 
