@@ -1,6 +1,6 @@
-%%  OpenDataConnections
-%%% OpenDataConnections
-%%% OpenDataConnections
+%%  OpenDataConnectionsUrl
+%%% OpenDataConnectionsUrl
+%%% OpenDataConnectionsUrl
 function Connections=OpenDataConnectionsUrl(Url)
   
 % this mode (Url) assumes that the url points to an ncml file on a THREDDS
@@ -52,8 +52,8 @@ function Connections=OpenDataConnectionsUrl(Url)
              'or that there are firewall issues on the client side. ',... 
             TopTextUrl]);
         SetUIStatusMessage(ME.message)
-        %throw(ME);
-        return
+        throw(ME);
+        %return
     end
        
     % open up connection to ncml file
@@ -71,8 +71,8 @@ function Connections=OpenDataConnectionsUrl(Url)
             'server is down or that files referenced in the ncml file do not exist. ',...
             TopDodsCUrl]);
        SetUIStatusMessage(ME.message)
-       %throw(ME);
-       return
+       throw(ME);
+       %return
 
     end
     

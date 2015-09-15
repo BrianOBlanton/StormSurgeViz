@@ -10,7 +10,7 @@ function SetUIStatusMessage(varargin)
 
     StatusBarHandle=Handles.StatusBar;
     set(StatusBarHandle,'String',msg)
- 
+    drawnow
     if getappdata(Handles.MainFigure,'SendDiagnosticsToCommandWindow')
         fprintf('SSViz-- %s\n',msg)
     end

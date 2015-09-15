@@ -321,7 +321,7 @@ axes(Handles.MainAxes);
 % Set a timer to check for catalog updates
 if exist('timer','file')
     if isfinite(SSVizOpts.PollInterval)
-        SetUIStatusMessage('Setting Timer Function to check for updates.\n')
+        SetUIStatusMessage('Setting Timer Function to check for updates.')
         Handles.Timer=timer('ExecutionMode','fixedRate',...
             'TimerFcn',@CheckForUpdateFromTimer,...
             'Period',SSVizOpts.PollInterval,...
@@ -719,7 +719,7 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
       Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
    end
    
-   SetUIStatusMessage('* Got it.')
+   SetUIStatusMessage('*** Got it.')
 
 end
 
@@ -3461,7 +3461,7 @@ function Handles=SetSnapshotControls(varargin)
             'Tag','VectorSnapshotButtonGroup');
         
         
-        if m>0
+        if m>1
             Handles.ScalarSnapshotButtonHandle=uicontrol(...
                 Handles.ScalarSnapshotButtonHandlePanel,...
                 'Style','popupmenu',...

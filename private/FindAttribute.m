@@ -1,7 +1,7 @@
 function res=FindAttribute(obj,name)
 
 if ~(isa(obj,'ncgeovariable') || isa(obj,'ncvariable'))
-    error('Object to FindAttribute must be an ncgeovariable | ncvariable')
+    error('Object to FindAttribute must be ncgeovariable | ncvariable')
 end
 
 res=[];
