@@ -1,0 +1,23 @@
+REQUIRED:
+
+cdm_data_type
+Conventions
+institution
+model
+wind_source
+forecaststarttime
+forecastendtime
+
+OPTIONAL (BUT HIGHLY RECOMMENDED):
+
+advisory_or_cycle
+grid
+stormname
+stormtype
+stormyear
+
+OPTIONAL:
+
+id
+title
+
