@@ -1,4 +1,4 @@
-function [SS,edges,spec]=MakeShape(fgs,q,bin_centers,varargin)
+function [SS,edges,spec]=MakeAdcircShape(fgs,q,bin_centers,varargin)
 % [SS,spec,edges]=MakeShape(fgs,q,bin_centers,p1,v1,p2,v2,...);
 %
 %   WriteShape(SS,OutName)
@@ -35,9 +35,8 @@ while k<length(varargin),
   end;
 end;
 
-if length(varargin)<2
-   varargin={};
-end
+FeatureName(regexp(FeatureName,'([ ]+)'))=[];
+
 
 %Threshold=1e-10;
 %Fuzz=0;  % percent slop in nodal values
@@ -432,10 +431,10 @@ for ii=1:length(list)
                 % polygon, and not just within the bounding box...
                 inpoly=inpolygon(x(Conn{k}),y(Conn{k}),x(Conn{current_poly}),y(Conn{current_poly}));
                 
-                % if all points in x(Conn{k}),y(Conn{k}) are in the main
+                % If all points in x(Conn{k}),y(Conn{k}) are in the main
                 % polygon, add length to iring, flip order if needed, add
                 % to coord list (with NaN separating segments)
-                % IT turns out that we don't really need iring for MATLAB's
+                % It turns out that we don't really need iring for MATLAB's
                 % ShapeWrite, but we may for other libraries (java,
                 % python, etc)....
                 if all(inpoly)
@@ -470,6 +469,7 @@ for ii=1:length(list)
         %SS(c).Parts=iring;
         SS(c).Lon=p1x';
         SS(c).Lat=p1y';
+
         com=sprintf('SS(c).%s=(bin_centers(ii));',FeatureName);
         eval(com);
 %        SS(c).WaterLevel=(bin_centers(ii));

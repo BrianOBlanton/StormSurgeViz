@@ -13,7 +13,7 @@ end
 
 if isempty(which('detbndy'))
     cd([HOME '/util'])
-    ssinit
+    ssvinit
 end
 
 cd(PWD)
@@ -134,6 +134,16 @@ switch lower(SSVizOpts.Mode)
         
         [status,result]=system([cpcom ' private/run.properties.fake ' TempDataLocation '/run.properties']);
         SSVizOpts.DefaultBoundingBox=NaN;
+        
+        % check for existence of input local directory
+        if isempty(SSVizOpts.Url)
+            SSVizOpts.Url=pwd;
+        end
+        if ~exist(SSVizOpts.Url,'dir')
+            fprintf('SSViz++ Input directory (%s) does not exist.  Use file browser...\n',SSVizOpts.Url)
+        else
+            LocalDirectory=SSVizOpts.Url;
+        end
         
     otherwise
         

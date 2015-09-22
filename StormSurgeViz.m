@@ -178,7 +178,7 @@ switch lower(SSVizOpts.Mode)
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
         Url.FullFileServer= UrlBase;
-        Url.Ens={LocalDirectory};
+        Url.Ens={SSVizOpts.Url};
         Url.CurrentSelection=NaN;
         Url.Base=UrlBase;
         Url.UseShapeFiles=SSVizOpts.UseShapeFiles;
@@ -237,75 +237,87 @@ setappdata(Handles.MainFigure,'Connections',Connections);
 global TheGrids
 
 %% SetEnsembleControls
-Handles=SetEnsembleControls(Handles.MainFigure);
-set(Handles.MainFigure,'UserData',Handles);
-
+if isfield(Connections,'members')
+    Handles=SetEnsembleControls(Handles.MainFigure);
+    set(Handles.MainFigure,'UserData',Handles);
+end
+    
 %% SetVariableControls
-Handles=SetVariableControls(Handles.MainFigure,Handles.MainAxes);
-set(Handles.MainFigure,'UserData',Handles);
+if isfield(Connections,'members')
+    Handles=SetVariableControls(Handles.MainFigure,Handles.MainAxes);
+    set(Handles.MainFigure,'UserData',Handles);
+end
 
 %% SetSnapshotControls 
-Handles=SetSnapshotControls(Handles.MainFigure,Handles.MainAxes);
-set(Handles.MainFigure,'UserData',Handles);
-
-%% GetDataObject 
-SetUIStatusMessage('Getting initial data set links...\n');
-EnsIndex=GetCurrentEnsIndex(Handles);
-VarIndex=GetCurrentVarIndex(Handles);
-TimIndex=1;
-Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
-
-VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
-if ~isempty(VectorVariableClicked)
-    WindVecIndex=find(strcmp(Connections.VariableNames,VectorVariableClicked));  
-    Connections=GetDataObject(Connections,EnsIndex,WindVecIndex,TimIndex);
-    setappdata(Handles.MainFigure,'Connections',Connections);
+if isfield(Connections,'members')
+    Handles=SetSnapshotControls(Handles.MainFigure,Handles.MainAxes);
+    set(Handles.MainFigure,'UserData',Handles);
 end
-
-%% MakeTheAxesMap
-SetUIStatusMessage('Making default plot ... \n')
-Handles=MakeTheAxesMap(Handles);  
-
-ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
-Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
-if isfield(Connections,'Tracks')
-    if ~isempty(Connections.Tracks{EnsIndex})
-        Handles.Storm_Track=DrawTrack(Connections.Tracks{EnsIndex});
-        set(Handles.ShowTrackButton,'String','Hide Track')
-        set(Handles.ShowTrackButton,'Enable','on')
+%% GetDataObject
+if isfield(Connections,'members')
+    SetUIStatusMessage('Getting initial data set links...\n');
+    EnsIndex=GetCurrentEnsIndex(Handles);
+    VarIndex=GetCurrentVarIndex(Handles);
+    TimIndex=1;
+    Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
+    
+    VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
+    if ~isempty(VectorVariableClicked)
+        WindVecIndex=find(strcmp(Connections.VariableNames,VectorVariableClicked));
+        Connections=GetDataObject(Connections,EnsIndex,WindVecIndex,TimIndex);
+        setappdata(Handles.MainFigure,'Connections',Connections);
     end
 end
-
-RendererKludge;  %% dont ask...
-
-temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
-if ~isreal(temp),temp=abs(temp);end
-[MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
-Max=min([MaxTemp SSVizOpts.ColorMax]);
-Min=max([MinTemp SSVizOpts.ColorMin]);
-SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
-
-SetUIStatusMessage('* Done.\n\n');
-
-%% Finalize Initializations
-set(Handles.UnitsString,'String',SSVizOpts.Units);
-set(Handles.TimeOffsetString,'String',SSVizOpts.LocalTimeOffset)
-set(Handles.MainFigure,'UserData',Handles);
-
-UpdateUI(Handles.MainFigure);
-SetTitle(Connections);
-
-% Final UI tweaks; based on availible files
-if isfield(Connections,'Tracks') && isempty(Connections.Tracks{1})
-    set(Handles.ShowTrackButton,'String','No Track to Show')
-    set(Handles.ShowTrackButton,'Enable','off')
+%% MakeTheAxesMap
+if isfield(Connections,'members')
+    SetUIStatusMessage('Making default plot ... \n')
+    Handles=MakeTheAxesMap(Handles);
+    
+    ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
+    Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
+    if isfield(Connections,'Tracks')
+        if ~isempty(Connections.Tracks{EnsIndex})
+            Handles.Storm_Track=DrawTrack(Connections.Tracks{EnsIndex});
+            set(Handles.ShowTrackButton,'String','Hide Track')
+            set(Handles.ShowTrackButton,'Enable','on')
+        end
+    end
+    
+    RendererKludge;  %% dont ask...
+    
+    temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
+    if ~isreal(temp),temp=abs(temp);end
+    [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
+    Max=min([MaxTemp SSVizOpts.ColorMax]);
+    Min=max([MinTemp SSVizOpts.ColorMin]);
+    SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+    
 end
 
-axes(Handles.MainAxes);
+SetUIStatusMessage('* Done.');
+
+%% Finalize Initializations
+if isfield(Connections,'members')
+    set(Handles.UnitsString,'String',SSVizOpts.Units);
+    set(Handles.TimeOffsetString,'String',SSVizOpts.LocalTimeOffset)
+    set(Handles.MainFigure,'UserData',Handles);
+    
+    UpdateUI(Handles.MainFigure);
+    SetTitle(Connections);
+    
+    % Final UI tweaks; based on availible files
+    if isfield(Connections,'Tracks') && isempty(Connections.Tracks{1})
+        set(Handles.ShowTrackButton,'String','No Track to Show')
+        set(Handles.ShowTrackButton,'Enable','off')
+    end
+    
+    axes(Handles.MainAxes);
+end
 
 % Last thing
 % Set a timer to check for catalog updates
 if exist('timer','file')
+    if strcmpi(SSVizOpts.Mode,'network')
     if isfinite(SSVizOpts.PollInterval)
         SetUIStatusMessage('Setting Timer Function to check for updates.\n')
         Handles.Timer=timer('ExecutionMode','fixedRate',...
@@ -316,9 +328,15 @@ if exist('timer','file')
         start(Handles.Timer);
         set(Handles.MainFigure,'UserData',Handles);
     end
+    end
 end
 
-SetUIStatusMessage('Done Done.\n')
+if isfield(Connections,'members')
+    SetUIStatusMessage('Done Done.')
+else
+    SetUIStatusMessage('Use the "Browse File System to navigate to a simulation directory.')
+end
+
 set(Handles.MainFigure,'Pointer',CurrentPointer);
 
 if nargout>0, varargout{1}=Handles; end
@@ -434,15 +452,65 @@ function BrowseFileSystem(~,~)
     Handles=get(FigThatCalledThisFxn,'UserData');
     Url=getappdata(FigThatCalledThisFxn,'Url');
     
+    LocalStartingDirectory='./';
+    
     directoryname = uigetdir(LocalStartingDirectory,'Navigate to a dir containing a maxele.63.nc file');
     
     if directoryname==0 % cancel was pressed
        return
     end
     
-    set(Handles.ServerInfoString,'String',['file://' directoryname]);
+    Url=getappdata(Handles.MainFigure,'Url');
+    Url.Base='file://';
+    Url.Ens{1}=directoryname;
+
+    set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
     ClearUI(FigThatCalledThisFxn);
     
+    global Connections
+    Connections=OpenDataConnectionsLocal(Url);
+    setappdata(Handles.MainFigure,'Connections',Connections);
+    
+   EnsIndex=1;
+   VarIndex=1;
+   TimIndex=1;
+   Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
+
+    Handles=SetEnsembleControls(Handles.MainFigure);
+    set(Handles.MainFigure,'UserData',Handles);
+    Handles=SetVariableControls(Handles.MainFigure,Handles.MainAxes);
+    set(Handles.MainFigure,'UserData',Handles);
+    Handles=SetSnapshotControls(Handles.MainFigure,Handles.MainAxes);
+    set(Handles.MainFigure,'UserData',Handles);
+    
+   % get color setting to preserve.
+   axes(Handles.MainAxes);
+   %cax=caxis;
+   
+   
+   Handles=MakeTheAxesMap(Handles);
+   ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
+   Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
+      
+   [Min,Max]=GetMinMaxInView(TheGrid,Connections.members{EnsIndex,VarIndex}.TheData{1});
+   NumberOfColors=str2double(get(Handles.NCol,'String'));
+   ColorIncrement=SSVizOpts.ColorIncrement;
+   SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
+  
+   set(Handles.MainFigure,'UserData',Handles);
+   SetTitle(Connections);
+
+   UpdateUI(Handles.MainFigure);
+   
+   set(Handles.MainFigure,'WindowButtonDownFcn','')
+   set(Handles.HydrographButton,'Value',0);
+   
+   setappdata(Handles.MainFigure,'Url',Url);
+   
+   SetUIStatusMessage('Done.')
+
+   RendererKludge;
+
 end
 
 %%  DisplayCatalog
@@ -615,6 +683,7 @@ function Connections=OpenDataConnections(Url)
     [~,~,C] = xlsread(ff,sheet);
     [m,n]=size(C);
     vars=C(1,:)';
+    
     for i=1:n
         for j=2:m
             thisvar=vars{i};
@@ -627,6 +696,7 @@ function Connections=OpenDataConnections(Url)
             eval(com)
         end
     end
+    
     % convert any FileNetcdfVariableNames from a 2-string string into a
     % 2-element cell.
     for i=1:m-1 
@@ -870,7 +940,7 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
    if ~exist('TimIndex','var')
        TimIndex=1;
    else
-       str=[str ' at time level ' int2str(TimIndex) ' ... \n'];
+       str=[str ' at time level ' int2str(TimIndex) ' ...'];
    end  % first time level if TimIndex not passed in
    SetUIStatusMessage(str);
 
@@ -922,7 +992,7 @@ function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex)
       Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=temp*fac;
    end
    
-   SetUIStatusMessage('* Got it.\n\n')
+   SetUIStatusMessage('* Got it.')
 
 end
 
@@ -1062,7 +1132,7 @@ function InstanceUrl(varargin)
    
    setappdata(Handles.MainFigure,'Url',Url);
    
-   SetUIStatusMessage('Done.\n')
+   SetUIStatusMessage('Done.')
 
    RendererKludge;
    
@@ -1196,7 +1266,7 @@ function SetNewField(varargin)
 
     RendererKludge;
 
-    SetUIStatusMessage('Done. \n')
+    SetUIStatusMessage('Done.')
 
     
 end
@@ -1253,7 +1323,7 @@ function DrawDepthContours(hObj,~)
             end
             set(Handles.BathyContours,'Tag','BathyContours');
         end
-        SetUIStatusMessage('Done. \n')
+        SetUIStatusMessage('Done.')
 
     else
         SetUIStatusMessage(sprintf('Contouring routine contmex5 not found for arch=%s.  Skipping depth contours.\n',computer))
@@ -1295,7 +1365,7 @@ function Handles=MakeTheAxesMap(Handles)
     view(2)
     
     if ~isempty(which('contmex5'))  && ~DisableContouring
-        SetUIStatusMessage('** Drawing depth contours ... \n')
+        SetUIStatusMessage('** Drawing depth contours ...')
         DepthContours=get(Handles.DepthContours,'String');
         DepthContours=sscanf(DepthContours,'%d');
         Handles.BathyContours=lcontour(TheGrid,TheGrid.z,DepthContours,'Color','k');
@@ -1326,7 +1396,7 @@ function Handles=MakeTheAxesMap(Handles)
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
     set(Handles.AxisLimits,'String',num2str(axx))
 
-    SetUIStatusMessage('** Done.\n')
+    SetUIStatusMessage('** Done.')
 
     
 end
@@ -2958,7 +3028,7 @@ function UpdateUI(varargin)
     global Connections Debug TheGrids
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    SetUIStatusMessage('Updating GUI ... \n')
+    SetUIStatusMessage('Updating GUI ...')
 
     if nargin==1
         %disp('UpdateUI called as a function')
@@ -3100,7 +3170,7 @@ function UpdateUI(varargin)
     end
 
     set(FigHandle,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.\n')
     set(Handles.MainFigure,'Pointer','arrow');
 
 end
@@ -3215,7 +3285,7 @@ function Handles=SetEnsembleControls(varargin)
     global Connections Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    SetUIStatusMessage('Setting up Ensemble controls ...\n')
+    SetUIStatusMessage('Setting up Ensemble controls ...')
 
     FigHandle=varargin{1};     
     Handles=get(FigHandle,'UserData');  
@@ -3263,7 +3333,7 @@ function Handles=SetEnsembleControls(varargin)
             set(Handles.EnsButtonHandles(i),'Enable','on');
     end
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.\n')
 
 end
 
@@ -3275,7 +3345,7 @@ function Handles=SetVariableControls(varargin)
     global Connections Debug Vecs SSVizOpts
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    SetUIStatusMessage('Setting up Variable controls ...\n')
+    SetUIStatusMessage('Setting up Variable controls ...')
 
     FigHandle=varargin{1};     
     AxesHandle=varargin{2};  
@@ -3421,7 +3491,7 @@ function Handles=SetVariableControls(varargin)
             'CallBack','');
     end
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.\n')
 
 end
 
@@ -3433,7 +3503,7 @@ function Handles=SetSnapshotControls(varargin)
     global Connections Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-    SetUIStatusMessage('Setting up Snapshot Controls ... \n')
+    SetUIStatusMessage('Setting up Snapshot Controls ...')
 
     FigHandle=varargin{1};     
     AxesHandle=varargin{2};  
@@ -3611,7 +3681,7 @@ function Handles=SetSnapshotControls(varargin)
     end
     
     set(Handles.MainFigure,'UserData',Handles);
-    SetUIStatusMessage('* Done.\n\n')
+    SetUIStatusMessage('* Done.\n')
 
 end
     
@@ -4797,22 +4867,21 @@ function SetTitle(Connections)
         %t=datenum(t,DateStringFormat);
     
     end
-    
-    
+        
 %    LowerString=datestr((datenum(currentdate,'yymmdd')+...
 %        (NowcastForecastOffset)/24+LocalTimeOffset/24),'ddd, dd mmm, HH PM');
     LowerString=datestr(t,DateStringFormat);
 
-    
-    if ~isempty(advisory)
+    if ~isempty(advisory)  && ~strcmp(advisory,'NaN')
         %titlestr={sprintf('%s  Advisory=%s  ',stormname, advisory),[LowerString ' ']};
         titlestr=[sprintf('%s  Advisory=%s  ',stormname, advisory),[' ' LowerString ' ']];
-    else    
+    elseif ~strcmp(stormname,'NaN')
         %titlestr={sprintf('%s',stormname),[LowerString ' ']};
         titlestr=[sprintf('%s',stormname),[' ' LowerString ' ']];
-    end
-    if isfield(Connections,'Institution')
+    elseif isfield(Connections,'Institution')
         titlestr={titlestr,Connections.Institution};
+    else
+        titlestr=LowerString;
     end
     title(titlestr,'FontWeight','bold') 
 end
