@@ -206,11 +206,12 @@ function Connections=OpenDataConnectionsUrl(Url)
         urltemp.ThisAdv=str2double(nc.attribute{'advisory_or_cycle'});
         urltemp.ThisStorm=nc.attribute{'stormname'};
         urltemp.StormYear=str2double(nc.attribute{'stormyear'});
-        
-        startingnameletters={'a','b','c','d','e','f','g','h','i','j',...
-            'k','l','m','n','o','p','r','s','t','u',...
-            'v','w','x','y','z'};
-        urltemp.ThisStormNumber=find(strcmpi(urltemp.ThisStorm(1),startingnameletters));
+        urltemp.ThisStormNumber=nc.attribute{'stormnumber'};
+
+%        startingnameletters={'a','b','c','d','e','f','g','h','i','j',...
+%             'k','l','m','n','o','p','r','s','t','u',...
+%             'v','w','x','y','z'};
+%         urltemp.ThisStormNumber=find(strcmpi(urltemp.ThisStorm(1),startingnameletters));
         urltemp.Basin='al';
     end
      
@@ -227,6 +228,7 @@ function Connections=OpenDataConnectionsUrl(Url)
                 Connections.AtcfShape=LoadAtcfShapefile(urltemp.Basin,...
                     urltemp.ThisStormNumber,urltemp.StormYear,...
                     urltemp.ThisAdv,TempDataLocation);
+                SetUIStatusMessage(sprintf('Got ATCF file %s. \n',f));
             catch ME
                 SetUIStatusMessage(sprintf('Failed to get %s/%s.  Check arguments to %s.\n',UrlBase,f,mfilename));
             end

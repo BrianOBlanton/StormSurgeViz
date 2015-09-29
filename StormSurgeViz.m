@@ -4664,8 +4664,10 @@ end
 %%  SetColors
 function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement)
 
-     FieldMax=ceil(maxThisData/ColorIncrement)*ColorIncrement;
-     FieldMin=floor(minThisData/ColorIncrement)*ColorIncrement;
+%     FieldMax=ceil(maxThisData/ColorIncrement)*ColorIncrement;
+%     FieldMin=floor(minThisData/ColorIncrement)*ColorIncrement;
+     FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
+     FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
 
      set(Handles.CMax,'String',sprintf('%.2f',FieldMax))
      set(Handles.CMin,'String',sprintf('%.2f',FieldMin))
