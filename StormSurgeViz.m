@@ -150,7 +150,7 @@ switch lower(SSVizOpts.Mode)
         Url.ThisAdv=NaN;
         Url.ThisGrid=NaN;
         Url.Basin=NaN;
-        Url.StormType='other';
+        Url.StormClass='other';
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
         Url.FullFileServer=strrep(Url.FullDodsC,'dodsC','fileServer');
@@ -174,7 +174,7 @@ switch lower(SSVizOpts.Mode)
         Url.ThisAdv=NaN;
         Url.ThisGrid=NaN;
         Url.Basin=NaN;
-        Url.StormType='other';
+        Url.StormClass='other';
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
         Url.FullFileServer= UrlBase;
@@ -281,6 +281,7 @@ end
 %% MakeTheAxesMap
 SetUIStatusMessage('Making default plot ...')
 Handles=MakeTheAxesMap(Handles);  
+SetBaseMap;
 
 ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
 Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
@@ -807,9 +808,9 @@ function InstanceUrl(varargin)
    Url.Units=SSVizOpts.Units;
       
    if str2double(ThisAdv)<1000
-       Url.StormType='TC';       
+       Url.StormClass='TC';       
    else  %  otherwise itll be the nam date...
-       Url.StormType='other';
+       Url.StormClass='other';
    end
 
    Instance=ThisInstance;
@@ -828,7 +829,7 @@ function InstanceUrl(varargin)
         Url.ThisAdv=NaN;
         Url.ThisGrid=NaN;
         Url.Basin=NaN;
-        Url.StormType='other';
+        Url.StormClass='other';
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
         Url.FullFileServer=strrep(Url.FullDodsC,'dodsC','fileServer');
@@ -890,6 +891,7 @@ function InstanceUrl(varargin)
    
    setappdata(Handles.MainFigure,'Url',Url);
    setappdata(Handles.MainFigure,'TheCatalog',TheCatalog);
+   setappdata(Handles.MainFigure,'Connections',Connections);
 
    SetUIStatusMessage('Done.')
 
@@ -1041,8 +1043,13 @@ function SetBaseMap(~,~,~)
 
     global Debug
 
-    FigThatCalledThisFxn=gcbf;
+    if nargin==0
+        FigThatCalledThisFxn=findobj(0,'Tag','MainVizAppFigure');
+    else
+        FigThatCalledThisFxn=gcbf;
+    end
     Handles=get(FigThatCalledThisFxn,'UserData');
+
     GoogleMapsApiKey=getappdata(Handles.MainFigure,'GoogleMapsApiKey');
     MapTypeClicked=get(get(Handles.BaseMapButtonGroup,'SelectedObject'),'string');
     if Debug,fprintf('SSViz++ Function = %s (%s)\n',ThisFunctionName,MapTypeClicked);end
@@ -1166,6 +1173,8 @@ function Handles=MakeTheAxesMap(Handles)
     set(Handles.ColorBar,'FontSize',FontSizes(2))
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
     set(Handles.AxisLimits,'String',num2str(axx,3))
+    
+    SetBaseMap;
 
     SetUIStatusMessage('** Done.')
 
@@ -2145,7 +2154,8 @@ UiToolbarContainter;
                 'Position', [.1 ytemp(i) .9 .15],...
                 'Tag','BaseMapRadioButton');
         end
-        set(Handles.BaseMapButtonHandles(1),'Value',1);
+        idx=strcmp(buttonnames,SSVizOpts.DefaultGoogleMap);
+        set(Handles.BaseMapButtonHandles(idx),'Value',1);
         
         uicontrol(...
             'Parent',Handles.CenterContainerMiddle,...
@@ -2204,15 +2214,15 @@ UiToolbarContainter;
 %%% InformationPanelContainerContents
     function InformationPanelContainerContents
              
-        ns=15;
+        ns=16;
         
-        YStartVec=.15:1/(ns):.95;
+        YStartVec=.15:1/(ns):.98;
      
         Start1=.01;
         Width1=.48;
         Start2=.51;
         Width2=.48;
-        Height=.050;
+        Height=.05;
                
         % Provider
         % Provider
@@ -2235,7 +2245,7 @@ UiToolbarContainter;
             'Position',[Start2 YStartVec(end) Width2 Height],...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
-            'Tag','InstanceName',...
+            'Tag','ProviderName',...
             'String','N/A');
         
         % WindSource
@@ -2259,12 +2269,12 @@ UiToolbarContainter;
             'Position',[Start2 YStartVec(end-1) Width2 Height],...
             'FontSize',fs1,...
             'HorizontalAlignment','left',...
-            'Tag','InstanceName',...
+            'Tag','WindPreSource',...
             'String','Unknown');
 
-        % InstanceName
-        % InstanceName
-        % InstanceName
+        % RunID
+        % RunID
+        % RunID
         uicontrol(...
             'Parent',Handles.InformationPanel,...
             'Style','text',...
@@ -2273,8 +2283,8 @@ UiToolbarContainter;
             'Position',[Start1 YStartVec(end-2) Width1 Height],...
             'FontSize',fs1,...
             'HorizontalAlignment','right',...
-            'String','Instance = ');
-        Handles.InstanceName=uicontrol(...
+            'String','Run ID = ');
+        Handles.RunID=uicontrol(...
             'Parent',Handles.InformationPanel,...
             'Style','text',...
             'Units','normalized',...
@@ -2282,7 +2292,7 @@ UiToolbarContainter;
             'Position',[Start2 YStartVec(end-2) Width2 Height],...
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
-            'Tag','InstanceName',...
+            'Tag','RunID',...
             'String','N/A');
         
         % ModelName
@@ -2511,7 +2521,7 @@ UiToolbarContainter;
             'FontSize',fs2,...
             'HorizontalAlignment','left',...
             'Tag','ForecastStartTime',...
-            'String','NaN');
+            'String','Unknown');
         
         % ForecastEndTime
         % ForecastEndTime
@@ -2523,7 +2533,7 @@ UiToolbarContainter;
             'BackGroundColor','w',...
             'Position',[Start1 YStartVec(end-12) Width1 Height],...
             'HorizontalAlignment','right',...
-            'String','End Time  = ');
+            'String','End Time = ');
         Handles.ForecastEndTime=...
             uicontrol('Parent',Handles.InformationPanel,...
             'Style','text',...
@@ -2533,8 +2543,26 @@ UiToolbarContainter;
             'Position',[Start2 YStartVec(end-12) Width2 Height],...
             'HorizontalAlignment','left',...
             'Tag','ForecastEndTime',...
-            'String','NaN');
+            'String','Unknown');
         
+        uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'FontSize',fs1,...
+            'BackGroundColor','w',...
+            'Position',[Start1 YStartVec(end-13) Width1 Height],...
+            'HorizontalAlignment','right',...
+            'String','Create Time = ');
+        Handles.CreateTime=...
+            uicontrol('Parent',Handles.InformationPanel,...
+            'Style','text',...
+            'Units','normalized',...
+            'FontSize',fs2,...
+            'BackGroundColor','w',...
+            'Position',[Start2 YStartVec(end-13) Width2 Height],...
+            'HorizontalAlignment','left',...
+            'Tag','CreateTime',...
+            'String','Unknown');
     end
             
 %%  ControlPanelContainerContents
@@ -2910,6 +2938,10 @@ function UpdateUI(varargin)
     EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     EnsembleNames=Connections.EnsembleNames; 
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
+    if isempty(EnsembleNames{:})
+        set(Handles.EnsButtonHandles,'Enable','off')
+        set(Handles.EnsButtonHandles,'Value',0)
+    end
     
     for i=1:length(Handles.ScalarVarButtonHandles)
         if ~isfield(Connections.members{EnsIndex,Scalars(i)},'NcTBHandle') || ... 
@@ -2932,12 +2964,12 @@ function UpdateUI(varargin)
     end
     
     
-      if isempty(Vectors)
-          set(Handles.VectorAsScalarButton,'Enable','off')
-          set(Handles.VectorKeepInSyncButton,'Enable','off')
-          set(Handles.VectorOptionsOverlayButton,'Enable','off')
-      end
-      
+    if isempty(Vectors)
+        set(Handles.VectorAsScalarButton,'Enable','off')
+        set(Handles.VectorKeepInSyncButton,'Enable','off')
+        set(Handles.VectorOptionsOverlayButton,'Enable','off')
+    end
+    
 %     for i=1:length(Handles.VectorVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
 %             set(Handles.VectorVarButtonHandles(i),'Value',1)
@@ -2973,8 +3005,10 @@ function UpdateUI(varargin)
     
     
     nc=Connections.members{1}.NcTBHandle;
+    createdate=value4key(nc.attributes,'creation_date');
     provider=value4key(nc.attributes,'institution');
     ModelGrid=value4key(nc.attributes,'grid');
+    
     if isempty(ModelGrid)
         ModelGrid=value4key(nc.attributes,'agrid');
     end
@@ -2989,7 +3023,12 @@ function UpdateUI(varargin)
         StormName='N/A';
     end
     
-    Instance=value4key(nc.attributes,'id');
+    StormClass=value4key(nc.attributes,'stormclass');
+    if isempty(StormClass)
+        StormClass='N/A';
+    end
+    
+    RunID=value4key(nc.attributes,'id');
     
     AdvCyc=value4key(nc.attributes,'advisory_or_cycle');
     if isempty(AdvCyc)
@@ -3009,7 +3048,7 @@ function UpdateUI(varargin)
     set(Handles.ModelGridElemNums,  'String',str_e)
     set(Handles.ModelGridNodeNums,  'String',str_n)
     set(Handles.ModelName,          'String',ModelName)
-    set(Handles.InstanceName,       'String',Instance)
+    set(Handles.RunID,              'String',RunID)
     
     % set time window
     if any(strcmpi(nc.variables,'time'))
@@ -3019,6 +3058,7 @@ function UpdateUI(varargin)
         set(Handles.ForecastStartTime,   'String',datestr(t1))
         set(Handles.ForecastEndTime,     'String',datestr(t2))
     end
+    set(Handles.CreateTime,     'String',createdate)
 
 %    set(Handles.UnitsString,   'String',Units)
 %    set(Handles.TimeOffsetString,   'String',LocalTimeOffset)
@@ -4648,7 +4688,7 @@ end
 %%  SetColorMap
 function SetColorMap(hObj,~)
 
-FigThatCalledThisFxn=gcbf;
+    FigThatCalledThisFxn=gcbf;
 
     Handles=get(FigThatCalledThisFxn,'UserData');
     axes(Handles.MainAxes);
@@ -4678,6 +4718,7 @@ function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement
      cmap=eval(sprintf('%s(%d)',CurrentMap,NumberOfColors));
      CLim([FieldMin FieldMax])
      colormap(cmap)
+     colorbar
      
 end
 

@@ -8,9 +8,7 @@ function p=StormSurgeVizOptions
 %
 % http://renci-unc.github.io/StormSurgeViz/
 %
-% or: 
-%
-% https://docs.google.com/document/d/1a5ZLwSY1JB8t2m794KdqqLL1g8FiRQ8_pUB70ubumLU/pub
+
 
 p=struct;
 
@@ -37,6 +35,7 @@ p.UseGoogleMaps=true;
 p.UseShapeFiles=true;
 p.UseNcml=true;
 p.KeepScalarsAndVectorsInSync=true;
+p.DefaultGoogleMap='terrain';
 
 p.Mode={'Url','Network','Local'}; 
 p.Units={'Meters','Metric','Feet','English'};
@@ -61,5 +60,4 @@ p.GoogleMapsApiKey='';
 p.SendDiagnosticsToCommandWindow=true;
 p.ForkAxes=false;
 p.UITest=false;
-
 p.BoundingBox=NaN;

@@ -57,8 +57,6 @@ idx=2;
                 [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']};
             
                             %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
-
-                            
                             
 Providers.Default=1;
 
