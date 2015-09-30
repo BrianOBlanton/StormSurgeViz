@@ -296,14 +296,15 @@ end
 RendererKludge;  %% dont ask...
 
 temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
+units=Connections.members{EnsIndex,VarIndex}.Units;
 if ~isreal(temp),temp=abs(temp);end
 if strcmp(SSVizOpts.ColorFixed,'off') && (~isnan(SSVizOpts.ColorMin) || ~isnan(SSVizOpts.ColorMax))
-    SetColors(Handles,SSVizOpts.Colors.Min,SSVisOpts.Colors.Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+    SetColors(Handles,SSVizOpts.Colors.Min,SSVisOpts.Colors.Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement,units);
 else
     [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
     Max=min([MaxTemp SSVizOpts.ColorMax]);
     Min=max([MinTemp SSVizOpts.ColorMin]);
-    SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+    SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement,units);
 end
 
 SetUIStatusMessage('* Done.');
@@ -872,13 +873,14 @@ function InstanceUrl(varargin)
    Handles=MakeTheAxesMap(Handles);
    ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
    Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
-      
+   
+   units=Connections.members{EnsIndex,VarIndex}.Units;
    fc=get(Handles.FixCMap,'Value');
    if ~fc
        [Min,Max]=GetMinMaxInView(TheGrid,Connections.members{EnsIndex,VarIndex}.TheData{1});
        NumberOfColors=str2double(get(Handles.NCol,'String'));
        ColorIncrement=SSVizOpts.ColorIncrement;
-       SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
+       SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement,units);
    end
    
    set(Handles.MainFigure,'UserData',Handles);
@@ -970,7 +972,7 @@ function SetNewField(varargin)
     end    
     
     Handles=DrawTriSurf(Handles,Member,ThisData);
-    
+    units=Connections.members{EnsIndex,ScalarVarIndex}.Units;
     % only reset colors if the variable is changing
     if strcmp(ButtonGroupThatCalled,'ScalarVariableMemberRadioButtonGroup')
         fc=get(Handles.FixCMap,'Value');
@@ -978,12 +980,10 @@ function SetNewField(varargin)
             NumberOfColors=str2double(get(Handles.NCol,'String'));
             ColorIncrement=SSVizOpts.ColorIncrement;
             [Min,Max]=GetMinMaxInView(TheGrid,ThisData);
-            SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement);
+            SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement,units);
         end
     end
     
-    set(get(Handles.ColorBar,'ylabel'),...
-        'String',Connections.members{EnsIndex,ScalarVarIndex}.Units,'FontSize',FontSizes(1));
     drawnow
     
     % redraw track if already present in axes
@@ -1168,11 +1168,12 @@ function Handles=MakeTheAxesMap(Handles)
         Handles.States=line(states(:,1),states(:,2),'Tag','States');
     end
     
-    % add colorbar
-    Handles.ColorBar=colorbar('Location',ColorBarLocation);
-    set(Handles.ColorBar,'FontSize',FontSizes(2))
-    set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
-    set(Handles.AxisLimits,'String',num2str(axx,3))
+%     % add colorbar
+%     Handles.ColorBar=colorbar('Location',ColorBarLocation);
+%     set(Handles.ColorBar,'FontSize',FontSizes(2))
+%     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
+
+     set(Handles.AxisLimits,'String',num2str(axx,3))
     
     SetBaseMap;
 
@@ -1233,7 +1234,7 @@ function Handles=DrawTriSurf(Handles,Member,Field)
 %     end
     
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
-    set(get(Handles.ColorBar,'ylabel'),'String',Member.Units,'FontSize',FontSizes(1));
+    %set(get(Handles.ColorBar,'ylabel'),'String',Member.Units,'FontSize',FontSizes(1));
 
     drawnow 
 end
@@ -2940,7 +2941,7 @@ function UpdateUI(varargin)
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     if isempty(EnsembleNames{:})
         set(Handles.EnsButtonHandles,'Enable','off')
-        set(Handles.EnsButtonHandles,'Value',0)
+        %set(Handles.EnsButtonHandles,'Value',0)
     end
     
     for i=1:length(Handles.ScalarVarButtonHandles)
@@ -4702,7 +4703,10 @@ function SetColorMap(hObj,~)
 end
 
 %%  SetColors
-function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement)
+function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement,units)
+
+     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
+     FontSizes=getappdata(Handles.MainFigure,'FontSizes');    
 
 %     FieldMax=ceil(maxThisData/ColorIncrement)*ColorIncrement;
 %     FieldMin=floor(minThisData/ColorIncrement)*ColorIncrement;
@@ -4718,8 +4722,13 @@ function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement
      cmap=eval(sprintf('%s(%d)',CurrentMap,NumberOfColors));
      CLim([FieldMin FieldMax])
      colormap(cmap)
-     colorbar
-     
+  
+    % add colorbar
+    ColorBarLocation=SSVizOpts.ColorBarLocation;
+    Handles.ColorBar=colorbar('Location',ColorBarLocation);
+    set(Handles.ColorBar,'FontSize',FontSizes(2))
+    set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
+    set(get(Handles.ColorBar,'ylabel'),'String',units,'FontSize',FontSizes(1));
 end
 
 %%  GetColors
