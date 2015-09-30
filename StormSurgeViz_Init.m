@@ -114,6 +114,7 @@ end
 if ~exist(TempDataLocation,'dir')
     mkdir(TempDataLocation)
 end
+addpath(TempDataLocation)
 
 %%
 % get remote copy of InstanceDefaults.m
@@ -153,16 +154,20 @@ switch lower(SSVizOpts.Mode)
         % get InstanceDefaults.m file from thredds server
         try
             fprintf('SSViz++ Retrieving remote InstanceDefaults.m file ...\n')
-            urlwrite(InstanceDefaultsFileLocation,'temp.m');
-            if exist('InstanceDefaults.m','file')
-                [status,result]=system([mvcom ' InstanceDefaults.m InstanceDefaults.m.backup']);
+            f1=[TempDataLocation '/temp.m']; 
+            f2=[TempDataLocation '/InstanceDefaults.m']; 
+            urlwrite(InstanceDefaultsFileLocation,f1);
+            if exist(f2,'file')
+                com=sprintf('%s %s %s.backup',mvcom,f2,f2);
+                [status,result]=system(com);
             end
-            [status,result]=system([mvcom ' temp.m InstanceDefaults.m']);
+            com=sprintf('%s %s %s',mvcom,f1,f2);
+            [status,result]=system(com);
             InstanceDefaults;
         catch ME1
             fprintf('*SSViz++ Failed to get InstanceDefaults.m.  Looking for previous version ...\n')
             try
-                if exist('InstanceDefaults.m','file')
+                if exist(f2,'file')
                     fprintf('* Found it.\n')
                     InstanceDefaults;
                 end
