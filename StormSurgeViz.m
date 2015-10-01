@@ -994,8 +994,15 @@ function SetNewField(varargin)
         temp2=findobj(Handles.MainAxes,'Tag','AtcfTrackShape');
         delete(temp);
         delete(temp2);
-        track=Connections.Tracks{EnsIndex};
-        Handles.Storm_Track=DrawTrack(track);
+        if isfield(Connections,'Tracks')
+            track=Connections.Tracks{EnsIndex}; 
+            Handles.Storm_Track=DrawTrack(track);
+        end
+        if isfield(Connections,'AtcfShape')
+            Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
+            set(Handles.ShowTrackButton,'String','Hide Track')
+
+        end
     end
     
     % if this is a time-dependent var, enable snapshot controls
