@@ -150,15 +150,6 @@ if ~exist(TempDataLocation,'dir')
     mkdir(TempDataLocation)
 end
 
-%%
-% get remote copy of InstanceDefaults.m
-% if isunix
-%     mvcom='mv';
-%     cpcom='cp';
-% else
-%     mvcom='move';
-%     cpcom='copy';
-% end
 
 SSVizOpts.DefaultBoundingBox=NaN;
 %SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
