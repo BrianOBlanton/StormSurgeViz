@@ -27,7 +27,6 @@ ThreddsList={
 %            'http://workhorse.europa.renci.org:8080/thredds'
 %            'http://thredds.crc.nd.edu/thredds'
         
-InstanceDefaultsFileLocation='http://opendap.renci.org:1935/thredds/fileServer/ASGS/InstanceDefaults_SS.m';
 
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])
@@ -116,8 +115,6 @@ if ~exist(TempDataLocation,'dir')
 end
 addpath(TempDataLocation)
 
-%%
-% get remote copy of InstanceDefaults.m
 if isunix
     mvcom='mv';
     cpcom='cp';
@@ -151,33 +148,8 @@ switch lower(SSVizOpts.Mode)
         SSVizOpts.Mode='Network';
         fprintf('SSViz++ Mode is Network.\n')
         
-        % get InstanceDefaults.m file from thredds server
-        try
-            fprintf('SSViz++ Retrieving remote InstanceDefaults.m file ...\n')
-            f1=[TempDataLocation '/temp.m']; 
-            f2=[TempDataLocation '/InstanceDefaults.m']; 
-            urlwrite(InstanceDefaultsFileLocation,f1);
-            if exist(f2,'file')
-                com=sprintf('%s %s %s.backup',mvcom,f2,f2);
-                [status,result]=system(com);
-            end
-            com=sprintf('%s %s %s',mvcom,f1,f2);
-            [status,result]=system(com);
-            InstanceDefaults;
-        catch ME1
-            fprintf('*SSViz++ Failed to get InstanceDefaults.m.  Looking for previous version ...\n')
-            try
-                if exist(f2,'file')
-                    fprintf('* Found it.\n')
-                    InstanceDefaults;
-                end
-            catch ME2
-                % set a big default view
-                fprintf('SSViz++   No local InstanceDefaults.m found. Setting a wide default view.\n')
-                SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
-                %error('\nNo local InstanceDefaults.m found. This is Terminal.\n')
-            end
-        end
+        SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
+
 end
 
 if isempty(SSVizOpts.BoundingBox),SSVizOpts.BoundingBox=SSVizOpts.DefaultBoundingBox;end

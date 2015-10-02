@@ -34,8 +34,7 @@ function varargout=StormSurgeViz(varargin)
 % file can be put anywhere on the MATLAB path EXCEPT in the StormSurgeViz 
 % directory.  A convenient place is in the user "matlab" directory, which
 % is in <USERHOME>/matlab by default in Unix/OSX. Parameters passed in via  
-% the command line will override any settings in MyStormSurgeViz_Init.m, as
-% well as any loaded in from the remotely maintained InstanceDefaults.m.  
+% the command line will override any settings in MyStormSurgeViz_Init.m.
 %
 % Do not put StormSurgeViz parameters in startup.m since this 
 % is called first by MATLAB at startup.
@@ -1085,7 +1084,7 @@ function InstanceUrl(varargin)
    end
 
    Instance=ThisInstance;
-   InstanceDefaults;
+   SSVizOpts.DefaultBoundingBox=[];
    setappdata(Handles.MainFigure,'DefaultBoundingBox',SSVizOpts.DefaultBoundingBox);
 
    % new data connections
