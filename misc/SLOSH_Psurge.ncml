@@ -1,0 +1,23 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" 
+        location="Arthur_Adv14_2014070406_e10_cum_agl_reduced.nc">
+
+  <attribute name="cdm_data_type" value="cgrid" />
+  <attribute name="model" value="NOAA-PSURGE" />
+  <attribute name="id" value="PSURGE.Arthur.Adv14" />
+  <attribute name="stormname" value="Arthur" />
+  <attribute name="advisory_or_cycle" value="14" />
+  <attribute name="institution" value="NOAA NHC" />
+ 
+   <variable name="SURGE_0maboveground" >
+      <attribute name="standard_name" value="sea_surface_height_above_geoid" type="String"/> 
+    </variable>
+
+   <variable name="longitude" >
+      <attribute name="standard_name" value="longitude" type="String"/> 
+    </variable>
+   <variable name="latitude" >
+      <attribute name="standard_name" value="latitude" type="String"/> 
+    </variable>
+ 
+</netcdf>
+

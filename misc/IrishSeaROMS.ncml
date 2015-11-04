@@ -1,0 +1,32 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" location="http://milas.marine.ie/thredds/dodsC/IMI_ROMS_HYDRO/AGGREGATE">
+
+  <attribute name="title" type="string" value="IMI_ROMS_HYDRO_AGGREGATE"/>
+  <attribute name="institution" type="string" value="IMI"/>
+  <attribute name="Conventions" value="CF-1.6" />
+  <attribute name="cdm_data_type" value="cgrid" />
+  <attribute name="model" value="IMI-ROMS" />
+  <attribute name="advisory_or_cycle" value="???" />
+  <attribute name="id" value="IMI.Daily.Prognostic" />
+ 
+
+   <variable name="time" >
+      <attribute name="standard_name" value="time" type="String"/> 
+   </variable>
+
+   <variable name="longitude" >
+      <attribute name="standard_name" value="longitude" type="String"/> 
+   </variable>
+
+   <variable name="latitude" >
+      <attribute name="standard_name" value="latitude" type="String"/> 
+   </variable>
+
+   <variable name="sea_surface_height" >
+      <attribute name="standard_name" value="sea_surface_height_above_geoid" type="String"/> 
+   </variable>
+
+</netcdf>
+
+
+
+

@@ -1,0 +1,119 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+
+  <attribute name="advisory_or_cycle" value="27" />
+  <attribute name="cdm_data_type"     value="ugrid" />
+  <attribute name="Conventions"       value="CF-1.6, UGRID-0.9" />
+  <attribute name="grid"              value="nc6b" />
+  <attribute name="id"                value="ASGS.NCFS.JOAQUIN.27.2015" />
+  <attribute name="institution"       value="RENCI-UNC, IMS-UNC, SeahorseCoastal" />
+  <attribute name="wind_source"       value="vortex-nws320" />
+  <attribute name="stormnumber"       value="11" />
+  <attribute name="stormname"         value="JOAQUIN" />
+  <attribute name="stormclass"        value="HU" />
+  <attribute name="stormyear"         value="2015" />
+  <attribute name="summary"           value="ADCIRC Surge Guidance System Forecast for HU JOAQUIN 2015, Advisory 27" />
+  <attribute name="title"             value="ASGS/NCFS for JOAQUIN, Adv 27, 2015" />
+  <attribute name="TESTSTRING"        value="DontEvenThinkAboutIt" />
+  
+  <variable name="adcirc_mesh" shape="mesh" type="int">
+    <attribute name="long_name"              value="mesh_topology" />
+    <attribute name="node_coordinates"       value="x y" />
+    <attribute name="face_node_connectivity" value="element" />
+    <attribute name="cf_role"                value="mesh_topology" />
+    <attribute name="topology_dimension"     value="2" type="int" />
+  </variable>
+
+  <variable name="element" >
+    <attribute name="long_name"              value="element" />
+    <attribute name="start_index" type="int" value="1" />
+    <attribute name="units"                  value="1" />
+    <attribute name="cf_role"                value="face_node_connectivity" />
+  </variable>
+
+  <remove name="nolibf"                       type="attribute" />
+  <remove name="nolifa"                       type="attribute" />
+  <remove name="nolica"                       type="attribute" />
+  <remove name="nolicat"                      type="attribute" />
+  <remove name="a00"                          type="attribute" />
+  <remove name="b00"                          type="attribute" />
+  <remove name="c00"                          type="attribute" />
+  <remove name="h0"                           type="attribute" />
+  <remove name="cf"                           type="attribute" />
+  <remove name="eslm"                         type="attribute" />
+  <remove name="ics"                          type="attribute" />
+  <remove name="_FillValue"                   type="attribute" />
+  <remove name="agrid"                        type="attribute" />
+  <remove name="ncor"                         type="attribute" />
+  <remove name="cori"                         type="attribute" />
+  <remove name="nws"                          type="attribute" />
+  <remove name="ntip"                         type="attribute" />
+  <remove name="statim"                       type="attribute" />
+  <remove name="reftim"                       type="attribute" />
+  <remove name="slam0"                        type="attribute" />
+  <remove name="sfea0"                        type="attribute" />
+  <remove name="ntif"                         type="attribute" />
+  <remove name="nbfr"                         type="attribute" />
+  <remove name="ihot"                         type="attribute" />
+  <remove name="tau0"                         type="attribute" />
+  <remove name="dramp"                        type="attribute" />
+  <remove name="nramp"                        type="attribute" />
+  <remove name="nwp"                          type="attribute" />
+
+  <remove name="nope"                         type="dimension" />
+  <remove name="nbou"                         type="dimension" />
+  <remove name="max_nvdll"                    type="dimension"  />
+  <remove name="max_nvell"                    type="dimension"  />
+
+  <remove name="ibtype"                       type="variable"  />
+  <remove name="ibtypee"                      type="variable"  />
+  <remove name="iestp"                        type="variable"  />
+  <remove name="igep"                         type="variable"  />
+  <remove name="igwp"                         type="variable"  />
+  <remove name="igvp"                         type="variable"  />
+  <remove name="igpp"                         type="variable"  />
+  <remove name="imhs"                         type="variable"  />
+  <remove name="iths"                         type="variable"  />
+  <remove name="ivstp"                        type="variable"  />
+  <remove name="iwstp"                        type="variable"  />
+  <remove name="ipstp"                        type="variable"  />
+  <remove name="max_nvdll"                    type="variable"  />
+  <remove name="max_nvell"                    type="variable"  />
+  <remove name="_nc4_non_coord_max_nvdll"     type="variable"  />
+  <remove name="_nc4_non_coord_max_nvell"     type="variable"  />
+  <remove name="nbdv"                         type="variable"  />
+  <remove name="nbvv"                         type="variable"  />
+  <remove name="neta"                         type="variable"  />
+  <remove name="nodecode"                     type="variable"  />
+  <remove name="noff"                         type="variable"  />
+  <remove name="nscouge"                      type="variable"  />
+  <remove name="nscougv"                      type="variable"  />
+  <remove name="nscougu"                      type="variable"  />
+  <remove name="nscougw"                      type="variable"  />
+  <remove name="nscouv"                       type="variable"  />
+  <remove name="nscoum"                       type="variable"  />
+  <remove name="nscoue"                       type="variable"  />
+  <remove name="nvell"                        type="variable"  />
+  <remove name="nvel"                         type="variable"  />
+  <remove name="nvdll"                        type="variable"  />
+
+  <aggregation type="union" recheckEvery="5 min">
+    <!--scan location="." regExp=".*\.nc$" subdirs="false"/-->        
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/fort.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/fort.64.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/fort.68.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/fort.73.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/fort.74.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/maxele.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/maxrs.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/maxwvel.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/minpr.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_DIR.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_DIR_max.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_HS.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_HS_max.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_TMM10.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_TMM10_max.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_TPS.63.nc"/>
+    <netcdf location="http://opendap.renci.org:1935/thredds/dodsC//LatestTropical/swan_TPS_max.63.nc"/>
+  </aggregation>
+</netcdf>

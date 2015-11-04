@@ -1,0 +1,24 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" 
+        location="http://colossus.dl.stevens-tech.edu/thredds/dodsC/latest/Complete_gcmplt.nc">
+
+  <attribute name="advisory_or_cycle" value="N/A" />
+  <attribute name="cdm_data_type"     value="cgrid" />
+  <attribute name="id"                value="NYHOPS.Daily.Prognostic" />
+  <attribute name="model"             value="NYHOPS" />
+  <attribute name="stormname"         value="N/A" />
+  <attribute name="stormtype"         value="other" />
+
+  <variable name="elev" >
+    <attribute name="standard_name" value="sea_surface_height_above_geoid" />
+  </variable>
+
+  <variable name="wh" >
+    <attribute name="standard_name" value="sea_surface_wave_significant_height" />
+  </variable>
+
+  <variable name="depth" >
+     <attribute name="standard_name" value="depth_below_geoid" />
+  </variable>
+ 
+</netcdf>
+

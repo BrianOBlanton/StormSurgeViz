@@ -1,0 +1,98 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2">
+
+  <attribute name="cdm_data_type"     value="ugrid" />
+  <attribute name="Conventions"       value="CF-1.6, UGRID-0.9" />
+  <attribute name="wind_source"       value="NHC_Official_Track" />
+  <attribute name="advisory_or_cycle" value="27" />
+  <attribute name="title"             value="CSDL.ASGS.Prognostic" />
+  <attribute name="id"                value="CSDL.ASGS.Prognostic" />
+  <attribute name="institution"       value="NOAA CSDL" />
+  <attribute name="stormname"         value="Joaquin" />
+
+  <variable name="element" >
+    <attribute name="units" value="1" />
+  </variable>
+
+  <variable name="zeta" >
+    <attribute name="standard_name" value="sea_surface_height_above_geoid" />
+    <attribute name="coordinates" value="time y x" />
+  </variable>
+
+  <variable name="depth" >
+     <attribute name="standard_name" value="depth_below_geoid" />
+  </variable>
+ 
+  <aggregation type="union">
+    <!--scan location="." regExp=".*\.nc$" subdirs="false"/-->        
+    <netcdf location="http://coastalmodeldev.data.noaa.gov/thredds/dodsC/ASGS/latest/fort.63.nc"/>
+    <netcdf location="http://coastalmodeldev.data.noaa.gov/thredds/dodsC/ASGS/latest/fort.73.nc"/>
+    <netcdf location="http://coastalmodeldev.data.noaa.gov/thredds/dodsC/ASGS/latest/fort.74.nc"/>
+    <netcdf location="http://coastalmodeldev.data.noaa.gov/thredds/dodsC/ASGS/latest/maxele.63.nc"/>
+    <netcdf location="http://coastalmodeldev.data.noaa.gov/thredds/dodsC/ASGS/latest/maxwvel.63.nc"/>
+    <netcdf location="http://coastalmodeldev.data.noaa.gov/thredds/dodsC/ASGS/latest/minpr.63.nc"/>
+  </aggregation>
+
+  <remove name="nolibf"       type="attribute" />
+  <remove name="nolifa"       type="attribute" />
+  <remove name="nolica"       type="attribute" />
+  <remove name="nolicat"      type="attribute" />
+  <remove name="a00"          type="attribute" />
+  <remove name="b00"          type="attribute" />
+  <remove name="c00"          type="attribute" />
+  <remove name="h0"           type="attribute" />
+  <remove name="cf"           type="attribute" />
+  <remove name="eslm"         type="attribute" />
+  <remove name="ics"          type="attribute" />
+  <remove name="_FillValue"   type="attribute" />
+  <remove name="ncor"         type="attribute" />
+  <remove name="cori"         type="attribute" />
+  <remove name="nws"          type="attribute" />
+  <remove name="ntip"         type="attribute" />
+  <remove name="statim"       type="attribute" />
+  <remove name="reftim"       type="attribute" />
+  <remove name="slam0"        type="attribute" />
+  <remove name="sfea0"        type="attribute" />
+  <remove name="ntif"         type="attribute" />
+  <remove name="nbfr"         type="attribute" />
+  <remove name="ihot"         type="attribute" />
+  <remove name="tau0"         type="attribute" />
+  <remove name="dramp"        type="attribute" />
+  <remove name="nramp"        type="attribute" />
+  <remove name="nwp"          type="attribute" />
+  <remove name="nope"         type="attribute" />
+  <remove name="nbou"         type="attribute" />
+  <remove name="max_nvell"    type="attribute" />
+  <remove name="max_nvdll"    type="attribute" />
+
+  <remove name="nscouge"   type="variable" />
+  <remove name="nscougv"   type="variable" />
+  <remove name="nscougu"   type="variable" />
+  <remove name="nscougw"   type="variable" />
+  <remove name="nscouv"    type="variable" />
+  <remove name="nscoum"    type="variable" />
+  <remove name="iestp"     type="variable" />
+  <remove name="noff"      type="variable" />
+  <remove name="iths"      type="variable" />
+  <remove name="ivstp"     type="variable" />
+  <remove name="iwstp"     type="variable" />
+  <remove name="ipstp"     type="variable" />
+  <remove name="igep"      type="variable" />
+  <remove name="igwp"      type="variable" />
+  <remove name="igvp"      type="variable" />
+  <remove name="igpp"      type="variable" />
+  <remove name="nscoue"    type="variable" />
+  <remove name="imhs"      type="variable" />
+  <remove name="nodecode"  type="variable" />
+  <remove name="nvell"     type="variable" />
+  <remove name="ibtype"    type="variable" />
+  <remove name="ibtypee"   type="variable" />
+  <remove name="nvel"      type="variable" />
+  <remove name="neta"      type="variable" />
+  <remove name="nbdv"      type="variable" />
+  <remove name="nbvv"      type="variable" />
+  <remove name="nvdll"     type="variable" />
+  <remove name="_nc4_non_coord_max_nvdll"     type="variable" />
+  <remove name="_nc4_non_coord_max_nvell"     type="variable" />
+
+</netcdf>
+
