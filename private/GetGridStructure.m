@@ -77,10 +77,12 @@ switch lower(Member.CdmDataType)
         
         temp=Member.NcTBHandle.standard_name('longitude');
         temp=Member.NcTBHandle.data(temp);
+        TheGrid.True_X=temp;
         TheGrid.x=cast(temp,'double');
         
         temp=Member.NcTBHandle.standard_name('latitude');
         temp=Member.NcTBHandle.data(temp);
+        TheGrid.True_Y=temp;
         TheGrid.y=cast(temp,'double');
         
         % if both x and y are 1-D, assume rectangular grid and replicate

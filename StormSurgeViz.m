@@ -815,7 +815,7 @@ function InstanceUrl(varargin)
 
    Instance=ThisInstance;
 
-   SSVizOpts.DefaultBoundingBox=[NaN]
+   SSVizOpts.DefaultBoundingBox=[NaN];
    setappdata(Handles.MainFigure,'DefaultBoundingBox',SSVizOpts.DefaultBoundingBox);
 
    % new data connections
@@ -3547,7 +3547,8 @@ function Handles=SetSnapshotControls(varargin)
                 'Tag','VectorSnapshotButton',...
                 'Interruptible','off',...
                 'BusyAction','queue',...
-                'Callback',@ViewSnapshot);
+                'Callback',@ViewSnapshot,...
+                'Enable','off');
             
             Handles.VectorSnapshotSliderHandle=uicontrol(...
                 Handles.VectorSnapshotButtonHandlePanel,...
@@ -4575,11 +4576,13 @@ end
 %%% ToggleElements
 function ToggleElements(hObj,~)
 
+    elementcolor=[1 1 1]*.7;
+    linewidth=.25;
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
     cv=get(Handles.TriSurf,'EdgeColor');
     if strcmp(cv,'none')
-        set(Handles.TriSurf,'EdgeColor','k');
+        set(Handles.TriSurf,'EdgeColor',elementcolor,'LineWidth',linewidth);
         set(hObj,'String','Hide Elements');
     else
         set(Handles.TriSurf,'EdgeColor','none');

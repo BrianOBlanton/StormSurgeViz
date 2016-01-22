@@ -36,25 +36,28 @@ CatalogEntryPoint={
 %                   'SSV'
                   };
 
-Providers.Tag={'RenciAsgs-Tropical',...
+Providers.Tag={'NYHOPS',...
                'RenciAsgs-Daily',...
-               'NOAA_CSDL-Tropical',...
                'NOAA_ESTOFS',...
-               'NYHOPS',...
                'IrishSeaROMS',...
-               'NOAA_Psurge'};
+               'NOAA_Psurge',...
+               'RenciAsgs-Tropical',...
+               'NOAA_CSDL-Tropical',...
+               'COOPS-ROMS (Test)'};
            
 Providers.ThreddsServer{1}='http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/';
 Providers.ThreddsServer{2}='http://opendap.renci.org:1935/thredds/dodsC/SSV-Ncml/';
+Providers.ThreddsServer{3}='http://localhost:8080/thredds/dodsC/SSV-Ncml/';
 idx=2;
 
- Providers.Url={[Providers.ThreddsServer{idx} 'RenciAsgs_LatestTropical.ncml']
+ Providers.Url={[Providers.ThreddsServer{idx} 'NYHOPS.ncml']
                 [Providers.ThreddsServer{idx} 'RenciAsgs_LatestDaily.ncml']
-                [Providers.ThreddsServer{idx} 'CSDL_Tropical.ncml']
                 ['http://coastalmodeldev.data.noaa.gov/thredds/dodsC/dailyESTOFS/latest/ssv.ncml']
-                [Providers.ThreddsServer{idx} 'NYHOPS.ncml']
                 [Providers.ThreddsServer{idx} 'IrishSeaROMS.ncml']
-                [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']};
+                [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']
+                [Providers.ThreddsServer{idx} 'RenciAsgs_LatestTropical.ncml']
+                [Providers.ThreddsServer{idx} 'CSDL_Tropical.ncml']
+                [Providers.ThreddsServer{idx} 'COOPS-ROMS.ncml']};
             
                             %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
                             
@@ -186,7 +189,7 @@ end
 if (~isempty(SSVizOpts.BoundingBox) || isnan(SSVizOpts.BoundingBox)),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
 
 %SetVectorOptions('Stride',100,'ScaleFac',25,'Color','k')
-VectorOptions.Stride=100;
+VectorOptions.Stride=10;
 VectorOptions.ScaleFac=25;
 VectorOptions.Color='k';
 
