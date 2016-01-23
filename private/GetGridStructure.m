@@ -68,7 +68,7 @@ switch lower(Member.CdmDataType)
         
     case 'cgrid'
         
-        % build triangluar grid for cgrid...
+        % build triangular grid for cgrid...
         SetUIStatusMessage('** Generating grid for cgrid ...')
         TheGrid.name=['GridID.eq.xyz'];
         
@@ -86,6 +86,7 @@ switch lower(Member.CdmDataType)
         TheGrid.y=cast(temp,'double');
         
         % if both x and y are 1-D, assume rectangular grid and replicate
+        % e.g., IMI ROMS
         if ( size(TheGrid.x,1)==1 || size(TheGrid.x,2)==1 ) && ...
            ( size(TheGrid.y,1)==1 || size(TheGrid.y,2)==1 ) 
              m=length(TheGrid.y);
@@ -99,7 +100,7 @@ switch lower(Member.CdmDataType)
             TheGrid.y=TheGrid.y(:);
         end
         
-        % an attempt to put grid in west-is-negative ...
+        % attempt to put grid in west-is-negative ...
         if max(TheGrid.x>0) && min(TheGrid.x)>0
             TheGrid.x=TheGrid.x-360;
         end
@@ -117,6 +118,9 @@ switch lower(Member.CdmDataType)
         TheGrid=belint(TheGrid);
         
     otherwise
+        
+        SetUIStatusMessage(sprintf('**** cdm_data_type %s not yet supported.',Member.CdmDataType))
+
         
     
 end

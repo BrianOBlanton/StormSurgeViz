@@ -70,6 +70,7 @@ void mexFunction(int            nlhs,
    ONE=1.+tol;
    ZERO=0.-tol;
    for (j=0;j<ne;j++){
+      if (!mxIsNaN(AR[j])){
       for (ip=0;ip<np;ip++){  
          if(fnd[ip]<(double)0){
             fac=.5/AR[j];         
@@ -83,6 +84,8 @@ void mexFunction(int            nlhs,
          }
        l20: continue;
        }
+    }
+    l30: continue;
     }
     for (ip=0;ip<np;ip++) if(fnd[ip]<(double)0)fnd[ip]=NaN;
                

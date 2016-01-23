@@ -153,7 +153,7 @@ switch lower(SSVizOpts.Mode)
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
         Url.FullFileServer=strrep(Url.FullDodsC,'dodsC','fileServer');
-        Url.Ens={''};
+        Url.Ens={'Primary/Only'};
         Url.CurrentSelection=NaN;
         Url.Base=UrlBase;
         Url.UseShapeFiles=SSVizOpts.UseShapeFiles;
@@ -4280,7 +4280,7 @@ function SetupHydrograph(hObj,~)
 
     global Connections Debug
     
-    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('\nSSViz++ Function = %s\n',ThisFunctionName);end
     
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
@@ -4326,7 +4326,7 @@ function SetupHydrograph(hObj,~)
         zoom off
         set(Handles.TriSurf,'ButtonDownFcn',@PopoutHydrograph)
         set(Handles.UserEnteredText,'CallBack',@PopoutHydrograph)
-        SetUIStatusMessage('Click on map to get hydrograph at nearest node or enter node number in box to right ...\n')
+        SetUIStatusMessage('Click on map to get hydrograph at nearest node or enter node number in box to right ...')
         set(Handles.UserEnteredText,'String','<Enter Node>')
 
     elseif button_state==get(hObj,'Min')
@@ -4416,6 +4416,16 @@ function SetupHydrograph(hObj,~)
                     [~,imin]=min(diffx.^2+diffy.^2);
                     NodeNumber=TheGrid.e(j,imin);
                     
+                    % Get coords for plotting later...
+                    xx=TheGrid.x(NodeNumber);
+                    yy=TheGrid.y(NodeNumber);
+                    
+                    % convert linear index NodeNumber to i,j if cgrid
+                    if strcmp(Connections.members{1}.CdmDataType,'cgrid')
+                        [a,b]=ind2sub(Connections.members{1}.NNodes,NodeNumber);
+                        NodeNumber=a+sqrt(-1)*b;
+                    end
+                                    
                 else
                     SetUIStatusMessage('Location is out of model domain.')
                     return
@@ -4424,31 +4434,35 @@ function SetupHydrograph(hObj,~)
                 SetUIStatusMessage('Location is not in view.')
                 return
             end
-            SetUIStatusMessage(sprintf('Location found in element %d ...',j))
+            SetUIStatusMessage(sprintf('   Location found in element %d ...',j))
 
         else
             disp('No grid object found.')
             return
         end
-
-        xx=TheGrid.x(NodeNumber);
-        yy=TheGrid.y(NodeNumber);
         
         tic;
         
         TimeseriesData=LoadNodeTimeSeries(VarIndexTimeDep,NodeNumber);
         line(xx,yy,2,'linewidth',2,'Marker','o','Color','k','MarkerFaceColor','k','MarkerSize',5,'Tag','HydroNodeMarker','Clipping','on');
+
+        % this is the current number of hydrograph stations plotted
+%         if exist('HyAxes','var')
+%             linecount=length(findobj(HyAxes,'Type','line'))/length(Connections.EnsembleNames);
+%         else
+%             linecount=0;
+%         end
         
         if all(isnan(TimeseriesData.q(:)))
             SetUIStatusMessage(['Node: ',num2str(NodeNumber,'%10d'), ' at (',num2str(x, '%10.2f'),' , ',num2str(y, '%10.2f'),') is dry.'])
             text(xx+dx,yy-dy,2,'Dry','Color','k','Tag','HydrographText','FontWeight','bold','Clipping','on')
         else
-            text(xx+dx,yy-dy,2,num2str(NodeNumber),'Color','k','Tag','HydrographText','FontWeight','bold','Clipping','on')
             xwin=.35;ywin=.07;
             titlename=titlenamebase;
             figurename=['Hydrograph of ',titlenamebase];
             
-            str=sprintf('Drawing hydrograph at %10.2f, %10.2f  Node: %10d',xx,yy,NodeNumber);
+%            str=sprintf('Drawing hydrograph at %10.2f, %10.2f  Node: %10d',xx,yy,NodeNumber);
+            str=sprintf('Drawing hydrograph at %.2f, %.2f',xx,yy);
             SetUIStatusMessage(str)
             
             if isempty(findobj(0,'Tag','HydrographFigure'))
@@ -4458,7 +4472,7 @@ function SetupHydrograph(hObj,~)
                     'NumberTitle','off',...
                     'Name',figurename,...
                     'Resize','on');
-                %set(HyFig,'CloseRequestFcn',@deletemarkatclose)
+                set(HyFig,'CloseRequestFcn',@deletemarkatclose)
                 HyAxes=axes('units','normalized','position',[0.1 0.2 0.75 0.65],'fontsize',Vizfs(4),'Tag','HydrographAxes');
                 box on
             else
@@ -4486,21 +4500,32 @@ function SetupHydrograph(hObj,~)
             
             ylabel(Units)
             
-            [~,objh,~,~]=legend(h,Connections.EnsembleNames);
-            set(objh,'color','k')
-            idx=strcmp(get(objh,'type'),'text');
-            set(objh(idx),'FontWeight','bold','FontSize',Vizfs(4))
+            % only put legend if there are multiple ensemble members
+            if size(Connections.EnsembleNames,1) > 1 
+                [~,objh,~,~]=legend(h,Connections.EnsembleNames);
+                set(objh,'color','k')
+                idx=strcmp(get(objh,'type'),'text');
+                set(objh(idx),'FontWeight','bold','FontSize',Vizfs(4))
+            end
             
             linecount=length(findobj(HyAxes,'Type','line'))/length(Connections.EnsembleNames)+1;
-            text('units','normalized','position',[1.05 1-0.1*linecount],...
-                'FontSize',10,'backgroundcolor','w','Color',c,...
-                'String',sprintf('Node: %d',NodeNumber),'fontsize',Vizfs(4),...
-                'FontWeight','bold','EdgeColor',c)
+            text('Units','normalized',...
+                 'Position',[1.05 1-0.1*linecount],...
+                 'FontSize',10,...
+                 'Backgroundcolor','w',...
+                 'Color',c,...
+                 'String',sprintf('Point: %d',linecount-1),...
+                 'Fontsize',Vizfs(4),...
+                 'FontWeight','bold',...
+                 'EdgeColor',c,...
+                 'Tag',sprintf('HydrographPointLegendLine'))
         end
         dt=toc;
         str=sprintf('Took %.1f secs.  Click on another location or enter another node number ...\n',dt);
         SetUIStatusMessage(str)
         axes(cax)
+        text(xx+dx,yy-dy,2,num2str(linecount-1),'Color',c,'Tag','HydrographText','FontWeight','bold','Clipping','on')
+
     end
 
     function deletemarkatclose(~,~) %#ok<DEFNU>
@@ -4522,7 +4547,7 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
 
     global Connections
 
-    SetUIStatusMessage('Getting nodal timeseries ...')
+    SetUIStatusMessage('Getting point timeseries ...')
 
     q=cell(length(Connections.EnsembleNames),1);
     t=q;
@@ -4531,17 +4556,30 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
     
     for i=1:length(Connections.EnsembleNames)
 
-        SetUIStatusMessage(sprintf('Getting nodal timeseries at node %d for ens=%s ...',NodeNumber,Connections.EnsembleNames{i}))
+        SetUIStatusMessage(sprintf('Getting point timeseries for ens=%s ...',Connections.EnsembleNames{i}))
         
         varnameinfile=Connections.members{i,VarIndex}.VariableName;
+        CdmDataType=Connections.members{i,VarIndex}.CdmDataType;
         
         h=Connections.members{i,VarIndex}.NcTBHandle;
                 
         fac=Connections.VariableUnitsFac{VarIndex};
         
         qn=h.geovariable(varnameinfile);
-        q{i}=fac*qn.data(:,NodeNumber);
-
+        
+        switch lower(CdmDataType)
+            case 'ugrid'
+                q{i}=fac*qn.data(:,NodeNumber);
+            case 'cgrid'
+                q{i}=fac*qn.data(:,real(NodeNumber),imag(NodeNumber));
+            otherwise
+                SetUIStatusMessage(sprintf('**** cdm_data_type %s not yet supported.',CdmDataType))
+        end
+        
+        if isa(q{i},'single')
+            q{i}=double(q{i});
+        end
+ 
         time=h.geovariable('time');
         basedate=time.attribute('base_date');
         if isempty(basedate)
@@ -4556,18 +4594,25 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
 
     end
     
+    Data.q=NaN*ones(length(t{1}),length(Connections.EnsembleNames));
+    Data.t=Data.q;
+    for i=1:length(Connections.EnsembleNames)
+        Data.t(:,i)=t{i};
+        Data.q(:,i)=q{i};
+    end
+
     % get everything onto the same time level; assume the same dt for
     % now...
-    dt=(t{1}(2)-t{1}(1));
-    nsecs=maxt-mint;
-    Data.t=(mint:dt:maxt)';
-    Data.q=NaN*ones(length(Data.t),length(Connections.EnsembleNames));
-    for i=1:length(Connections.EnsembleNames)
-        j1=find(abs(Data.t-t{i}(1))<.001);
-        j2=find(abs(Data.t-t{i}(end))<.001);
-        Data.q(j1:j2,i)=q{i};
-    end
-    Data.t=Data.t/86400+timebase_datenum;
+%     dt=(t{1}(2)-t{1}(1));
+%     nsecs=maxt-mint;
+%     Data.t=(mint:dt:maxt)';
+%     Data.q=NaN*ones(length(Data.t),length(Connections.EnsembleNames));
+%     for i=1:length(Connections.EnsembleNames)
+%         j1=find(abs(Data.t-t{i}(1))<.001);
+%         j2=find(abs(Data.t-t{i}(end))<.001);
+%         Data.q(j1:j2,i)=q{i};
+%     end
+%     Data.t=Data.t/86400+timebase_datenum;
 
 end
 
