@@ -21,21 +21,22 @@ end
 cd(PWD)
 
 global SSVizOpts
-
-ThreddsList={
-             'http://opendap.renci.org:1935/thredds'
-             'http://coastalmodeldev.data.noaa.gov/thredds'
-%             'http://mrtee.europa.renci.org:8080/thredds'
-            };
-%            'http://workhorse.europa.renci.org:8080/thredds'
-%            'http://thredds.crc.nd.edu/thredds'
-        
+% 
+% ThreddsList={
+%              'http://opendap.renci.org:1935/thredds'
+%              'http://coastalmodeldev.data.noaa.gov/thredds'
+% %             'http://mrtee.europa.renci.org:8080/thredds'
+%             };
+% %            'http://workhorse.europa.renci.org:8080/thredds'
+% %            'http://thredds.crc.nd.edu/thredds'
+%         
 CatalogEntryPoint={
                    'ASGS'
                    'ASGS'
 %                   'SSV'
                   };
 
+              
 Providers.Tag={'NYHOPS',...
                'RenciAsgs-Daily',...
                'NOAA_ESTOFS',...
@@ -52,7 +53,7 @@ idx=2;
 
  Providers.Url={[Providers.ThreddsServer{idx} 'NYHOPS.ncml']
                 [Providers.ThreddsServer{idx} 'RenciAsgs_LatestDaily.ncml']
-                ['http://coastalmodeldev.data.noaa.gov/thredds/dodsC/dailyESTOFS/latest/ssv.ncml']
+                'http://coastalmodeldev.data.noaa.gov/thredds/dodsC/dailyESTOFS/latest/ssv.ncml'
                 [Providers.ThreddsServer{idx} 'IrishSeaROMS.ncml']
                 [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']
                 [Providers.ThreddsServer{idx} 'RenciAsgs_LatestTropical.ncml']
@@ -108,11 +109,11 @@ SSVizOpts=opts;
 SSVizOpts.Storm=lower(SSVizOpts.Storm);
 SSVizOpts.Providers=Providers;
 
-cn=1;
-if isempty(SSVizOpts.ThreddsServer)
-    SSVizOpts.ThreddsServer=ThreddsList{cn};
-    SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{cn};
-end
+% cn=1;
+% if isempty(SSVizOpts.ThreddsServer)
+%     SSVizOpts.ThreddsServer=ThreddsList{cn};
+%     SSVizOpts.CatalogEntryPoint=CatalogEntryPoint{cn};
+% end
 
 %scc=get(0,'ScreenSize');
 %DisplayWidth=scc(3);
@@ -153,7 +154,6 @@ if ~exist(TempDataLocation,'dir')
     mkdir(TempDataLocation)
 end
 
-
 SSVizOpts.DefaultBoundingBox=NaN;
 %SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
 switch lower(SSVizOpts.Mode)
@@ -162,12 +162,12 @@ switch lower(SSVizOpts.Mode)
         
         fprintf('SSViz++ Mode is Local.\n')
         fprintf('SSViz++ Local Mode not yet fully supported. Best of Luck... \n')
-        
-        
+               
     case 'url'
         
         if isempty(SSVizOpts.Url)
             SSVizOpts.Url=Providers.Url{Providers.Default};
+            SSVizOpts.Provider=Providers.Tag{Providers.Default};
             fprintf('SSViz++ No URL provided.  Using default of %s...\n',SSVizOpts.Url)
         end
         
@@ -178,8 +178,6 @@ switch lower(SSVizOpts.Mode)
        
         SSVizOpts.Mode='Network';
         fprintf('SSViz++ Mode is Network.\n')
-        
-       
 
     otherwise
         error('Mode %s unknown.  Modes are {''Local'',''Url'',''Network''}',SSVizOpts.Mode)
@@ -189,12 +187,30 @@ end
 if (~isempty(SSVizOpts.BoundingBox) || isnan(SSVizOpts.BoundingBox)),SSVizOpts.DefaultBoundingBox=SSVizOpts.BoundingBox;end
 
 %SetVectorOptions('Stride',100,'ScaleFac',25,'Color','k')
-VectorOptions.Stride=10;
-VectorOptions.ScaleFac=25;
-VectorOptions.Color='k';
+SSVizOpts.VectorOptions.Stride=10;
+SSVizOpts.VectorOptions.ScaleFac=25;
+SSVizOpts.VectorOptions.Color='k';
+
+
+%            b     blue          .     point              -     solid
+%            g     green         o     circle             :     dotted
+%            r     red           x     x-mark             -.    dashdot 
+%            c     cyan          +     plus               --    dashed   
+%            m     magenta       *     star             (none)  no line
+%            y     yellow        s     square
+%            k     black         d     diamond
+%            w     white         v     triangle (down)
+%                                ^     triangle (up)
+%                                <     triangle (left)
+%                                >     triangle (right)
+%                                p     pentagram
+%                                h     hexagram
+%                           
 
 %%% clean up after initialization
 clear jts
 global Debug
-
 Debug=SSVizOpts.Debug;
+
+
+

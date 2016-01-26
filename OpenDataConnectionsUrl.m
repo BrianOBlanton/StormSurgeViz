@@ -22,6 +22,7 @@ function Connections=OpenDataConnectionsUrl(Url)
     CF=CF_table;
     
     Connections.EnsembleNames=Url.Ens;
+    Connections.Provider=Url.Provider;
     
     if Debug,fprintf('SSViz++   Attempting to get to NCML file on server.\n');end
     i=1;
@@ -82,21 +83,25 @@ function Connections=OpenDataConnectionsUrl(Url)
     if ~isempty(nc.attribute{'model'})
         Connections.Model=nc.attribute{'model'};
     else
-        error('Required NC file global attribute "model" not found.  This is terminal.')
+        fprintf('SSViz++ *Required* NC file global attribute "model" not found.  This is terminal.')
+        error('*Required* NC file global attribute "model" not found.  This is terminal.')
     end
     if ~isempty(nc.attribute{'Conventions'})
         Connections.Conventions=nc.attribute{'Conventions'};
         if ~strcmp(Connections.Conventions(1:2),'CF')
-            error('Required NC file global attribute "Conventions" does not start with "CF". This is terminal.')
+            fprintf('SSViz++ *Required* NC file global attribute "Conventions" does not start with "CF". This is terminal.')
+            error('*Required* NC file global attribute "Conventions" does not start with "CF". This is terminal.')
         end
     else
-        error('Required NC file global attribute "Conventions" not found.  This is terminal.')
+        fprintf('SSViz++ *Required* NC file global attribute "Conventions" not found.  This is terminal.')
+        error('*Required* NC file global attribute "Conventions" not found.  This is terminal.')
     end
         
     if ~isempty(nc.attribute{'institution'})
         Connections.Institution=nc.attribute{'institution'};
     else
-        error('Required NC file global attribute "Institution" not found.  This is terminal.')
+        fprintf('SSViz++ *Required* NC file global attribute "Institution" not found.  This is terminal.')
+        error('*Required* NC file global attribute "Institution" not found.  This is terminal.')
     end
    
     % look for optional attributes
@@ -106,6 +111,22 @@ function Connections=OpenDataConnectionsUrl(Url)
     else
         fprintf('SSViz++    Optional NC file global attribute "title" not found.  Setting to unspecified ...\n')
     end
+
+    Connections.VDatum='unspecified';
+    if ~isempty(nc.attribute{'vertical_datum'})
+        Connections.VDatum=nc.attribute{'vertical_datum'};
+    else
+        fprintf('SSViz++    Optional NC file global attribute "vertical_datum" not found.  Setting to unspecified ...\n')
+    end
+
+    
+%     Connections.Provider='unspecified';
+%     if ~isempty(nc.attribute{'title'})
+%         Connections.Provider=nc.attribute{'provider'};
+%     else
+%         fprintf('SSViz++    Optional NC file global attribute "provider" not found.  Setting to unspecified ...\n')
+%     end
+
     
     % set SubConvention according to existence of "element" variable
 %     if ~isempty(strcmp(nc.variables,'element'))
