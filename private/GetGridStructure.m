@@ -17,6 +17,8 @@ fig=findobj(0,'Tag','MainVizAppFigure');
 TempDataLocation=getappdata(fig,'TempDataLocation');
 SSVizOpts=getappdata(fig,'SSVizOpts');
 
+nc=Member.NcTBHandle;
+
 switch lower(Member.CdmDataType)
     case 'ugrid'
         if ~exist([TempDataLocation '/' Member.GridHash '_FGS.mat'],'file')
@@ -24,16 +26,16 @@ switch lower(Member.CdmDataType)
             %try
             v=Member.NcTBHandle.variables;
             if any(strcmp(v,'element'))
-                TheGrid.e=double(Member.NcTBHandle.data('element'));
-                TheGrid.x=Member.NcTBHandle.data('x');
-                TheGrid.y=Member.NcTBHandle.data('y');
+                TheGrid.e=double(nc.data('element'));
+                TheGrid.x=nc.data('x');
+                TheGrid.y=nc.data('y');
                 TheGrid.bnd=detbndy(TheGrid.e);
             else
                 error('element variable not in netCDF')
             end
             
             if any(strcmp(v,'depth'))
-                TheGrid.z=Member.NcTBHandle.data('depth');
+                TheGrid.z=nc.data('depth');
             end
             
             %catch ME
@@ -70,21 +72,33 @@ switch lower(Member.CdmDataType)
         
         % build triangular grid for cgrid...
         SetUIStatusMessage('** Generating grid for cgrid ...')
-        TheGrid.name=['GridID.eq.xyz'];
+        TheGrid.name='GridID.eq.xyz';
         
         TheGrid.e=elgen(Member.NNodes(2),Member.NNodes(1));
         TheGrid.bnd=detbndy(TheGrid.e);
         
-        temp=Member.NcTBHandle.standard_name('longitude');
-        temp=Member.NcTBHandle.data(temp);
+        temp=nc.standard_name('longitude');
+        temp=nc.data(temp);
         TheGrid.True_X=temp;
         TheGrid.x=cast(temp,'double');
         
-        temp=Member.NcTBHandle.standard_name('latitude');
-        temp=Member.NcTBHandle.data(temp);
+        temp=nc.standard_name('latitude');
+        temp=nc.data(temp);
         TheGrid.True_Y=temp;
         TheGrid.y=cast(temp,'double');
         
+        % check to see if there are mask arrays in the netCDF file
+        % we've specified that the water level mask array needs a
+        % standard_name of sea_surface_height_mask (probably via ncml)
+        wmask=[];
+        temp=nc.standard_name('sea_surface_height_mask');
+        if ~isempty(temp)
+            temp=nc.data(temp);
+            wmask=temp==0;
+            TheGrid.x(wmask)=NaN;
+            TheGrid.y(wmask)=NaN;
+        end
+         
         % if both x and y are 1-D, assume rectangular grid and replicate
         % e.g., IMI ROMS
         if ( size(TheGrid.x,1)==1 || size(TheGrid.x,2)==1 ) && ...
@@ -100,20 +114,21 @@ switch lower(Member.CdmDataType)
             TheGrid.y=TheGrid.y(:);
         end
         
+        temp=nc.standard_name('depth_below_geoid');
+        if isempty(temp)
+            SetUIStatusMessage('**** No depth variable found.  Setting depths to NaN...')
+            TheGrid.z=NaN(size(TheGrid.x));
+        else
+            temp=nc.data(temp);
+            temp(wmask)=NaN;
+            TheGrid.z=cast(temp(:),'double');
+        end
+        
         % attempt to put grid in west-is-negative ...
         if max(TheGrid.x>0) && min(TheGrid.x)>0
             TheGrid.x=TheGrid.x-360;
         end
         
-        temp=Member.NcTBHandle.standard_name('depth_below_geoid');
-        if isempty(temp)
-            SetUIStatusMessage('**** No depth variable found.  Setting depths to NaN...')
-            TheGrid.z=NaN(length(TheGrid.x),1);
-        else
-            temp=Member.NcTBHandle.data(temp);
-            TheGrid.z=cast(temp(:),'double');
-        end
-   
         TheGrid=el_areas(TheGrid);
         TheGrid=belint(TheGrid);
         
@@ -121,8 +136,7 @@ switch lower(Member.CdmDataType)
         
         SetUIStatusMessage(sprintf('**** cdm_data_type %s not yet supported.',Member.CdmDataType))
 
-        
-    
+           
 end
         %    set(Handles.MainFigure,'Pointer',CurrentPointer);
         SetUIStatusMessage('** Got it.')     

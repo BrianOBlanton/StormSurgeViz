@@ -115,18 +115,18 @@ switch lower(SSVizOpts.Mode)
     case 'network'
         UrlBase=SSVizOpts.ThreddsServer;  %  ThreddsList{1}; %#ok<USENS>
         
-        %% Test for the catalog existence
+        % Test for the catalog existence
         err=TestForCatalogServer(UrlBase,SSVizOpts.CatalogEntryPoint,SSVizOpts.CatalogName);
         if err
             error('catalog file could not be found.')
         end
         
-        %% Get the catalog
+        % Get the catalog
         %global TheCatalog
         fprintf('\nSSViz++ Getting Catalog.\n')
         TheCatalog=GetCatalogFromServer(UrlBase,SSVizOpts.CatalogEntryPoint,SSVizOpts.CatalogName,TempDataLocation);
         
-        %% Determine starting URL based on Instance
+        % Determine starting URL based on Instance
         Url=GetUrl2(SSVizOpts.Storm,...
                     SSVizOpts.Advisory,...
                     SSVizOpts.Grid,...
@@ -166,7 +166,7 @@ switch lower(SSVizOpts.Mode)
     case 'local' 
         str='Local file access is not fully supported. Best of Luck!!';
         fprintf('%s \n',str);
-        %% Set up for Local Files
+        % Set up for Local Files
         UrlBase=['file://' SSVizOpts.File];
         Url.ThisInstance='Local';
         Url.ThisStorm=NaN;
@@ -229,10 +229,10 @@ msg='Opening OPeNDAP connections ... ';
 SetUIStatusMessage(msg)
 global Connections
 if strcmpi(SSVizOpts.Mode,'Local')
-    set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
+    set(Handles.ServerInfoString,'String',[Url.Base]);
     Connections=OpenDataConnectionsLocal(Url);
 elseif strcmpi(SSVizOpts.Mode,'Url')
-    set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
+    set(Handles.ServerInfoString,'String',[Url.Base]);
     Connections=OpenDataConnectionsUrl(Url);
 else
     set(Handles.ServerInfoString,'String',Url.FullDodsC);
@@ -3015,7 +3015,6 @@ function UpdateUI(varargin)
         end
     end
     
-    
     if isempty(Vectors)
         set(Handles.VectorAsScalarButton,'Enable','off')
         set(Handles.VectorKeepInSyncButton,'Enable','off')
@@ -3055,12 +3054,11 @@ function UpdateUI(varargin)
 %     [~,remm]=strtok(temp,'//');
 %     [provider,~]=strtok(remm,'//');
     
-    
     nc=Connections.members{1}.NcTBHandle;
     createdate=value4key(nc.attributes,'creation_date');
     provider=value4key(nc.attributes,'institution');
     
-    VertDatum=value4key(nc.attributes,'vertical_datum');
+    VertDatum=value4key(nc.attributes,'vert_datum');
     if isempty(VertDatum)
         VertDatum='unspecified';
     end
@@ -3518,12 +3516,13 @@ function Handles=SetSnapshotControls(varargin)
     else
                
         % base the times on the variables selected in the UI. 
-        h=Connections.members{EnsIndex,b(1)}.NcTBHandle;
-        timevar=h{'time'};
-        time_datenum=h.time('time');
+        nc=Connections.members{EnsIndex,b(1)}.NcTBHandle;
+        timevarname=nc.standard_name('time');
+        timevar=nc{timevarname};
+        time_datenum=nc.time(timevarname);
         
         %time=Connections.members{EnsIndex,b(1)}.NcTBHandle.geovariable('time');
-        basedate=timevar.attribute('base_date');
+        %basedate=timevar.attribute('base_date');
         %timebase_datenum=datenum(basedate,DateStringFormatInput);
 
 %         if isempty(basedate)
@@ -4653,12 +4652,14 @@ function Data=LoadNodeTimeSeries(VarIndex,NodeNumber)
 %              basedate=datestr(datenum(s(13:end),'yyyy-mm-dd HH:MM:SS'));
 %         end
 %         timebase_datenum=datenum(basedate);
-        
+
+        timevarname=h.standard_name('time');
         try
-            t{i}=h.time('time');
+            t{i}=h.time(timevarname);
         catch
       	    SetUIStatusMessage(sprintf('**** Failed to get datenum time for time variable. Using whatever is in the time.data field.'));
-            t{i}=time.data(:);
+            temp=h.geovariable(timevarname);
+            t{i}=temp.data(:);
         end
         
         if isa(t{i},'single')
@@ -4839,10 +4840,10 @@ function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement
      SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
      FontSizes=getappdata(Handles.MainFigure,'FontSizes');    
 
-%     FieldMax=ceil(maxThisData/ColorIncrement)*ColorIncrement;
-%     FieldMin=floor(minThisData/ColorIncrement)*ColorIncrement;
-     FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
-     FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
+     FieldMax=ceil(maxThisData/ColorIncrement)*ColorIncrement;
+     FieldMin=floor(minThisData/ColorIncrement)*ColorIncrement;
+%     FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
+%     FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
 
      set(Handles.CMax,'String',sprintf('%.2f',FieldMax))
      set(Handles.CMin,'String',sprintf('%.2f',FieldMin))

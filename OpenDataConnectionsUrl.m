@@ -113,10 +113,10 @@ function Connections=OpenDataConnectionsUrl(Url)
     end
 
     Connections.VDatum='unspecified';
-    if ~isempty(nc.attribute{'vertical_datum'})
-        Connections.VDatum=nc.attribute{'vertical_datum'};
+    if ~isempty(nc.attribute{'vert_datum'})
+        Connections.VDatum=nc.attribute{'vert_datum'};
     else
-        fprintf('SSViz++    Optional NC file global attribute "vertical_datum" not found.  Setting to unspecified ...\n')
+        fprintf('SSViz++    Optional NC file global attribute "vert_datum" not found.  Setting to unspecified ...\n')
     end
 
     
