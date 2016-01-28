@@ -59,7 +59,12 @@ for ii=1:length(VariableStandardNames)
             % generate a hash value based on lengths of element and "x"
             % array
             a=prod(double(size(nctemp.variable{'element'})));
-            b=prod(double(size(nctemp.variable{'x'})));
+            temp=nctemp.standard_name('longitude');
+            if ~isempty(temp)
+                b=prod(double(size(nctemp.variable{temp})));
+            else
+                SetUIStatusMessage('**** No x-coord variable with standard_name=longitude found.  Exiting back to GUI.')
+            end
             
             storm(jj).GridHash=DataHash2(a*b);
             
