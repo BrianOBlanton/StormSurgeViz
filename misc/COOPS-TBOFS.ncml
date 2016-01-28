@@ -1,0 +1,129 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" >
+
+<explicit /> 
+
+  <attribute name="title" type="string" value="COOPS-TBOFS-Test"/>
+  <attribute name="institution" type="string" value="NOAA/COOPS"/>
+  <attribute name="Conventions" value="CF-1.6" />
+  <attribute name="cdm_data_type" value="cgrid" />
+  <attribute name="model" value="ROMS/TOMS" />
+  <attribute name="advisory_or_cycle" value="00Z" />
+  <attribute name="id" value="Prognostic" />
+
+   <variable name="Uwind" >
+      <attribute name="standard_name" value="eastward_wind" type="String"/> 
+   </variable>
+
+   <variable name="Vwind" >
+      <attribute name="standard_name" value="northward_wind" type="String"/> 
+   </variable>
+
+   <variable name="Pair" >
+      <attribute name="standard_name" value="air_pressure_at_sea_level" type="String"/> 
+   </variable>
+
+   <variable name="ocean_time" >
+      <attribute name="standard_name" value="time" type="String"/> 
+   </variable>
+
+   <variable name="lon_rho" >
+      <attribute name="standard_name" value="longitude" type="String"/> 
+   </variable>
+
+   <variable name="lat_rho" >
+      <attribute name="standard_name" value="latitude" type="String"/> 
+   </variable>
+
+   <variable name="zeta" >
+      <attribute name="standard_name" value="sea_surface_height_above_geoid" type="String"/> 
+   </variable>
+
+   <variable name="h" >
+      <attribute name="standard_name" value="depth_below_geoid" type="String"/> 
+   </variable>
+
+   <variable name="mask_rho" >
+      <attribute name="standard_name" value="sea_surface_height_mask" type="String"/> 
+   </variable>
+
+
+  <aggregation type="joinExisting" dimName="ocean_time">
+    <!--scan location="." regExp=".*\.nc$" subdirs="false"/-->        
+
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f000.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f003.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f006.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f009.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f012.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f015.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f018.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f021.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f024.20160127.t00z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/TBOFS/MODELS/201601/nos.tbofs.fields.f027.20160127.t00z.nc"/>
+
+  </aggregation>
+
+
+  <remove name="angle"   type="variable" />
+  <remove name="pm"   type="variable" />
+  <remove name="pn"   type="variable" />
+  <remove name="f"   type="variable" />
+  <remove name="xl"   type="variable" />
+  <remove name="el"   type="variable" />
+  <remove name="Cs_w"   type="variable" />
+  <remove name="Cs_r"   type="variable" />
+  <remove name="s_w"   type="variable" />
+  <remove name="s_rho"   type="variable" />
+  <remove name="hc"   type="variable" />
+  <remove name="Tcline"   type="variable" />
+  <remove name="theta_b"   type="variable" />
+  <remove name="theta_s"   type="variable" />
+  <remove name="gamma2"   type="variable" />
+  <remove name="rho0"   type="variable" />
+  <remove name="Tobc_in"   type="variable" />
+  <remove name="Tobc_out"   type="variable" />
+  <remove name="M3obc_in"   type="variable" />
+  <remove name="M3obc_out"   type="variable" />
+  <remove name="M2obc_in"   type="variable" />
+  <remove name="M2obc_out"   type="variable" />
+  <remove name="FSobc_out"   type="variable" />
+  <remove name="FSobc_in"   type="variable" />
+  <remove name="Tnudg"   type="variable" />
+  <remove name="M3nudg"   type="variable" />
+  <remove name="M2nudg"   type="variable" />
+  <remove name="Znudg"   type="variable" />
+  <remove name="gls_c3m"   type="variable" />
+  <remove name="gls_cmu0"   type="variable" />
+  <remove name="gls_Pmin"   type="variable" />
+  <remove name="gls_Kmin"   type="variable" />
+  <remove name="gls_sigp"   type="variable" />
+  <remove name="gls_sigk"   type="variable" />
+  <remove name="gls_c3p"   type="variable" />
+  <remove name="gls_c3p"   type="variable" />
+  <remove name="gls_c2"   type="variable" />
+  <remove name="gls_c1"   type="variable" />
+  <remove name="gls_m"   type="variable" />
+  <remove name="gls_n"   type="variable" />
+  <remove name="gls_cmu1"   type="variable" />
+  <remove name="gls_p"   type="variable" />
+  <remove name="Zos"   type="variable" />
+  <remove name="Zob"   type="variable" />
+  <remove name="rdrg2"   type="variable" />
+  <remove name="rdrg"   type="variable" />
+  <remove name="Akp_bak"   type="variable" />
+  <remove name="Akk_bak"   type="variable" />
+  <remove name="Akv_bak"   type="variable" />
+  <remove name="Akt_bak"   type="variable" />
+  <remove name="Falpha"   type="variable" />
+  <remove name="Fbeta"   type="variable" />
+  <remove name="Fgamma"   type="variable" />
+  <remove name="nSTA"   type="variable" />
+  <remove name="nRST"   type="variable" />
+  <remove name="ndefHIS"     type="variable" />
+  <remove name="nHIS"     type="variable" />
+  <remove name="dtfast"     type="variable" />
+  <remove name="ntimes"     type="variable" />
+  <remove name="ndtfast"     type="variable" />
+
+</netcdf>
+

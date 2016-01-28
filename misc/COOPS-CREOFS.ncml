@@ -1,0 +1,70 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" >
+
+<explicit /> 
+
+  <attribute name="title" type="string" value="COOPS Columbia River and Estuarine Operational Forecast System"/>
+  <attribute name="institution" type="string" value="NOAA/COOPS"/>
+  <attribute name="Conventions" value="CF-1.6" />
+  <attribute name="cdm_data_type" value="ugrid" />
+  <attribute name="model" value="SELFE-MPI Version 3.1dc" />
+  <attribute name="advisory_or_cycle" value="00Z" />
+  <attribute name="id" value="Prognostic" />
+
+  <dimension name="mesh" length="1" />
+
+  <variable name="selfe_mesh" shape="mesh" type="int">
+    <attribute name="long_name"              value="mesh_topology" />
+    <attribute name="node_coordinates"       value="x y" />
+    <attribute name="face_node_connectivity" value="element" />
+    <attribute name="cf_role"                value="mesh_topology" />
+    <attribute name="topology_dimension"     value="2" type="int" />
+  </variable>
+
+  <variable name="element" orgName="ele" />
+
+   <variable name="uwind_speed" >
+      <attribute name="standard_name" value="eastward_wind" type="String"/> 
+      <attribute name="_FillValue" value="-9999.0" type="Float"/>
+   </variable>
+
+   <variable name="vwind_speed" >
+      <attribute name="standard_name" value="northward_wind" type="String"/> 
+      <attribute name="_FillValue" value="-9999.0" type="Float"/>
+   </variable>
+
+   <variable name="Pair" >
+      <attribute name="standard_name" value="air_pressure_at_sea_level" type="String"/> 
+      <attribute name="_FillValue" value="-9999.0" type="Float"/>
+   </variable>
+
+   <variable name="lon" >
+      <attribute name="standard_name" value="longitude" type="String"/> 
+   </variable>
+
+   <variable name="lat" >
+      <attribute name="standard_name" value="latitude" type="String"/> 
+   </variable>
+
+   <variable name="zeta" >
+      <attribute name="standard_name" value="sea_surface_height_above_geoid" type="String"/> 
+      <attribute name="_FillValue" value="-9999.0" type="Float"/>
+   </variable>
+
+   <variable name="h" >
+      <attribute name="standard_name" value="depth_below_geoid" type="String"/> 
+   </variable>
+
+  <aggregation type="joinExisting" dimName="time">
+    <!--scan location="." regExp=".*\.nc$" subdirs="false"/-->        
+
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/CREOFS/MODELS/201601/nos.creofs.fields.n000.20160128.t03z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/CREOFS/MODELS/201601/nos.creofs.fields.n000.20160128.t09z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/CREOFS/MODELS/201601/nos.creofs.fields.n000.20160128.t15z.nc"/>
+
+  </aggregation>
+
+
+  <remove name="Cs"     type="variable" />
+
+</netcdf>
+

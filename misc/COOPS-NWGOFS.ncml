@@ -1,0 +1,109 @@
+<netcdf xmlns="http://www.unidata.ucar.edu/namespaces/netcdf/ncml-2.2" >
+
+<explicit /> 
+
+  <attribute name="title" type="string" value="COOPS NWGOFS"/>
+  <attribute name="institution" type="string" value="NOAA/COOPS"/>
+  <attribute name="Conventions" value="CF-1.6" />
+  <attribute name="cdm_data_type" value="ugrid" />
+  <attribute name="model" value="FVCOM_3.0" />
+  <attribute name="advisory_or_cycle" value="00Z" />
+  <attribute name="id" value="Prognostic" />
+
+  <dimension name="mesh" length="1" />
+
+  <variable name="fvcom_mesh" shape="mesh" type="int">
+    <attribute name="long_name"              value="mesh_topology" />
+    <attribute name="node_coordinates"       value="x y" />
+    <attribute name="face_node_connectivity" value="element" />
+    <attribute name="cf_role"                value="mesh_topology" />
+    <attribute name="topology_dimension"     value="2" type="int" />
+  </variable>
+
+  <variable name="element" orgName="nv" />
+
+   <remove name="lonc"     type="variable" />
+   <remove name="latc"     type="variable" />
+
+   <remove name="uwind_speed"     type="variable" />
+   <remove name="vwind_speed"     type="variable" />
+
+   <remove name="va"     type="variable" />
+   <remove name="ua"     type="variable" />
+   <remove name="ww"     type="variable" />
+   <remove name="wv"     type="variable" />
+   <remove name="omega"     type="variable" />
+   <remove name="tauc"     type="variable" />
+   <remove name="u"     type="variable" />
+   <remove name="v"     type="variable" />
+   <remove name="x"     type="variable" />
+   <remove name="y"     type="variable" />
+   <remove name="xc"     type="variable" />
+   <remove name="yc"     type="variable" />
+   <remove name="siglay"     type="variable" />
+   <remove name="siglev"  type="variable" />
+   <remove name="iint"    type="variable" />
+   <remove name="Itime"   type="variable" />
+   <remove name="Itime2"  type="variable" />
+   <remove name="Times"   type="variable" />
+   <remove name="nbve"    type="variable" />
+   <remove name="nbe"     type="variable" />
+   <remove name="ntsn"    type="variable" />
+   <remove name="nbsn"    type="variable" />
+   <remove name="ntve"    type="variable" />
+   <remove name="ntbe"    type="variable" />
+   <remove name="a1u"     type="variable" />
+   <remove name="a2u"     type="variable" />
+   <remove name="aw0"     type="variable" />
+   <remove name="awx"     type="variable" />
+   <remove name="awy"     type="variable" />
+   <remove name="art1"                type="variable" />
+   <remove name="art2"                type="variable" />
+   <remove name="nprocs"              type="variable" />
+   <remove name="partition"           type="variable" />
+   <remove name="wet_cells"           type="variable" />
+   <remove name="wet_nodes_prev_int"  type="variable" />
+   <remove name="wet_cells_prev_int"  type="variable" />
+   <remove name="wet_cells_prev_ext"  type="variable" />
+
+<!--
+   <variable name="uwind_speed" >
+      <attribute name="standard_name" value="eastward_wind" type="String"/> 
+   </variable>
+
+   <variable name="vwind_speed" >
+      <attribute name="standard_name" value="northward_wind" type="String"/> 
+   </variable>
+-->
+
+   <variable name="atmos_press" >
+      <attribute name="standard_name" value="air_pressure_at_sea_level" type="String"/> 
+      <attribute name="_FillValue" value="-9999.0" type="Float"/>
+   </variable>
+
+   <variable name="zeta" >
+      <attribute name="standard_name" value="sea_surface_height_above_geoid" type="String"/> 
+   </variable>
+
+   <variable name="h" >
+      <attribute name="standard_name" value="depth_below_geoid" type="String"/> 
+   </variable>
+
+   <variable name="time" >
+      <attribute name="standard_name" value="time" type="String"/> 
+   </variable>
+
+  <aggregation type="joinExisting" dimName="time">
+    <!--scan location="." regExp=".*\.nc$" subdirs="false"/-->        
+
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/NWGOFS/MODELS/201601/nos.nwgofs.fields.f000.20160128.t03z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/NWGOFS/MODELS/201601/nos.nwgofs.fields.f000.20160128.t09z.nc"/>
+    <netcdf location="http://opendap.co-ops.nos.noaa.gov/thredds/dodsC/NOAA/NWGOFS/MODELS/201601/nos.nwgofs.fields.f000.20160128.t15z.nc"/>
+
+  </aggregation>
+
+
+  <remove name="Cs"     type="variable" />
+
+</netcdf>
+
