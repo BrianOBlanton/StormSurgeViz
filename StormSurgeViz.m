@@ -911,7 +911,7 @@ end
 %%% SetNewField
 function SetNewField(varargin)
 
-    global TheGrids Connections Debug
+    global TheGrids Connections Debug SSVizOpts
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
     
     hObj=varargin{1};
@@ -919,7 +919,7 @@ function SetNewField(varargin)
 
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
-    SSVizOpts=getappdata(FigHandle,'SSVizOpts');
+    %SSVizOpts=getappdata(FigHandle,'SSVizOpts');
 
     CurrentPointer=get(FigHandle,'Pointer');
     set(FigHandle,'Pointer','watch');
@@ -3644,6 +3644,7 @@ function ViewSnapshot(hObj,~)
     
     FigHandle=gcbf;
     Handles=get(FigHandle,'UserData');
+    
     DateStringFormatOutput=getappdata(Handles.MainFigure,'DateStringFormatOutput');
 
     EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
@@ -3757,7 +3758,15 @@ function ViewSnapshot(hObj,~)
       
     if ~isempty(ScalarData)
         Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,ScalarVarIndex},ScalarData);
+        units=Connections.members{EnsIndex,ScalarVarIndex}.Units;
         set(Handles.TriSurf,'UserData',time_datenum(ScalarSnapshotSliderValue))
+        fc=get(Handles.FixCMap,'Value');
+        if ~fc
+            NumberOfColors=str2double(get(Handles.NCol,'String'));
+            ColorIncrement=SSVizOpts.ColorIncrement;
+            [Min,Max]=GetMinMaxInView(TheGrid,ScalarData);
+            SetColors(Handles,Min,Max,NumberOfColors,ColorIncrement,units);
+        end
     end
     
     if ~isempty(VectorData)
@@ -4185,7 +4194,7 @@ function ShowMinimum(hObj,~)
         line(TheGrid.x(idx),TheGrid.y(idx),1,'Marker','x','Color',[0 1 1],...
             'MarkerSize',20,'Tag','MinMarker','Clipping','on');
         
-        SetUIStatusMessage(sprintf('Minimum in view = %.2f\n',Min))
+        SetUIStatusMessage(sprintf('Minimum in view = %.3g\n',Min))
         
         set(hObj,'String','Hide Minimum')
     else
@@ -4220,7 +4229,7 @@ function ShowMaximum(hObj,~)
         line(TheGrid.x(idx),TheGrid.y(idx),1,'Marker','x','Color',[1 1 0],...
             'MarkerSize',20,'Tag','MaxMarker','Clipping','on');
         
-        SetUIStatusMessage(sprintf('Maximum in view = %.2f\n',Max))
+        SetUIStatusMessage(sprintf('Maximum in view = %.3g\n',Max))
 
         set(hObj,'String','Hide Maximum')
     else
@@ -4511,7 +4520,7 @@ function SetupHydrograph(hObj,~)
             figurename=['Hydrograph of ',titlenamebase];
             
 %            str=sprintf('Drawing hydrograph at %10.2f, %10.2f  Node: %10d',xx,yy,NodeNumber);
-            str=sprintf('Drawing hydrograph at %.2f, %.2f',xx,yy);
+            str=sprintf('Drawing hydrograph at %.3g, %.3g',xx,yy);
             SetUIStatusMessage(str)
             
             if isempty(findobj(0,'Tag','HydrographFigure'))
@@ -4743,7 +4752,7 @@ function RecordAxisLimits(~,arg2)
     Handles=get(MainFig,'UserData');
     axx=axis;
     setappdata(Handles.MainFigure,'BoundingBox',axx);
-    set(Handles.AxisLimits,'String',sprintf('%.3f  ',axx))
+    set(Handles.AxisLimits,'String',sprintf('%.3g  ',axx))
     RendererKludge;
 
 end
@@ -4837,16 +4846,23 @@ end
 %%  SetColors
 function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement,units)
 
-     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
-     FontSizes=getappdata(Handles.MainFigure,'FontSizes');    
+        SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
+        FontSizes=getappdata(Handles.MainFigure,'FontSizes');
 
-     FieldMax=ceil(maxThisData/ColorIncrement)*ColorIncrement;
-     FieldMin=floor(minThisData/ColorIncrement)*ColorIncrement;
+        % if the data range is more than 2* the ColorIncrement..
+        if maxThisData-minThisData > 2*ColorIncrement
+            FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
+            FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
+        else
+            FieldMax=maxThisData + (maxThisData - minThisData)/NumberOfColors;
+            FieldMin=minThisData - (maxThisData - minThisData)/NumberOfColors;
+        end
+    
 %     FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
 %     FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
 
-     set(Handles.CMax,'String',sprintf('%.2f',FieldMax))
-     set(Handles.CMin,'String',sprintf('%.2f',FieldMin))
+     set(Handles.CMax,'String',sprintf('%.5g',FieldMax))
+     set(Handles.CMin,'String',sprintf('%.5g',FieldMin))
      set(Handles.NCol,'String',sprintf('%d',NumberOfColors))
      PossibleMaps=cellstr(get(Handles.ColormapSetter,'String'));
      CurrentValue=get(Handles.ColormapSetter,'Value');

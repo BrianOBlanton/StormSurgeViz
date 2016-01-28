@@ -44,7 +44,11 @@ Providers.Tag={'NYHOPS',...
                'NOAA_Psurge',...
                'RenciAsgs-Tropical',...
                'NOAA_CSDL-Tropical',...
-               'COOPS-ROMS (Test)'};
+               'COOPS-CBOFS (Test)',...
+               'COOPS-TBOFS (Test)',...
+               'COOPS-CREOFS (Test)',...
+               'COOPS-NWGOFS (Test)'
+               };
            
 Providers.ThreddsServer{1}='http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/';
 Providers.ThreddsServer{2}='http://opendap.renci.org:1935/thredds/dodsC/SSV-Ncml/';
@@ -58,11 +62,15 @@ idx=2;
                 [Providers.ThreddsServer{idx} 'SLOSH_Psurge.ncml']
                 [Providers.ThreddsServer{idx} 'RenciAsgs_LatestTropical.ncml']
                 [Providers.ThreddsServer{idx} 'CSDL_Tropical.ncml']
-                [Providers.ThreddsServer{idx} 'COOPS-ROMS.ncml']};
+                [Providers.ThreddsServer{idx} 'COOPS-CBOFS.ncml']
+                [Providers.ThreddsServer{idx} 'COOPS-TBOFS.ncml']
+                [Providers.ThreddsServer{idx} 'COOPS-CREOFS.ncml']
+                [Providers.ThreddsServer{idx} 'COOPS-NWGOFS.ncml']
+                };
             
                             %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
                             
-Providers.Default=1;
+Providers.Default=11;
 
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])

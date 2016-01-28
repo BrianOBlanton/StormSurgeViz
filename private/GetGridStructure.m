@@ -26,16 +26,51 @@ switch lower(Member.CdmDataType)
             %try
             v=Member.NcTBHandle.variables;
             if any(strcmp(v,'element'))
-                TheGrid.e=double(nc.data('element'));
-                TheGrid.x=nc.data('x');
-                TheGrid.y=nc.data('y');
+                temp=nc.data('element');
+                if ~isa(temp,'double')
+                    temp=cast(temp,'double');
+                end
+                if size(temp,1)<size(temp,2)  % then element array is 3x, not x3
+                    temp=temp';
+                end
+                TheGrid.e=temp;
                 TheGrid.bnd=detbndy(TheGrid.e);
             else
                 error('element variable not in netCDF')
             end
             
-            if any(strcmp(v,'depth'))
-                TheGrid.z=nc.data('depth');
+            temp=nc.standard_name('longitude');
+            if ~isempty(temp)
+                TheGrid.x=nc.data(temp);
+            else
+                SetUIStatusMessage('**** No x-coord variable with standard_name=longitude found.  Exiting back to GUI.')
+            end
+           
+            temp=nc.standard_name('latitude');
+            if ~isempty(temp)
+                TheGrid.y=nc.data(temp);     
+            else
+                SetUIStatusMessage('**** No y-coord variable with standard_name=latitude found.  Exiting back to GUI.')
+            end
+            
+            temp=nc.standard_name('depth_below_geoid');
+            if ~isempty(temp)
+                temp=nc.data(temp);
+                TheGrid.z=cast(temp(:),'double');
+            else
+                SetUIStatusMessage('**** No depth variable with standard_name=depth_below_geoid found.  Setting depths to NaN...')
+                TheGrid.z=NaN(size(TheGrid.x));
+            end
+            
+            % attempt to put grid in west-is-negative ...
+            if max(TheGrid.x>0) && min(TheGrid.x)>0
+                TheGrid.x=TheGrid.x-360;
+            end
+            
+            if isa(TheGrid.x,'single')
+                TheGrid.x=cast(TheGrid.x,'double');
+                TheGrid.y=cast(TheGrid.y,'double');
+                TheGrid.z=cast(TheGrid.z,'double');
             end
             
             %catch ME
@@ -54,6 +89,12 @@ switch lower(Member.CdmDataType)
             
             % add element areas and basis function arrays
             TheGrid=el_areas(TheGrid);
+            if all(TheGrid.ar<0)  % assume elements are ordered CW and switch to CCW
+                SetUIStatusMessage('**** Permuting element list to CCW. ')
+                TheGrid.e=TheGrid.e(:,[1 3 2]);
+                TheGrid=el_areas(TheGrid);
+                TheGrid.bnd=detbndy(TheGrid.e);
+            end
             TheGrid=belint(TheGrid);
             
             if SSVizOpts.UseStrTree
