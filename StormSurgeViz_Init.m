@@ -72,7 +72,7 @@ idx=2;
             
                             %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
                             
-Providers.Default=11;
+Providers.Default=9;
 
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])

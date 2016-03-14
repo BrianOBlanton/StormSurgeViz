@@ -268,12 +268,14 @@ SetUIStatusMessage('Getting initial data set links...');
 EnsIndex=1;
 VarIndex=1;
 TimIndex=1;
-Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
+%Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
+GetDataObject(EnsIndex,VarIndex,TimIndex);
 
 VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
 if ~isempty(VectorVariableClicked)
     WindVecIndex=find(strcmp(Connections.VariableDisplayNames,VectorVariableClicked));  
-    Connections=GetDataObject(Connections,EnsIndex,WindVecIndex,TimIndex);
+    %Connections=GetDataObject(Connections,EnsIndex,WindVecIndex,TimIndex);
+    GetDataObject(EnsIndex,WindVecIndex,TimIndex);
     setappdata(Handles.MainFigure,'Connections',Connections);
 end
 
@@ -602,9 +604,9 @@ end
 %%  GetDataObject
 %%% GetDataObject
 %%% GetDataObject
-function Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex) 
+function GetDataObject(EnsIndex,VarIndex,TimIndex) 
 
-   global Debug 
+   global Debug Connections
    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
    v=Connections.members{EnsIndex,VarIndex}.VariableName;
@@ -842,6 +844,7 @@ function InstanceUrl(varargin)
         
         idx=strcmp(url,SSVizOpts.Providers.Url);
         Url.Provider=SSVizOpts.Providers.Tag{idx};
+        
         SSVizOpts.Provider=SSVizOpts.Providers.Tag{idx};
         
         TheCatalog.Catalog='Local';
@@ -858,7 +861,8 @@ function InstanceUrl(varargin)
    EnsIndex=1;
    VarIndex=1;
    TimIndex=1;
-   Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
+%   Connections=GetDataObject(Connections,EnsIndex,VarIndex,TimIndex);
+   GetDataObject(EnsIndex,VarIndex,TimIndex);
    %setappdata(Handles.MainFigure,'Connections',Connections);
 
    Handles=SetEnsembleControls(Handles.MainFigure);
@@ -948,11 +952,13 @@ function SetNewField(varargin)
     VectorVarIndex=find(strcmp(VectorVariableClicked,VariableNames));
 
     if ~isfield(Connections.members{EnsIndex,ScalarVarIndex},'TheData')
-        Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex);
+        %Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex);
+        GetDataObject(EnsIndex,ScalarVarIndex);
     end
     
     if ~isempty(VectorVarIndex) && ~isfield(Connections.members{EnsIndex,VectorVarIndex},'TheData')
-        Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex);
+        %Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex);
+        GetDataObject(EnsIndex,VectorVarIndex);
     end
      
     SetUIStatusMessage(sprintf('Setting/Drawing New Field to ens=%s, var=%s...\n',EnsembleClicked,ScalarVariableClicked),false)
@@ -3714,11 +3720,13 @@ function ViewSnapshot(hObj,~)
     if ScalarClicked
         [~,n]=size(Connections.members{EnsIndex,ScalarVarIndex}.TheData);
         if ScalarSnapshotSliderValue>n
-            Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue); 
+            %Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue); 
+            GetDataObject(EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue); 
         else
             % test value at EnsIndex,VarIndex,TimIndex; fill if empty        
             if isempty(Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotSliderValue})
-                Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue);
+                %Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue);
+                GetDataObject(EnsIndex,ScalarVarIndex,ScalarSnapshotSliderValue);
             end
         end
         ScalarData=Connections.members{EnsIndex,ScalarVarIndex}.TheData{ScalarSnapshotSliderValue};
@@ -3737,11 +3745,13 @@ function ViewSnapshot(hObj,~)
         if ~isempty(VectorVarIndex)
             [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
             if VectorSnapshotSliderValue>n
-                Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+                %Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+                GetDataObject(EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
             else
                 % test value at EnsIndex,VarIndex,TimIndex; fill if empty 
                 if isempty(Connections.members{EnsIndex,VectorVarIndex}.TheData{VectorSnapshotSliderValue})
-                    Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+                    %Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+                    GetDataObject(EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
                 end
             end
         end
