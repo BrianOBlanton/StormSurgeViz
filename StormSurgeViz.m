@@ -654,10 +654,10 @@ function GetDataObject(EnsIndex,VarIndex,TimIndex)
           end
           
           FillVal=[];
-          v=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
-          if ~isempty(v)
-              FillVal=hh.attribute(v);
-              idx=temp==FillVal;
+          vv=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
+          if ~isempty(vv)
+              FillVal=hh.attribute(vv);
+              idx=temp<=FillVal;
               temp(idx)=NaN;
           end
           
@@ -667,11 +667,11 @@ function GetDataObject(EnsIndex,VarIndex,TimIndex)
               hh=h.geovariable(v{2});
               temp2=squeeze(hh.data(TimIndex,:));
               FillVal=[];
-              v=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
-              if ~isempty(v)
-                  FillVal=hh.attribute(v);
-                  idx=temp==FillVal;
-                  temp(idx)=NaN;
+              vv=FindAttribute(hh,'illva');  % FindAttribute regexp's the test against the attributes of nctemp
+              if ~isempty(vv)
+                  FillVal=hh.attribute(vv);
+                  idx=temp2<=FillVal;
+                  temp2(idx)=NaN;
               end             
               inan=abs(temp)<eps & abs(temp2)<eps;
               temp=temp+sqrt(-1)*temp2;
@@ -697,10 +697,6 @@ function GetDataObject(EnsIndex,VarIndex,TimIndex)
           
           TheData=temp*fac;
       end
-      % just in case  ...
-      TheData=cast(TheData,'double');  
-      % make sure TheData is a column vector!
-      Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
       
    else
        
@@ -718,10 +714,15 @@ function GetDataObject(EnsIndex,VarIndex,TimIndex)
       end
       
       TheData=temp*fac;
-      TheData=cast(TheData,'double');  
-      Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
+
    end
    
+   % just in case  ...
+   if isa(TheData,'single')
+       TheData=cast(TheData,'double');
+   end
+   % make sure TheData is a column vector!
+   Connections.members{EnsIndex,VarIndex}.TheData{TimIndex}=TheData(:);
    SetUIStatusMessage('*** Got it.')
 
 end
@@ -733,6 +734,7 @@ function InstanceUrl(varargin)
 
    global TheGrids Connections Debug
    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+   Connections=[];
    
    SetUIStatusMessage('Getting data objects from opendap server ...')
    
@@ -1343,19 +1345,23 @@ function Handles=DrawVectors(Handles,Member,Field)
 
     u=real(Field);
     v=imag(Field);
-    axes(Handles.MainAxes);
-    Handles.Vectors=vecplot(TheGrid.x,TheGrid.y,u,v,...
-        'ScaleFac',ScaleFac,...
-        'Stride',Stride,...
-        'Color',Color,...
-        'ScaleLabel',ScaleLabel); %,...
+    if (all(isnan(u)) || all(u==0)) || (all(isnan(v)) || all(v==0))
+        SetUIStatusMessage('Vector field is mostly 0s or NaNs.  Not plotting.')
+    else
+        axes(Handles.MainAxes);
+        Handles.Vectors=vecplot(TheGrid.x,TheGrid.y,u,v,...
+            'ScaleFac',ScaleFac,...
+            'Stride',Stride,...
+            'Color',Color,...
+            'ScaleLabel',ScaleLabel); %,...
         %'ScaleType','floating');
-    
-    % depending on the args to vecplot, the handle may have >1 values.
-    % but the first is the handle to the drawn vectors
-    nz=2*ones(size(get(Handles.Vectors(1),'XData')));
-    set(Handles.Vectors(1),'ZData',nz);
-    setappdata(Handles.Vectors(1),'Field',Field);
+        
+        % depending on the args to vecplot, the handle may have >1 values.
+        % but the first is the handle to the drawn vectors
+        nz=2*ones(size(get(Handles.Vectors(1),'XData')));
+        set(Handles.Vectors(1),'ZData',nz);
+        setappdata(Handles.Vectors(1),'Field',Field);
+    end
     
     drawnow
     
@@ -1693,7 +1699,7 @@ Handles.VectorOptionsPanel = uipanel(...
     'FontSize',fs0,...
     'BorderType','etchedin',...
     'Visible','off',...
-    'Position',[.01 .60 .98 .39]);
+    'Position',[.01 .43 .98 .55]); % [.01 .60 .98 .38]);
 
 Handles.ControlPanel = uipanel(...
     'Parent',FarRightContainer,...
@@ -1776,7 +1782,7 @@ UiToolbarContainter;
         
         Width=.33;
         Width2=.17;
-        Height=.09;
+        Height=.05;
         
         tbh = findall(Handles.MainFigure,'Type','uitoolbar','Tag','SSVizToolbar');
         a=imread('private/vo.png');
@@ -1787,7 +1793,7 @@ UiToolbarContainter;
         % Stride
         % Stride
         % Stride
-        Height=.12;
+        Height=.06;
         uicontrol(...
             'Parent',Handles.VectorOptionsPanel,...
             'Style','text',...
@@ -3743,6 +3749,9 @@ function ViewSnapshot(hObj,~)
     VectorData=[];
     if VectorClicked
         if ~isempty(VectorVarIndex)
+            if ~isfield(Connections.members{EnsIndex,VectorVarIndex},'TheData')
+                GetDataObject(EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
+            end
             [~,n]=size(Connections.members{EnsIndex,VectorVarIndex}.TheData);
             if VectorSnapshotSliderValue>n
                 %Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex,VectorSnapshotSliderValue);
@@ -4829,7 +4838,15 @@ function SetCLims(~,~)
     NumCols=get(Handles.NCol,'String');
     CMin=get(Handles.CMin,'String');
     CMax=get(Handles.CMax,'String');
-    CLim([str2double(CMin) str2double(CMax)])
+    
+    %CLim([str2double(CMin) str2double(CMax)])
+
+    if CMax>CMin
+        set(gca,'CLim',[str2double(CMin) str2double(CMax)])
+    else
+        SetUIStatusMessage('Error: Color Min > Color Max.  Check values.')
+    end
+
     eval(sprintf('cmap=colormap(%s(%s));',CurrentMap,NumCols))    
     FlipCMap=get(Handles.FlipCMap,'Value');
     if FlipCMap,cmap=flipud(cmap);end
@@ -4855,38 +4872,52 @@ end
 
 %%  SetColors
 function SetColors(Handles,minThisData,maxThisData,NumberOfColors,ColorIncrement,units)
-
-        SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
-        FontSizes=getappdata(Handles.MainFigure,'FontSizes');
-
-        % if the data range is more than 2* the ColorIncrement..
-        if maxThisData-minThisData > 2*ColorIncrement
-            FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
-            FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
-        else
-            FieldMax=maxThisData + (maxThisData - minThisData)/NumberOfColors;
-            FieldMin=minThisData - (maxThisData - minThisData)/NumberOfColors;
-        end
     
+    global Debug
+    
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+
+    SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
+    FontSizes=getappdata(Handles.MainFigure,'FontSizes');
+
+    PossibleMaps=cellstr(get(Handles.ColormapSetter,'String'));
+    CurrentValue=get(Handles.ColormapSetter,'Value');
+    CurrentMap=PossibleMaps{CurrentValue};
+    ColorBarLocation=SSVizOpts.ColorBarLocation;
+    
+    cmap=eval(sprintf('%s(%d)',CurrentMap,NumberOfColors));
+
+    
+    % if the data range is more than 2* the ColorIncrement..
+    if maxThisData-minThisData > 2*ColorIncrement
+        FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
+        FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
+    elseif maxThisData-minThisData<eps
+        FieldMax=1;
+        FieldMin=-1;
+        SetUIStatusMessage('Error: Color Min > Color Max.  Color range has been set to +/- 1.')
+    else
+        FieldMax=maxThisData + (maxThisData - minThisData)/NumberOfColors;
+        FieldMin=minThisData - (maxThisData - minThisData)/NumberOfColors;
+    end
+
 %     FieldMax=floor(maxThisData/ColorIncrement)*ColorIncrement;
 %     FieldMin=ceil(minThisData/ColorIncrement)*ColorIncrement;
 
-     set(Handles.CMax,'String',sprintf('%.5g',FieldMax))
-     set(Handles.CMin,'String',sprintf('%.5g',FieldMin))
-     set(Handles.NCol,'String',sprintf('%d',NumberOfColors))
-     PossibleMaps=cellstr(get(Handles.ColormapSetter,'String'));
-     CurrentValue=get(Handles.ColormapSetter,'Value');
-     CurrentMap=PossibleMaps{CurrentValue};
-     cmap=eval(sprintf('%s(%d)',CurrentMap,NumberOfColors));
-     CLim([FieldMin FieldMax])
-     colormap(cmap)
-  
+    set(Handles.CMax,'String',sprintf('%.5g',FieldMax))
+    set(Handles.CMin,'String',sprintf('%.5g',FieldMin))
+    set(Handles.NCol,'String',sprintf('%d',NumberOfColors))
+    
+    set(gca,'CLim',[FieldMin FieldMax])
+
     % add colorbar
-    ColorBarLocation=SSVizOpts.ColorBarLocation;
     Handles.ColorBar=colorbar('Location',ColorBarLocation);
     set(Handles.ColorBar,'FontSize',FontSizes(2))
     set(get(Handles.ColorBar,'ylabel'),'FontSize',FontSizes(1));
     set(get(Handles.ColorBar,'ylabel'),'String',units,'FontSize',FontSizes(1));
+    
+    colormap(cmap)
+    
 end
 
 %%  GetColors

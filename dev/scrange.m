@@ -16,7 +16,7 @@ function scrange(data)
 
 [m,n]=size(data);
 
-if m==1 | n==1 
+if m==1 || n==1 
    data=data(:);
 %    disp(' ')
     disp(['min = ' num2str(min(data),16)]);
