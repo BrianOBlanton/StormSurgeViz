@@ -49,9 +49,9 @@ Providers.Tag={'NYHOPS',...
                'COOPS-CREOFS (Test)',...
                'COOPS-NWGOFS (Test)',...
                'TACC (Test)'...
-               'URI (Test)'...
                };
-           
+%               'URI (Test)'...
+
 Providers.ThreddsServer{1}='http://mrtee.europa.renci.org:8080/thredds/dodsC/SSV-Ncml/';
 Providers.ThreddsServer{2}='http://opendap.renci.org:1935/thredds/dodsC/SSV-Ncml/';
 Providers.ThreddsServer{3}='http://localhost:8080/thredds/dodsC/SSV-Ncml/';
@@ -69,12 +69,12 @@ idx=2;
                 [Providers.ThreddsServer{idx} 'COOPS-CREOFS.ncml']
                 [Providers.ThreddsServer{idx} 'COOPS-NWGOFS.ncml']
                 [Providers.ThreddsServer{idx} 'TACC_TEST.ncml']
-                [Providers.ThreddsServer{idx} 'DHS-URI.ncml']
                 };
+%                [Providers.ThreddsServer{idx} 'DHS-URI.ncml']
             
                             %[Providers.ThreddsServer{idx} 'ESTOFS.ncml']
                             
-Providers.Default=11;
+Providers.Default=12;
 
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])
