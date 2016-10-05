@@ -73,7 +73,7 @@ if ~isempty(tags)
          'Press Continue to close other StormSurgeViz instances and start'
          'this one, or Cancel to abort the current instance.'};
     ButtonName=questdlg(str,'Other StormSurgeViz Instances Found!!!','Continue','Cancel','Cancel');
-    switch ButtonName,
+    switch ButtonName
         case 'Continue'
             close(tags)
         otherwise
@@ -267,6 +267,13 @@ if isfield(Connections,'members')
         setappdata(Handles.MainFigure,'Connections',Connections);
     end
 end
+
+%% Process ensemble probabilities
+NEns=length(Connections.EnsembleNames);
+if isfield(Connections,'EnsemblePVals') && NEns>3
+    Connections=ProcessEnsemble(Connections);
+end
+
 %% MakeTheAxesMap
 if isfield(Connections,'members')
     SetUIStatusMessage('Making default plot ... \n')
@@ -277,6 +284,11 @@ if isfield(Connections,'members')
     if isfield(Connections,'Tracks')
         if ~isempty(Connections.Tracks{EnsIndex})
             Handles.Storm_Track=DrawTrack(Connections.Tracks{EnsIndex});
+            set(Handles.ShowTrackButton,'String','Hide Track')
+            set(Handles.ShowTrackButton,'Enable','on')
+        end
+        if isfield(Connections,'AtcfShape')
+            Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
             set(Handles.ShowTrackButton,'String','Hide Track')
             set(Handles.ShowTrackButton,'Enable','on')
         end
@@ -485,7 +497,6 @@ function BrowseFileSystem(~,~)
    % get color setting to preserve.
    axes(Handles.MainAxes);
    %cax=caxis;
-   
    
    Handles=MakeTheAxesMap(Handles);
    ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
@@ -906,6 +917,46 @@ function Connections=OpenDataConnections(Url)
     end
 end
 
+%%  ProcessEnsemble
+%%% ProcessEnsemble
+%%% ProcessEnsemble
+function Connections=ProcessEnsemble(Connections)
+
+    global TheGrids Debug 
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+
+    MainFig=findobj(0,'Tag','MainVizAppFigure');
+    Handles=get(MainFig,'UserData');
+    SSVizOpts=getappdata(MainFig,'SSVizOpts');
+    
+    np=length(Connections.EnsemblePVals);
+    NEns=length(Connections.EnsembleNames);
+    weights=eye(NEns)*1/NEns;
+    g=TheGrids{1};
+    Z=NaN*ones(length(g.x),NEns);
+
+    for i=1:NEns
+        h=Handles.EnsButtonHandles(i);
+        Z(:,i)=Connections.members{i,1}.NcTBHandle{'zeta_max'}(:);
+        h.Enable='on';
+    end
+    
+    if Debug,fprintf('SSViz++   Computing Exceedence Levels... \n');end
+    Zs=sort(Z,2);
+    cdff=cumsum(diag(weights));
+    for i=1:np
+         Connections.members{i+NEns,1}.TheData{1}=...
+             interp1(cdff,Zs',Connections.EnsemblePVals(i));
+         h=Handles.EnsButtonHandles(NEns+i);
+         h.Enable='on';
+        Connections.members{i+NEns,1}.FileNetcdfVariableName='zeta_max';
+        Connections.members{i+NEns,1}.GridId=1;
+        Connections.members{i+NEns,1}.Units='Meters';
+        %Connections.EnsembleNames{i+NEns}=
+    end
+    
+end
+
 %%  GetDataObject
 %%% GetDataObject
 %%% GetDataObject
@@ -1178,14 +1229,26 @@ function SetNewField(varargin)
     ScalarVarIndex=find(strcmp(ScalarVariableClicked,VariableNames));
     VectorVarIndex=find(strcmp(VectorVariableClicked,VariableNames));
 
+    if isempty(EnsIndex)
+        % must be an exceedance level.  Make sure only zeta_max is selected
+        if ~strcmp(ScalarVariableClicked,'Max Water Level')
+             SetUIStatusMessage('* Can''t select an exceedence level for this scalar variable. Setting to "Max Water Level".')
+             ScalarVarIndex=find(strcmp('Max Water Level',VariableNames));
+        end
+        
+        EnsIndex=find(strcmp(EnsembleClicked,Connections.EnsemblePValNames)); 
+        
+    end
+    
     if ~isfield(Connections.members{EnsIndex,ScalarVarIndex},'TheData')
         Connections=GetDataObject(Connections,EnsIndex,ScalarVarIndex);
     end
     
+    if EnsIndex<=length(EnsembleNames)
     if ~isempty(VectorVarIndex) && ~isfield(Connections.members{EnsIndex,VectorVarIndex},'TheData')
         Connections=GetDataObject(Connections,EnsIndex,VectorVarIndex);
     end
-     
+    end 
     SetUIStatusMessage(sprintf('Setting/Drawing New Field to ens=%s, var=%s...',EnsembleClicked,ScalarVariableClicked),false)
 
     Member=Connections.members{EnsIndex,ScalarVarIndex};
@@ -1229,11 +1292,21 @@ function SetNewField(varargin)
         temp2=findobj(Handles.MainAxes,'Tag','AtcfTrackShape');
         delete(temp);
         delete(temp2);
-        track=Connections.Tracks{EnsIndex};
-        Handles.Storm_Track=DrawTrack(track);
+        if EnsIndex<=length(EnsembleNames)
+            track=Connections.Tracks{EnsIndex};     
+            Handles.Storm_Track=DrawTrack(track,true);
+        else
+            for i=1:length(Connections.Tracks)
+                track=Connections.Tracks{i};
+                Handles.Storm_Track=DrawTrack(track,false);
+                set(Handles.Storm_Track,'Color',[1 1 1]*.6,'LineWidth',2)
+            end
+        end
+        Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
     end
     
     % if this is a time-dependent var, enable snapshot controls
+    if EnsIndex<=length(EnsembleNames)
     if  Connections.members{EnsIndex,ScalarVarIndex}.NTimes>1
         set(Handles.ScalarSnapshotButtonHandle,'Enable','on')
         set(Handles.ScalarSnapshotSliderHandle,'Enable','on')
@@ -1247,13 +1320,16 @@ function SetNewField(varargin)
         set(Handles.ScalarSnapshotButtonHandle,'Enable','off')
         set(Handles.ScalarSnapshotSliderHandle,'Enable','off')
     end
-   
-    if ~isempty(VectorVarIndex) && (Connections.members{EnsIndex,VectorVarIndex}.NTimes>1)
-        set(Handles.VectorSnapshotButtonHandle,'Enable','on')
-        set(Handles.VectorSnapshotSliderHandle,'Enable','on')
-    else
-        set(Handles.VectorSnapshotButtonHandle,'Enable','off')
-        set(Handles.VectorSnapshotSliderHandle,'Enable','off')
+    end
+    
+    if EnsIndex<=length(EnsembleNames)
+        if ~isempty(VectorVarIndex) && (Connections.members{EnsIndex,VectorVarIndex}.NTimes>1)
+            set(Handles.VectorSnapshotButtonHandle,'Enable','on')
+            set(Handles.VectorSnapshotSliderHandle,'Enable','on')
+        else
+            set(Handles.VectorSnapshotButtonHandle,'Enable','off')
+            set(Handles.VectorSnapshotSliderHandle,'Enable','off')
+        end
     end
     
     set(Handles.MainFigure,'UserData',Handles);
@@ -1460,11 +1536,12 @@ end
 %%  DrawTrack
 %%% DrawTrack
 %%% DrawTrack
-function h=DrawTrack(track)
+function h=DrawTrack(track,ltext)
     
     global Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
-
+    if ~exist('ltext','var'),ltext=true;end
+    
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
@@ -1489,25 +1566,27 @@ function h=DrawTrack(track)
             'LineWidth',2,'Tag','Storm_Track','Clipping','on');
         
         h2=NaN*ones(length(lon),1);
-        for i=1:length(lon)-1
-            heading=atan2((lat(i+1)-lat(i)),(lon(i+1)-lon(i)))*180/pi;
-            h2(i)=text(lon(i),lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
+        if ltext
+            for i=1:length(lon)-1
+                heading=atan2((lat(i+1)-lat(i)),(lon(i+1)-lon(i)))*180/pi;
+                h2(i)=text(lon(i),lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
+                    'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
+                    'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
+            end
+            
+            h2(i+1)=text(lon(i+1),lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
                 'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
                 'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
+            h=[h1;h2(:)];
+        else
+            h=h1;
         end
-        
-        h2(i+1)=text(lon(i+1),lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
-            'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
-            'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
-        h=[h1;h2(:)];
-        
     catch ME
 
         fprintf('Could not draw the track.\n')
     
     end
     
-    drawnow
 end
 
 %%  DrawVectors
@@ -2019,7 +2098,7 @@ BackgroundMapsContainerContents;
             set(Handles.GraphicOutputHandles(i),'Enable','on');
         end
         
-        if ForkAxes,
+        if ForkAxes
             set(Handles.GraphicOutputHandles(2),'Enable','off');
         end
         
@@ -3055,6 +3134,7 @@ function UpdateUI(varargin)
     EnsembleNames=Connections.EnsembleNames; 
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     
+    if ~isempty(EnsIndex)
     if isfield(Handles,'ScalarVarButtonHandles')
     for i=1:length(Handles.ScalarVarButtonHandles)
         if ~isfield(Connections.members{EnsIndex,Scalars(i)},'NcTBHandle') || ... 
@@ -3063,12 +3143,14 @@ function UpdateUI(varargin)
         end
     end
     end
+    end
 %     for i=1:length(Handles.ScalarVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Scalars(i)}.NcTBHandle)
 %             set(Handles.ScalarVarButtonHandles(i),'Value',1)
 %             break
 %         end
 %     end
+    if ~isempty(EnsIndex)
     if isfield(Handles,'VectorVarButtonHandles')
     for i=1:length(Handles.VectorVarButtonHandles)
         if isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle) || ... 
@@ -3077,7 +3159,7 @@ function UpdateUI(varargin)
         end
     end
     end
-    
+    end    
 %     for i=1:length(Handles.VectorVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
 %             set(Handles.VectorVarButtonHandles(i),'Value',1)
@@ -3163,8 +3245,8 @@ function UpdateUI(varargin)
             set(Handles.ShowTrackButton,'String','No Track to Show')
             set(Handles.ShowTrackButton,'Enable','off')
         else
-            set(Handles.ShowTrackButton,'String','Show Track')
-            set(Handles.ShowTrackButton,'Enable','on')
+            %set(Handles.ShowTrackButton,'String','Show Track')
+            %set(Handles.ShowTrackButton,'Enable','on')
         end
     end
 
@@ -3308,7 +3390,7 @@ function Handles=SetEnsembleControls(varargin)
     
     % build out ensemble member controls
     NEns=length(EnsembleNames);
-    dy=.45;
+    dy=.60;
     
     Handles.EnsButtonHandlesGroup = uibuttongroup(...
         'Parent',Handles.CenterContainerUpper,...
@@ -3318,7 +3400,7 @@ function Handles=SetEnsembleControls(varargin)
         'Position',[.01 .975-dy .48 dy],...
         'Tag','EnsembleMemberRadioButtonGroup',...
         'SelectionChangeFcn',@SetNewField);
-    dy=1/10;
+    dy=1/15;
     for i=1:NEns
         Handles.EnsButtonHandles(i)=uicontrol(...
             Handles.EnsButtonHandlesGroup,...
@@ -3331,6 +3413,37 @@ function Handles=SetEnsembleControls(varargin)
   
             set(Handles.EnsButtonHandles(i),'Enable','on');
     end
+    
+    % set active member to nhcConsensus
+    idx=strcmp(EnsembleNames,'nhcConsensus');
+    Handles.EnsButtonHandles(idx).Value=1;
+
+    % set pval buttons
+     uicontrol(...
+            'Parent',Handles.EnsButtonHandlesGroup,...
+            'Style','text',...
+            'Units','normalized',...
+            'Position',[.1 .3 .8 .1],...
+            'FontSize',FontSizes(2),...
+            'HorizontalAlignment','left',...
+            'String','Exceedence Levels:',...
+            'FontWeight','bold');
+        
+        Connections.EnsemblePVals=[.5 .75 .9 .95 .99];
+        for i=NEns+1:NEns+length(Connections.EnsemblePVals)
+            p=round((1-Connections.EnsemblePVals(i-NEns))*100);
+            Handles.EnsButtonHandles(i)=uicontrol(...
+                Handles.EnsButtonHandlesGroup,...
+                'Style','Radiobutton',...
+                'String',sprintf('P%d',p),...
+                'Units','normalized',...
+                'FontSize',FontSizes(2),...
+                'Position', [.1 .875-dy*i .9 dy],...
+                'Enable','off',...
+                'Tag','EnsembleMemberRadioButton');
+            Connections.EnsemblePValNames{i}=sprintf('P%d',p);
+        end
+    
     set(Handles.MainFigure,'UserData',Handles);
     SetUIStatusMessage('* Done.\n')
 
@@ -3544,9 +3657,15 @@ function Handles=SetSnapshotControls(varargin)
         if ishandle(Handles.ScalarSnapshotButtonHandlePanel)
             delete(Handles.ScalarSnapshotButtonHandlePanel);
         end
-        Handles=rmfield(Handles,'ScalarSnapshotButtonHandle');
-        Handles=rmfield(Handles,'ScalarSnapshotButtonHandlePanel');
-        Handles=rmfield(Handles,'ScalarSnapshotSliderHandle');
+        if isfield(Handles,'ScalarSnapshotButtonHandle')
+            Handles=rmfield(Handles,'ScalarSnapshotButtonHandle');
+        end
+        if isfield(Handles,'ScalarSnapshotButtonHandlePanel')
+            Handles=rmfield(Handles,'ScalarSnapshotButtonHandlePanel');
+        end
+        if isfield(Handles,'ScalarSnapshotSliderHandle')
+            Handles=rmfield(Handles,'ScalarSnapshotSliderHandle');
+        end
     end
     
     if ~any(a) || ~ThreeDvarsattached
@@ -4866,7 +4985,11 @@ function SetTitle(Connections)
         %t=datenum(t,DateStringFormat);
     
     end
-        
+    
+    EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
+    ScalarVariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
+    %VectorVariableClicked=get(get(Handles.VectorVarButtonHandlesGroup,'SelectedObject'),'string');
+    
 %    LowerString=datestr((datenum(currentdate,'yymmdd')+...
 %        (NowcastForecastOffset)/24+LocalTimeOffset/24),'ddd, dd mmm, HH PM');
     LowerString=datestr(t,DateStringFormat);

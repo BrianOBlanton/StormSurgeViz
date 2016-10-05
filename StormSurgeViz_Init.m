@@ -148,8 +148,8 @@ switch lower(SSVizOpts.Mode)
         SSVizOpts.Mode='Network';
         fprintf('SSViz++ Mode is Network.\n')
         
-        SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
-
+        %SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
+        SSVizOpts.DefaultBoundingBox=[-93.09       -60.09       17.433       41.433];
 end
 
 if isempty(SSVizOpts.BoundingBox),SSVizOpts.BoundingBox=SSVizOpts.DefaultBoundingBox;end

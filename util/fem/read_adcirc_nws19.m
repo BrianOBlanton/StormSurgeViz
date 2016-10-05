@@ -1,6 +1,6 @@
 function storm=read_adcirc_nws19(f22name)
 
-fmtstr='%s%d%s%s%s%d%s%s%d%d%s%d%s%d%d%d%d%d%s%d%s%s%s%s%s%d%d%s%s%d%d%d%d%d%s%s%s%s%s';
+fmtstr='%s%d%s%s%s%d%s%s%d%d%s%d%s%d%d%d%d%d%s%d%s%s%s%s%s%d%d%s%s%d%d%d%d%d%s%s%s%s%s%*[^\n]';
 
 [storm.basin,...
 storm.cy,...
