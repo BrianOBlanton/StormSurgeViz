@@ -1302,7 +1302,9 @@ function SetNewField(varargin)
                 set(Handles.Storm_Track,'Color',[1 1 1]*.6,'LineWidth',2)
             end
         end
-        Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
+        if isfield(Connections,'AtcfShape')
+            Handles.AtcfTrack=PlotAtcfShapefile(Connections.AtcfShape);
+        end
     end
     
     % if this is a time-dependent var, enable snapshot controls
@@ -3414,8 +3416,13 @@ function Handles=SetEnsembleControls(varargin)
             set(Handles.EnsButtonHandles(i),'Enable','on');
     end
     
-    % set active member to nhcConsensus
+    % set active member to nhcConsensus.   
+    % if there is nothing named nhcConsensus, set to first.
     idx=strcmp(EnsembleNames,'nhcConsensus');
+    if ~any(idx)
+        idx=1;
+    end
+  
     Handles.EnsButtonHandles(idx).Value=1;
 
     % set pval buttons
