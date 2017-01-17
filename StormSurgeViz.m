@@ -269,9 +269,12 @@ if isfield(Connections,'members')
 end
 
 %% Process ensemble probabilities
+ComputeExceedence=false;
+if ComputeExceedence
 NEns=length(Connections.EnsembleNames);
 if isfield(Connections,'EnsemblePVals') && NEns>3
     Connections=ProcessEnsemble(Connections);
+end
 end
 
 %% MakeTheAxesMap
