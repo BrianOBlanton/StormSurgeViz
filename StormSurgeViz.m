@@ -4522,18 +4522,17 @@ function FindHydrograph(hObj,~)
     EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
     
-    HyAvail=false;
-        if ismember('Water Level',Connections.VariableNames)
-            HyAvail=true;
-        end
-    if ~HyAvail
+    HydrographsAvail=false;
+    if ismember('Water Level',Connections.VariableNames)
+        HydrographsAvail=true;
+    end
+    if ~HydrographsAvail
         SetUIStatusMessage('No hydrographs for this solution.');
         return
     end
     
     fac=getappdata(Handles.MainFigure,'UnitsScaleFactor');
-            
-    
+           
     % make sure there is a trisurf obj to attach the callback to
     if ~isfield(Handles,'TriSurf')
         SetUIStatusMessage('No TriSurf Object found. Draw a surface first.')
@@ -4576,10 +4575,18 @@ function FindHydrograph(hObj,~)
         TheGrid=TheGrids{1};
         
         Vizfs=getappdata(Handles.MainFigure,'FontSizes');
-        LinestyleList={'-','--','-','-','-','-','-','-','-',':','-','-p','-.','-.','-.'};
-        MarkerList   ={'none','none','*','d','o','s','>','<','v','none','+','p','*','o','d'}; 
-        LineWidth=2;
+%        LinestyleList={'-','--','-','-','-','-','-','-','-',':','-','-p','-.','-.','-.'};
+%        MarkerList   ={'none','none','*','d','o','s','>','<','v','none','+','p','*','o','d'}; 
+        Colors=jet(7);
+        Colors=Colors([6 1 5 4 3 7 2],:);
+        LinestyleList={'-','--',':'};
+        MarkerList   ={'none','*','o'}; 
+        % line property ordering
+        pp=combvec(1:length(Colors),1:length(LinestyleList),1:length(MarkerList));
+        LineWidth=1.5;
         MarkerSize=6;
+        SpawnNewHydrographFigures=true;
+        
         
         EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
         VariableClicked=get(get(Handles.ScalarVarButtonHandlesGroup,'SelectedObject'),'string');
@@ -4666,58 +4673,62 @@ function FindHydrograph(hObj,~)
             text(xx+dx,yy-dy,2,num2str(NodeNumber),'Color','k','Tag','HydrographText','FontWeight','bold','Clipping','on')
             xwin=.35;ywin=.07;
             titlename=titlenamebase;
-            figurename=['Hydrograph of ',titlenamebase];
+            figurename=['Water level time series @ ' sprintf('%d',NodeNumber) ]; %  of ',titlenamebase];
             SetUIStatusMessage(['\nDrawing hydrograph at ( ',num2str(xx,'% 10.2f'),', ',num2str(yy,'% 10.2f'),' ), Node: ',num2str(NodeNumber,'%10d')])
             
-            if isempty(findobj(0,'Tag','HydrographFigure'))
+            if isempty(findobj(0,'Tag','HydrographFigure')) || SpawnNewHydrographFigures
                 HyFig=figure('Units','normalized',...
-                    'OuterPosition',[xwin ywin .65 .3],...
-                    'Tag','HydrographFigure',...
-                    'NumberTitle','off',...
-                    'Name',figurename,...
-                    'Resize','on');
-                %set(HyFig,'CloseRequestFcn',@deletemarkatclose)
-                HyAxes=axes('units','normalized','position',[0.1 0.2 0.75 0.65],'fontsize',Vizfs(4),'Tag','HydrographAxes');
+                             'OuterPosition',[xwin ywin .65 .3],...
+                             'Tag','HydrographFigure',...
+                             'NumberTitle','off',...
+                             'Name',figurename,...
+                             'Resize','on');
+                set(HyFig,'CloseRequestFcn',@deletemarkatclose)
+                HyAxes=axes('units','normalized','position',[0.1 0.2 0.75 0.65],'fontsize',Vizfs(3),'Tag','HydrographAxes');
                 box on
             else
                 HyFig=findobj(0,'Tag','HydrographFigure');
+                
                 figure(HyFig)
                 HyAxes=findobj(HyFig,'Tag','HydrographAxes');
             end
             
             t=TimeseriesData.t+LocalTimeOffset/24;
             y=TimeseriesData.q;
-            corder=get(HyAxes,'ColorOrder');
-            c=corder(1,:);
             h=NaN*ones([size(xx,2) 1]);
             for ii=1:size(y,2)
-                h(ii)=line(t,y(:,ii),'LineStyle',LinestyleList{ii},'Marker',MarkerList{ii},'markersize',MarkerSize,'linewidth',LineWidth,'Color',c);
+                color=Colors(pp(1,ii),:);
+                marker=MarkerList{pp(2,ii)};
+                linestyle=LinestyleList{pp(3,ii)};
+                h(ii)=line(t,y(:,ii),'LineStyle',linestyle,'Marker',marker,'markersize',MarkerSize,'linewidth',LineWidth,'Color',color);
             end
-            corder=circshift(corder,-1);
-            set(HyAxes,'ColorOrder',corder);
             
             axis tight
             grid on
             datetick('x','mm/dd HH:MM','keepticks','keeplimits')
-            title(titlename,'fontweight','bold','fontsize',Vizfs(3))
+            title(sprintf('Water level at %d',NodeNumber),'fontweight','bold','fontsize',Vizfs(2))
             Units=Connections.members{1,VarIndexTimeDep}.Units;
             
             ylabel(Units)
             
-            [~,objh,~,~]=legend(h,Connections.EnsembleNames);
-            set(objh,'color','k')
+            [~,objh,~,~]=legend(h,Connections.EnsembleNames,'Location','northwest');
+            %set(objh,'color','k')
             idx=strcmp(get(objh,'type'),'text');
             set(objh(idx),'FontWeight','bold','FontSize',Vizfs(4))
             
-            linecount=length(findobj(HyAxes,'Type','line'))/length(Connections.EnsembleNames)+1;
-            text('units','normalized','position',[1.05 1-0.1*linecount],...
-                'FontSize',10,'backgroundcolor','w','Color',c,...
-                'String',sprintf('Node: %d',NodeNumber),'fontsize',Vizfs(4),...
-                'FontWeight','bold','EdgeColor',c)
+%             linecount=length(findobj(HyAxes,'Type','line'))/length(Connections.EnsembleNames)+1;
+%             text('units','normalized',...
+%                  'position',[1.05 1-0.1*linecount],...
+%                  'FontSize',10,...
+%                  'backgroundcolor','w',...
+%                  'Color',c,...
+%                  'String',sprintf('Node: %d',NodeNumber),...
+%                  'fontsize',Vizfs(4),...
+%                  'FontWeight','bold','EdgeColor',c)
         end
         dt=toc;
         SetUIStatusMessage(sprintf('\nTook %.1f secs.  Click on another location or enter another node number ...\n',dt))
-        axes(cax)
+        %axes(cax)
     end
 
     function deletemarkatclose(~,~) %#ok<DEFNU>
