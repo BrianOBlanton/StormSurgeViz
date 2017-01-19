@@ -3709,7 +3709,13 @@ function Handles=SetSnapshotControls(varargin)
                
         % base the times on the variables selected in the UI. 
         
-        time=Connections.members{EnsIndex,b(iThreeDvar)}.NcTBHandle.geovariable('time');
+        try
+            time=Connections.members{EnsIndex,b(iThreeDvar)}.NcTBHandle.geovariable('time');
+        catch ME
+            msg=sprintf('Time variable in %s not correctly defined. The simulation may not be finished.  This is terminal. \n');
+            SetUIStatusMessage(msg)
+            throw(ME)
+        end
         basedate=time.attribute('base_date');
         if isempty(basedate)
             s=time.attribute('units');

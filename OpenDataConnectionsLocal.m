@@ -145,24 +145,24 @@ function Connections=OpenDataConnectionsLocal(Url)
         end
         
         % attach extra stuff if available.
-        f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
-        Connections.Tracks{i}='';
-        try
-            msg='* Connecting to fort.22 file\n';
-            %fprintf(msg);
-            SetUIStatusMessage(msg);
-            
-            urlwrite(f22url,[TempDataLocation '/fort.22']);
-            temp=read_adcirc_nws19([TempDataLocation '/fort.22']);
-            Connections.Tracks{i}=temp;
-            if DeleteTempFiles
-                delete([TempDataLocation '/fort.22']) %#ok<UNRCH>
-            end
-        catch ME
-            msg='* Could not open remote fort.22 file. \n';
-            %fprintf(msg);
-            SetUIStatusMessage(msg);
-        end
+%         f22url=[Url.FullFileServer '/' Url.Ens{i} '/fort.22'];
+%         Connections.Tracks{i}='';
+%         try
+%             msg='* Connecting to fort.22 file\n';
+%             %fprintf(msg);
+%             SetUIStatusMessage(msg);
+%             
+%             urlwrite(f22url,[TempDataLocation '/fort.22']);
+%             temp=read_adcirc_nws19([TempDataLocation '/fort.22']);
+%             Connections.Tracks{i}=temp;
+%             if DeleteTempFiles
+%                 delete([TempDataLocation '/fort.22']) %#ok<UNRCH>
+%             end
+%         catch ME
+%             msg='* Could not open remote fort.22 file. \n';
+%             %fprintf(msg);
+%             SetUIStatusMessage(msg);
+%         end
         msg=sprintf('* Successfully retrieved %s file links ...\n',Url.Ens{i});
         %fprintf(msg);
         SetUIStatusMessage(msg);
