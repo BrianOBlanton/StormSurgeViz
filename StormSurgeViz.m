@@ -1747,7 +1747,7 @@ Vecs='on';
 
 %LeftEdge=.01;
 
-colormaps={'noaa_cmap','jet','hsv','hot','cool','gray','parula'};
+colormaps={'RdYlBu','noaa_cmap','jet','hsv','hot','cool','gray','parula'};
 cmapidx=find(strcmp(ColorMap,colormaps));
 
 % normalized positions of container panels depend on ForkAxes
