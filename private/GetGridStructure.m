@@ -2,6 +2,8 @@
 %%% GetGridStructure
 %%% GetGridStructure
 function TheGrid=GetGridStructure(Member,id)
+%  TheGrid=GetGridStructure(Member,id)
+
 
     global Debug
     if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
