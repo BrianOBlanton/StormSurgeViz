@@ -658,7 +658,7 @@ function GetDataObject(EnsIndex,VarIndex,TimIndex)
           if ~isempty(vv)
               FillVal=hh.attribute(vv);
               idx=temp<=FillVal;
-              temp(idx)=NaN;
+              temp(~idx)=NaN;
           end
           
           % this adds the v-component to a vector field, for which v will

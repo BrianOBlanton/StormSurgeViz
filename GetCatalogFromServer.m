@@ -1,9 +1,9 @@
 function TheCatalog=GetCatalogFromServer(UrlBase,CatalogEntryPoint,CatalogName,TempDataLocation)
 
 % catalog=GetCatalogFromServer(url)
-% catalog=GetCatalogFromServer('http://opendap.renci.org:1935/thredds/')
+% catalog=GetCatalogFromServer('http://tds.renci.org:8080/thredds/')
 
-if ~exist('UrlBase','var'),UrlBase='http://opendap.renci.org:1935/thredds/';end
+if ~exist('UrlBase','var'),UrlBase='http://tds.renci.org:8080/thredds/';end
 if ~exist('CatalogName','var'),CatalogName='catalog.tree';end
 
 catUrl=[UrlBase '/fileServer/' CatalogEntryPoint '/' CatalogName];
