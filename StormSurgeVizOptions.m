@@ -44,8 +44,8 @@ p.DepthContours='0 10 50 100 500 1000 3000';  % depths must be enclosed in singl
 % color options
 p.ColorIncrement=.25;    % in whatever units
 p.NumberOfColors=32;
-p.ColorMax=5;
-p.ColorMin=NaN;
+p.ColorMax=15;
+p.ColorMin=0;
 p.ColorMap='parula';
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
 

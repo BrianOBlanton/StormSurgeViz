@@ -802,7 +802,7 @@ function Connections=OpenDataConnections(Url)
     if Url.UseShapeFiles
         if strcmp(Url.StormType,'TC')
             adv=str2double(Url.ThisAdv);
-            UrlBase='http://www.nhc.noaa.gov/gis/forecast/archive/';
+            UrlBase='https://www.nhc.noaa.gov/gis/forecast/archive/';
             yr=GetRunProperty(RunProperties,'year');
             Url.StormNumber=GetRunProperty(RunProperties,'stormnumber');
             f=sprintf('%s%s%s_5day_%03d.zip',Url.Basin,Url.StormNumber,yr,adv);
@@ -1764,7 +1764,7 @@ Vecs='on';
 
 %LeftEdge=.01;
 
-colormaps={'noaa_cmap','jet','hsv','hot','cool','gray','parula'};
+colormaps={'RdYlBu','noaa_cmap','jet','hsv','hot','cool','gray','parula'};
 cmapidx=find(strcmp(ColorMap,colormaps));
 
 % normalized positions of container panels depend on ForkAxes
