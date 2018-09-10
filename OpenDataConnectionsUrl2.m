@@ -25,8 +25,6 @@ function Connections=OpenDataConnectionsUrl2(Url)
      
     if isnan(Url.Ens{1}),Url.Ens{1}='./';end
 
-
-    
     % read the variable list, which is actually an excel spreadsheet
     % to make it easier to edit.  The first row are the variable names
     % in this function, declared above as empty cells.

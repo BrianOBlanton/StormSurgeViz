@@ -152,7 +152,7 @@ switch lower(SSVizOpts.Mode)
         Url.StormType='other';
         Url.ThisStormNumber=NaN;
         Url.FullDodsC= UrlBase;
-        Url.FullFileServer= UrlBase;
+        Url.FullFileServer= replace(UrlBase,'catalog','fileServer');
         Url.Ens={''};
         Url.CurrentSelection=NaN;
         Url.Base=UrlBase;
@@ -162,6 +162,10 @@ switch lower(SSVizOpts.Mode)
         TheCatalog.Catalog='Local';
         TheCatalog.CatalogHash=NaN;
         TheCatalog.CurrentSelection=[];
+        
+        % look for ens.txt file at endpoint
+        urlwrite([Url.FullFileServer '/ens.txt'],[TempDataLocation '/ens.txt']);
+        
 %        errordlg(str)
 %        return
         
@@ -225,7 +229,7 @@ if strcmpi(SSVizOpts.Mode,'Local')
     Connections=OpenDataConnectionsLocal(Url);
 elseif strcmpi(SSVizOpts.Mode,'Url')
     set(Handles.ServerInfoString,'String',[Url.Base Url.Ens{1}]);
-    Connections=OpenDataConnectionsUrl2(Url);
+    Connections=OpenDataConnections(Url);
 else  %  mode is "network"
     set(Handles.ServerInfoString,'String',Url.FullDodsC);
     Connections=OpenDataConnections(Url);
@@ -1551,12 +1555,12 @@ function h=DrawTrack(track,ltext)
     f=findobj(0,'Tag','MainVizAppFigure');
     Handles=get(f,'UserData');
     SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');              
-        LocalTimeOffset=SSVizOpts.LocalTimeOffset;
+    LocalTimeOffset=SSVizOpts.LocalTimeOffset;
     FontSizes=getappdata(Handles.MainFigure,'FontSizes');
 
-    %fmtstr=' mmmdd@HH PM';
+    fmtstr=' mmm dd, HH PM';
     %fmtstr=' ddd HHPM';
-    fmtstr='yyyy-mm-dd HH';
+    %fmtstr='yyyy-mm-dd HH';
     txtcol=[0 0 0]*.8;
     lincol=[1 1 1]*0;
     
@@ -1572,21 +1576,30 @@ function h=DrawTrack(track,ltext)
             'LineWidth',2,'Tag','Storm_Track','Clipping','on');
         
         h2=NaN*ones(length(lon),1);
+        
         if ltext
+            
             for i=1:length(lon)-1
                 heading=atan2((lat(i+1)-lat(i)),(lon(i+1)-lon(i)))*180/pi;
-                h2(i)=text(lon(i),lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
+                h2(i)=text(lon(i)+.2,lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
                     'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
-                    'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
+                    'HorizontalAlignment','left','VerticalAlignment','middle',...
+                    'BackgroundColor','w','EdgeColor','k'); % ,'Rotation',heading-90);
             end
             
-            h2(i+1)=text(lon(i+1),lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
+            h2(i+1)=text(lon(i+1)+.2,lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
                 'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
-                'HorizontalAlignment','left','VerticalAlignment','middle','Rotation',heading-90);
+                'HorizontalAlignment','left','VerticalAlignment','middle',...
+                'BackgroundColor','w','EdgeColor','k'); % ,'Rotation',heading-90);
+            
             h=[h1;h2(:)];
+            
         else
+            
             h=h1;
+            
         end
+        
     catch ME
 
         fprintf('Could not draw the track.\n')

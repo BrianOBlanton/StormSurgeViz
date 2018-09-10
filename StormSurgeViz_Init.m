@@ -21,7 +21,7 @@ cd(PWD)
 global SSVizOpts
 
 ThreddsList={
-             'http://opendap.renci.org:1935/thredds'   'RENCI/UNC/ASGS'
+             'http://tds.renci.org:8080/thredds'   'RENCI/UNC/ASGS'
              'http://coastalmodeldev.data.noaa.gov/thredds' 'CSDL/NOAA/ASGS'
             };
 %            'http://workhorse.europa.renci.org:8080/thredds'
@@ -149,7 +149,7 @@ switch lower(SSVizOpts.Mode)
         fprintf('SSViz++ Mode is Network.\n')
         
         %SSVizOpts.DefaultBoundingBox=[-100 -78 17 33];
-        SSVizOpts.DefaultBoundingBox=[-93.09       -60.09       17.433       41.433];
+        SSVizOpts.DefaultBoundingBox=[-93.09   -60.09   17.433   41.433];
 end
 
 if isempty(SSVizOpts.BoundingBox),SSVizOpts.BoundingBox=SSVizOpts.DefaultBoundingBox;end
