@@ -21,10 +21,12 @@ cd(PWD)
 global SSVizOpts
 
 ThreddsList={
+             'http://mrtee.europa.renci.org:8080/thredds'   'RENCI-exp/UNC/ASGS'
              'http://tds.renci.org:8080/thredds'   'RENCI/UNC/ASGS'
              'http://coastalmodeldev.data.noaa.gov/thredds' 'CSDL/NOAA/ASGS'
             };
-%            'http://workhorse.europa.renci.org:8080/thredds'
+
+        %            'http://workhorse.europa.renci.org:8080/thredds'
 %            'http://thredds.crc.nd.edu/thredds'
         
 

@@ -273,7 +273,7 @@ if isfield(Connections,'members')
 end
 
 %% Process ensemble probabilities
-ComputeExceedence=false;
+ComputeExceedence=true;
 if ComputeExceedence
     NEns=length(Connections.EnsembleNames); %#ok<UNRCH>
     if isfield(Connections,'EnsemblePVals') && NEns>3
@@ -942,6 +942,9 @@ function Connections=ProcessEnsemble(Connections)
     weights=eye(NEns)*1/NEns;
     g=TheGrids{1};
     Z=NaN*ones(length(g.x),NEns);
+   
+    ifac=find(strcmp(Connections.VariableNames,'Max Water Level'));
+    fac=Connections.VariableUnitsFac{ifac}; %#ok<FNDSB>
 
     for i=1:NEns
         h=Handles.EnsButtonHandles(i);
@@ -953,13 +956,18 @@ function Connections=ProcessEnsemble(Connections)
     Zs=sort(Z,2);
     cdff=cumsum(diag(weights));
     for i=1:np
-         Connections.members{i+NEns,1}.TheData{1}=...
+         temp=...
              interp1(cdff,Zs',Connections.EnsemblePVals(i));
-         h=Handles.EnsButtonHandles(NEns+i);
-         h.Enable='on';
+        h=Handles.EnsButtonHandles(NEns+i);
+        h.Enable='on';
         Connections.members{i+NEns,1}.FileNetcdfVariableName='zeta_max';
-        Connections.members{i+NEns,1}.GridId=1;
-        Connections.members{i+NEns,1}.Units='Meters';
+        Connections.members{i+NEns,1}.GridId=Connections.members{1,1}.GridId;
+        if strcmpi(Connections.members{1,1}.Units,'feet')
+            Connections.members{i+NEns,1}.Units='feet';
+        else
+            Connections.members{i+NEns,1}.Units='Meters';
+        end
+        Connections.members{i+NEns,1}.TheData{1}=temp*fac;
         %Connections.EnsembleNames{i+NEns}=
     end
     
@@ -1570,6 +1578,8 @@ function h=DrawTrack(track,ltext)
     lat=track.lat2(ii);
     time=track.time(ii);
     
+    axes(Handles.MainAxes);
+    
     try 
         
         h1=line(lon,lat,2*ones(size(lat)),'Marker','o','MarkerSize',6,'Color',lincol,...
@@ -1582,15 +1592,15 @@ function h=DrawTrack(track,ltext)
             for i=1:length(lon)-1
                 heading=atan2((lat(i+1)-lat(i)),(lon(i+1)-lon(i)))*180/pi;
                 h2(i)=text(lon(i)+.2,lat(i),2*ones(size(lat(i))),datestr(time(i)+LocalTimeOffset/24,fmtstr),...
-                    'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
+                    'FontSize',FontSizes(4),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
                     'HorizontalAlignment','left','VerticalAlignment','middle',...
-                    'BackgroundColor','w','EdgeColor','k'); % ,'Rotation',heading-90);
+                    'BackgroundColor','w','EdgeColor','k','Rotation',heading-90);
             end
             
             h2(i+1)=text(lon(i+1)+.2,lat(i+1),2*ones(size(lat(i+1))),datestr(time(i+1)+LocalTimeOffset/24,fmtstr),...
-                'FontSize',FontSizes(2),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
+                'FontSize',FontSizes(4),'FontWeight','bold','Color',txtcol,'Tag','Storm_Track','Clipping','on',...
                 'HorizontalAlignment','left','VerticalAlignment','middle',...
-                'BackgroundColor','w','EdgeColor','k'); % ,'Rotation',heading-90);
+                'BackgroundColor','w','EdgeColor','k','Rotation',heading-90);
             
             h=[h1;h2(:)];
             
@@ -3178,14 +3188,14 @@ function UpdateUI(varargin)
     EnsIndex=find(strcmp(EnsembleClicked,EnsembleNames)); 
     
     if ~isempty(EnsIndex)
-    if isfield(Handles,'ScalarVarButtonHandles')
-    for i=1:length(Handles.ScalarVarButtonHandles)
-        if ~isfield(Connections.members{EnsIndex,Scalars(i)},'NcTBHandle') || ... 
-                isempty(Connections.members{EnsIndex,Scalars(i)}.NcTBHandle)
-            set(Handles.ScalarVarButtonHandles(i),'Enable','off')
+        if isfield(Handles,'ScalarVarButtonHandles')
+            for i=1:length(Handles.ScalarVarButtonHandles)
+                if ~isfield(Connections.members{EnsIndex,Scalars(i)},'NcTBHandle') || ...
+                        isempty(Connections.members{EnsIndex,Scalars(i)}.NcTBHandle)
+                    set(Handles.ScalarVarButtonHandles(i),'Enable','off')
+                end
+            end
         end
-    end
-    end
     end
 %     for i=1:length(Handles.ScalarVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Scalars(i)}.NcTBHandle)
@@ -3194,15 +3204,15 @@ function UpdateUI(varargin)
 %         end
 %     end
     if ~isempty(EnsIndex)
-    if isfield(Handles,'VectorVarButtonHandles')
-    for i=1:length(Handles.VectorVarButtonHandles)
-        if isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle) || ... 
-                isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
-            set(Handles.VectorVarButtonHandles(i),'Enable','off')
+        if isfield(Handles,'VectorVarButtonHandles')
+            for i=1:length(Handles.VectorVarButtonHandles)
+                if isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle) || ...
+                        isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
+                    set(Handles.VectorVarButtonHandles(i),'Enable','off')
+                end
+            end
         end
     end
-    end
-    end    
 %     for i=1:length(Handles.VectorVarButtonHandles)
 %         if ~isempty(Connections.members{EnsIndex,Vectors(i)}.NcTBHandle)
 %             set(Handles.VectorVarButtonHandles(i),'Value',1)
@@ -3288,7 +3298,7 @@ function UpdateUI(varargin)
             set(Handles.ShowTrackButton,'String','No Track to Show')
             set(Handles.ShowTrackButton,'Enable','off')
         else
-            set(Handles.ShowTrackButton,'String','Show Track')
+            %set(Handles.ShowTrackButton,'String','Show Track')
             set(Handles.ShowTrackButton,'Enable','on')
         end
     end
@@ -3459,25 +3469,26 @@ function Handles=SetEnsembleControls(varargin)
     
     % set active member to nhcConsensus.   
     % if there is nothing named nhcConsensus, set to first.
-    idx=strcmp(EnsembleNames,'nhcConsensus');
+    %idx=strcmp(EnsembleNames,'nhcConsensus');
+    [~,idx,~]=intersect(EnsembleNames,{'nhcConsensus','nhcForecast'});
     if ~any(idx)
         idx=1;
     end
   
     Handles.EnsButtonHandles(idx).Value=1;
 
+    Connections.EnsemblePVals=[.5 .75 .9 .95 .99];
     % set pval buttons
      uicontrol(...
             'Parent',Handles.EnsButtonHandlesGroup,...
             'Style','text',...
             'Units','normalized',...
-            'Position',[.1 .3 .8 .1],...
+            'Position',[.1 .05 .8 .1],...
             'FontSize',FontSizes(2),...
             'HorizontalAlignment','left',...
             'String','Exceedence Levels:',...
             'FontWeight','bold');
         
-        Connections.EnsemblePVals=[.5 .75 .9 .95 .99];
         for i=NEns+1:NEns+length(Connections.EnsemblePVals)
             p=round((1-Connections.EnsemblePVals(i-NEns))*100);
             Handles.EnsButtonHandles(i)=uicontrol(...
@@ -3485,8 +3496,8 @@ function Handles=SetEnsembleControls(varargin)
                 'Style','Radiobutton',...
                 'String',sprintf('P%d',p),...
                 'Units','normalized',...
-                'FontSize',FontSizes(2),...
-                'Position', [.1 .875-dy*i .9 dy],...
+                'FontSize',FontSizes(4),...
+                'Position', [.01+.2*(i-NEns-1) .005 .2 .1],...
                 'Enable','off',...
                 'Tag','EnsembleMemberRadioButton');
             Connections.EnsemblePValNames{i}=sprintf('P%d',p);
