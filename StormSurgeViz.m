@@ -648,7 +648,7 @@ function DisplayCatalog(~,~)
     %%% "s" is the selection.  Split and process...    
     
     if ~isempty(s)
-        UserSelectedUrl=sprintf('%s/dodsC/ASGS/%s/%s/%s/%s/%s',...
+        UserSelectedUrl=sprintf('%s/dodsC/2019/%s/%s/%s/%s/%s',...
             Url.Base,...
             char(catalog(s).Storms),...
             char(catalog(s).Advisories),...
@@ -1133,8 +1133,8 @@ function InstanceUrl(varargin)
    Url.ThisGrid    =ThisGrid;
    Url.Basin       ='al';
    
-   Url.FullDodsC=sprintf('%s/%s/%s/%s/%s/%s/%s',Url.Base,'/dodsC/ASGS/',ThisStorm,ThisAdv,ThisGrid,ThisMachine,ThisInstance);
-   Url.FullFileServer=sprintf('%s/%s/%s/%s/%s/%s/%s',Url.Base,'/fileServer/ASGS/',ThisStorm,ThisAdv,ThisGrid,ThisMachine,ThisInstance);
+   Url.FullDodsC=sprintf('%s/%s/%s/%s/%s/%s/%s',Url.Base,'/dodsC/2019/',ThisStorm,ThisAdv,ThisGrid,ThisMachine,ThisInstance);
+   Url.FullFileServer=sprintf('%s/%s/%s/%s/%s/%s/%s',Url.Base,'/fileServer/2019/',ThisStorm,ThisAdv,ThisGrid,ThisMachine,ThisInstance);
    Url.Ens=Ensembles;
    Url.catalog=TheCatalog.Catalog;
    Url.CatalogHash=TheCatalog.CatalogHash;

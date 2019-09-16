@@ -6,8 +6,6 @@ function err=TestForCatalogServer(UrlBase,CatalogName)
 global Debug
 if Debug, fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
-
-
 err=0;
 % test getting to the server
 try 
@@ -19,7 +17,7 @@ catch ME
 end
 fprintf('SSViz++ Connected.\n')
     
-catUrl=[UrlBase '/fileServer/ASGS/' CatalogName];
+catUrl=[UrlBase '/fileServer/2019/' CatalogName];
 try
     fprintf(['SSViz++ Trying to get ' CatalogName ' from ' catUrl '\n']);
     % this is a workaround for ultimately getting a catalog from the thredds

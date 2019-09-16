@@ -2,10 +2,10 @@ function TheCatalog=GetCatalogFromServer(UrlBase,CatalogName,TempDataLocation)
 % catalog=GetCatalogFromServer(url)
 % catalog=GetCatalogFromServer('http://opendap.renci.org:1935/thredds/')
 
-if ~exist('UrlBase','var'),UrlBase='http://opendap.renci.org:1935/thredds/';end
+if ~exist('UrlBase','var'),UrlBase='http://tds.renci.org:8080/thredds/';end
 if ~exist('CatalogName','var'),CatalogName='catalog.tree';end
 
-catUrl=[UrlBase '/fileServer/ASGS/' CatalogName];
+catUrl=[UrlBase '/fileServer/2019/' CatalogName];
 try
 %    disp(['Trying to get catalog.tree from ' catUrl])
     % this is a workaround for ultimately getting a catalog from the thredds
