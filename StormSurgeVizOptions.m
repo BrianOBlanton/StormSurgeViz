@@ -46,7 +46,7 @@ p.ColorIncrement=.25;    % in whatever units
 p.NumberOfColors=32;
 p.ColorMax=15;
 p.ColorMin=0;
-p.ColorMap='parula';
+p.ColorMap='cera_cmap';
 p.ColorBarLocation={'EastOutside','SouthOutside','NorthOutside','WestOutside','North','South','East','West'};
 
 % GUI options

@@ -286,6 +286,13 @@ if isfield(Connections,'members')
     SetUIStatusMessage('Making default plot ... \n')
     Handles=MakeTheAxesMap(Handles);
     
+    temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
+    if ~isreal(temp),temp=abs(temp);end
+    [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
+    Max=min([MaxTemp SSVizOpts.ColorMax]);
+    Min=max([MinTemp SSVizOpts.ColorMin]);
+    SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+
     ThisData=Connections.members{EnsIndex,VarIndex}.TheData{1};
     Handles=DrawTriSurf(Handles,Connections.members{EnsIndex,VarIndex},ThisData);
     if isfield(Connections,'Tracks')
@@ -303,12 +310,12 @@ if isfield(Connections,'members')
     
     RendererKludge;  %% dont ask...
     
-    temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
-    if ~isreal(temp),temp=abs(temp);end
-    [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
-    Max=min([MaxTemp SSVizOpts.ColorMax]);
-    Min=max([MinTemp SSVizOpts.ColorMin]);
-    SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
+%     temp=Connections.members{EnsIndex,VarIndex}.TheData{1};
+%     if ~isreal(temp),temp=abs(temp);end
+%     [MinTemp,MaxTemp]=GetMinMaxInView(TheGrids{1},temp);
+%     Max=min([MaxTemp SSVizOpts.ColorMax]);
+%     Min=max([MinTemp SSVizOpts.ColorMin]);
+%     SetColors(Handles,Min,Max,SSVizOpts.NumberOfColors,SSVizOpts.ColorIncrement);
     
 end
 
@@ -1774,7 +1781,7 @@ Vecs='on';
 
 %LeftEdge=.01;
 
-colormaps={'RdYlBu','noaa_cmap','jet','hsv','hot','cool','gray','parula'};
+colormaps={'cera_cmap','RdYlBu','noaa_cmap','jet','hsv','hot','cool','gray','parula'};
 cmapidx=find(strcmp(ColorMap,colormaps));
 
 % normalized positions of container panels depend on ForkAxes
@@ -1819,7 +1826,6 @@ else
         'Name',AppName,...
         'Resize','off');
     
-
     Handles.MainFigureSub=figure(...  % this contains the drawing axes if forked
         'Units','normalized',...
         'Color',panelColor,...
