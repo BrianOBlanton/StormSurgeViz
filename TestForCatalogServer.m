@@ -17,7 +17,7 @@ catch ME
 end
 fprintf('SSViz++ Connected.\n')
     
-catUrl=[UrlBase '/fileServer/2019/' CatalogName];
+catUrl=[UrlBase '/fileServer/2020/' CatalogName];
 try
     fprintf(['SSViz++ Trying to get ' CatalogName ' from ' catUrl '\n']);
     % this is a workaround for ultimately getting a catalog from the thredds

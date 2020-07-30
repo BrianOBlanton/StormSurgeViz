@@ -85,8 +85,8 @@ if str2double(currentAdv)<1000
 else  %  otherwise it will be the nam date...
     Url.StormType='other';
 end
-Url.FullDodsC=[UrlBase '/dodsC/2019/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
-Url.FullFileServer=[UrlBase '/fileServer/2019/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+Url.FullDodsC=[UrlBase '/dodsC/2020/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+Url.FullFileServer=[UrlBase '/fileServer/2020/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
 Url.Ens=TheseEnsembles;
 Url.CurrentSelection=CurrentSelection;
 % Url.catalog=TheCatalog.Catalog;
