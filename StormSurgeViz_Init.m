@@ -11,10 +11,11 @@ if isempty(which('ncgeodataset')) || isempty(javaclasspath('-dynamic'))
     setup_nctoolbox;
 end
 
-if isempty(which('detbndy'))
-    cd([HOME '/util'])
-    ssvinit
+lp={'mex','basics','fem'};
+for i=1:length(lp)
+       addpath(fullfile([HOME '/util'], lp{i})); 
 end
+
 
 cd(PWD)
 
