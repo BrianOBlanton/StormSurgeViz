@@ -22,13 +22,15 @@ cd(PWD)
 global SSVizOpts
 
 ThreddsList={
-             'http://tds.renci.org:8080/thredds'   'RENCI/UNC/ASGS'
-             'http://coastalmodeldev.data.noaa.gov/thredds' 'CSDL/NOAA/ASGS'
+             'http://tds.renci.org:8080/thredds'   'RENCI'
+             'http://adcircvis.tacc.utexas.edu:8080/thredds'  'TACC'
+             'https://fortytwo.cct.lsu.edu/thredds/' 'LSU' 
             };
 
-             %'http://mrtee.europa.renci.org:8080/thredds'   'RENCI-exp/UNC/ASGS'
-        %            'http://workhorse.europa.renci.org:8080/thredds'
-%            'http://thredds.crc.nd.edu/thredds'
+% 'http://coastalmodeldev.data.noaa.gov/thredds' 'CSDL/NOAA/ASGS'
+% 'http://mrtee.europa.renci.org:8080/thredds'   'RENCI-exp/UNC/ASGS'
+% 'http://workhorse.europa.renci.org:8080/thredds'
+% 'http://thredds.crc.nd.edu/thredds'
         
 
 %if ~exist('varargin','var')
@@ -77,7 +79,19 @@ SSVizOpts.ThreddsServerProvider='Unknown';
 if isempty(SSVizOpts.ThreddsServer)
     SSVizOpts.ThreddsServer=ThreddsList{1,1};
     SSVizOpts.ThreddsServerProvider=ThreddsList{1,2};
+else
+   idx=strmatch(SSVizOpts.ThreddsServer,ThreddsList(:,2));
+   if isempty(idx)
+       fprintf('SSViz++ %s\n','Input TDS not found in ThreddsList.  Setting to RENCI...')
+       SSVizOpts.ThreddsServer=ThreddsList{1,1};
+       SSVizOpts.ThreddsServerProvider=ThreddsList{1,2};
+   else
+       SSVizOpts.ThreddsServer=ThreddsList{idx,1};
+       SSVizOpts.ThreddsServerProvider=ThreddsList{idx,2};
+       
+   end
 end
+fprintf('SSViz++ Thredds Data Server set to  %s\n',SSVizOpts.ThreddsServer)
 
 %scc=get(0,'ScreenSize');
 %DisplayWidth=scc(3);
