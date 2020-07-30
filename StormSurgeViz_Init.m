@@ -32,6 +32,10 @@ ThreddsList={
 % 'http://workhorse.europa.renci.org:8080/thredds'
 % 'http://thredds.crc.nd.edu/thredds'
         
+%             http://tds.renci.org:8080/thredds/catalog/2020/catalog.html
+%          https://fortytwo.cct.lsu.edu/thredds/catalog/2020/catalog.html
+% http://adcircvis.tacc.utexas.edu:8080/thredds/catalog/asgs/2020/catalog.html
+
 
 %if ~exist('varargin','var')
 %    error([mfilename ' cannot be called directly. Call StormSurgeViz instead.'])
@@ -86,8 +90,15 @@ else
        SSVizOpts.ThreddsServer=ThreddsList{1,1};
        SSVizOpts.ThreddsServerProvider=ThreddsList{1,2};
    else
-       SSVizOpts.ThreddsServer=ThreddsList{idx,1};
-       SSVizOpts.ThreddsServerProvider=ThreddsList{idx,2};
+       if strmatch(SSVizOpts.ThreddsServer,'TACC')
+           temp=ThreddsList{idx,1};
+           SSVizOpts.ThreddsServer=temp;
+           SSVizOpts.ThreddsServerProvider=ThreddsList{idx,2};
+
+       else
+           SSVizOpts.ThreddsServer=ThreddsList{idx,1};
+           SSVizOpts.ThreddsServerProvider=ThreddsList{idx,2};
+       end
        
    end
 end

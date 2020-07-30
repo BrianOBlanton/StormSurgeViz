@@ -15,9 +15,14 @@ catch ME
     fprintf('\n\nSSViz++** Could not reach OpenDAP server %s.\n\n',UrlBase)
     throw(ME);
 end
-fprintf('SSViz++ Connected.\n')
+fprintf('SSViz++ Connected to %s\n',UrlBase)
     
-catUrl=[UrlBase '/fileServer/2020/' CatalogName];
+if  regexp(UrlBase,'tacc')
+    catUrl=[UrlBase '/fileServer/asgs/2020/' CatalogName];
+else
+    catUrl=[UrlBase '/fileServer/2020/' CatalogName];
+end
+
 try
     fprintf(['SSViz++ Trying to get ' CatalogName ' from ' catUrl '\n']);
     % this is a workaround for ultimately getting a catalog from the thredds

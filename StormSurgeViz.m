@@ -773,6 +773,7 @@ function Connections=OpenDataConnections(Url)
     
     % get run.properties file from first ens.
     i=1;
+
     TopTextUrl= [Url.FullFileServer '/' Url.Ens{i}];
     RPurl=[TopTextUrl '/run.properties'];
     RPlocation=[TempDataLocation '/run.properties'];
@@ -916,7 +917,9 @@ function Connections=OpenDataConnections(Url)
                 end
             catch ME
                 SetUIStatusMessage(sprintf('***** Could not open %s connection. *****\n',ThisVariable))
-                if ii==1,throw(ME);end
+                if ii==1
+                    throw(ME)
+                end
             end
             
             storm(ii).NcTBHandle=ttemp;
@@ -938,9 +941,11 @@ function Connections=OpenDataConnections(Url)
                 end
                 
                 if (length(MandN)>1  && ~any(MandN==1))
-                    m=MandN(2);n=MandN(1);
+                    m=MandN(2);
+                    n=MandN(1);
                 else
-                    m=max(MandN);n=1;
+                    m=max(MandN);
+                    n=1;
                 end
                 storm(ii).NNodes=m;
                 storm(ii).NTimes=n;
