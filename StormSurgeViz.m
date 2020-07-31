@@ -1402,11 +1402,12 @@ end
 function SetBaseMap(~,~,~)
 
     global Debug
-   if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
     FigThatCalledThisFxn=gcbf;
     Handles=get(FigThatCalledThisFxn,'UserData');
-    GoogleMapsApiKey=getappdata(Handles.MainFigure,'GoogleMapsApiKey');
+    SSVizOpts=getappdata(Handles.MainFigure,'SSVizOpts');
+    GoogleMapsApiKey=SSVizOpts.GoogleMapsApiKey;
     %EnsembleClicked=get(get(Handles.EnsButtonHandlesGroup,'SelectedObject'),'string');
     MapTypeClicked=get(get(Handles.BaseMapButtonGroup,'SelectedObject'),'string');
     
@@ -1425,7 +1426,7 @@ end
 function DrawDepthContours(hObj,~)
     
     global TheGrids Debug
-   if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
+    if Debug,fprintf('SSViz++ Function = %s\n',ThisFunctionName);end
 
     TheGrid=TheGrids{1};
 
