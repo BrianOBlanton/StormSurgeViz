@@ -18,9 +18,9 @@ end
 fprintf('SSViz++ Connected to %s\n',UrlBase)
     
 if  regexp(UrlBase,'tacc')
-    catUrl=[UrlBase '/fileServer/asgs/2020/' CatalogName];
+    catUrl=[UrlBase '/fileServer/asgs/2021/' CatalogName];
 else
-    catUrl=[UrlBase '/fileServer/2020/' CatalogName];
+    catUrl=[UrlBase '/fileServer/2021/' CatalogName];
 end
 
 try

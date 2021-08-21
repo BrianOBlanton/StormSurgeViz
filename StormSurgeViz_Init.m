@@ -32,9 +32,9 @@ ThreddsList={
 % 'http://workhorse.europa.renci.org:8080/thredds'
 % 'http://thredds.crc.nd.edu/thredds'
         
-%             http://tds.renci.org:8080/thredds/catalog/2020/catalog.html
-%          https://fortytwo.cct.lsu.edu/thredds/catalog/2020/catalog.html
-% http://adcircvis.tacc.utexas.edu:8080/thredds/catalog/asgs/2020/catalog.html
+%             http://tds.renci.org:8080/thredds/catalog/2021/catalog.html
+%          https://fortytwo.cct.lsu.edu/thredds/catalog/2021/catalog.html
+% http://adcircvis.tacc.utexas.edu:8080/thredds/catalog/asgs/2021/catalog.html
 
 
 %if ~exist('varargin','var')

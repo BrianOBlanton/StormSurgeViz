@@ -39,10 +39,9 @@ else
     idxGrids=strcmp(Grids,ThisGrid);
     idxMachines=strcmp(Machines,ThisMachine); %#ok<*NODEF>
     idxInstances=strcmp(Instances,ThisInstance); %#ok<*NODEF>
+    idxAll=sum([idxStorms idxAdvisories idxGrids idxMachines idxInstances]')==sum(N);
 
-    idxAll=sum([idxStorms idxAdvisories idxGrids idxMachines idxInstances ]')==sum(N);
-
-    idxAny=any([idxStorms idxAdvisories idxGrids idxMachines idxInstances ]');
+    idxAny=any([idxStorms idxAdvisories idxGrids idxMachines idxInstances]');
 
     if any(idxAll)
         % select most recent from those that satisty all of the
@@ -65,7 +64,9 @@ else
 end
 
 % parse out ensemble member names
-idx=strcmp(Storms,currentStorm) & strcmp(Advisories,currentAdv) & strcmp(Grids,currentGrid) & strcmp(Machines,currentMachine) & strcmp(Instances,currentInstance);
+idx=strcmp(Storms,currentStorm) & strcmp(Advisories,currentAdv) & ...
+    strcmp(Grids,currentGrid) & strcmp(Machines,currentMachine) & ...
+    strcmp(Instances,currentInstance) & ~strcmp(Ensembles,'nowcast');
 TheseEnsembles=Ensembles(idx);
 
 % set default url and other things
@@ -88,11 +89,11 @@ end
 
 
 if regexp(UrlBase,'tacc')
-    Url.FullDodsC=[UrlBase '/dodsC/asgs/2020/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
-    Url.FullFileServer=[UrlBase '/fileServer/asgs/2020/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+    Url.FullDodsC=[UrlBase '/dodsC/asgs/2021/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+    Url.FullFileServer=[UrlBase '/fileServer/asgs/2021/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
 else
-    Url.FullDodsC=[UrlBase '/dodsC/2020/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
-    Url.FullFileServer=[UrlBase '/fileServer/2020/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+    Url.FullDodsC=[UrlBase '/dodsC/2021/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
+    Url.FullFileServer=[UrlBase '/fileServer/2021/' currentStorm '/' currentAdv '/' currentGrid '/' currentMachine '/' currentInstance];
 end
 Url.Ens=TheseEnsembles;
 Url.CurrentSelection=CurrentSelection;

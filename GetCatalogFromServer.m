@@ -6,9 +6,9 @@ if ~exist('UrlBase','var'),UrlBase='http://tds.renci.org:8080/thredds/';end
 if ~exist('CatalogName','var'),CatalogName='catalog.tree';end
 
 if  regexp(UrlBase,'tacc')
-    catUrl=[UrlBase '/fileServer/asgs/2020/' CatalogName];
+    catUrl=[UrlBase '/fileServer/asgs/2021/' CatalogName];
 else
-    catUrl=[UrlBase '/fileServer/2020/' CatalogName];
+    catUrl=[UrlBase '/fileServer/2021/' CatalogName];
 end
 
 try
@@ -89,6 +89,11 @@ for i=1:nLines
 end
 end
 catalog=cell2struct(data,fields,2);
+
+% eliminate nowcasts
+idx=strcmp([catalog.Ensembles],'nowcast');
+catalog=catalog(~idx);
+
 CatalogHash=DataHash(catalog);
 
 TheCatalog=struct;

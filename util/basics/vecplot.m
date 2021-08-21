@@ -103,39 +103,39 @@ MsgHandle=[];
 % Strip off propertyname/value pairs in varargin not related to
 % "line" object properties.
 k=1;
-while k<length(varargin),
-  switch lower(varargin{k}),
-    case 'maxthresh',
+while k<length(varargin)
+  switch lower(varargin{k})
+    case 'maxthresh'
       MaxThresh=varargin{k+1};
       varargin([k k+1])=[];
-    case 'minthresh',
+    case 'minthresh'
       MinThresh=varargin{k+1};
       varargin([k k+1])=[];
-    case 'stride',
+    case 'stride'
       Stride=varargin{k+1};
       varargin([k k+1])=[];
-    case 'scaletype',
+    case 'scaletype'
       ScaleType=varargin{k+1};
       varargin([k k+1])=[];
-    case 'scalexor',
+    case 'scalexor'
       ScaleXor=varargin{k+1};
       varargin([k k+1])=[];
-    case 'scaleyor',
+    case 'scaleyor'
       ScaleYor=varargin{k+1};
       varargin([k k+1])=[];
-    case 'scalelabel',
+    case 'scalelabel'
       ScaleLabel=varargin{k+1};
       varargin([k k+1])=[];
-    case 'scalefac',
+    case 'scalefac'
       ScaleFac=varargin{k+1};
       varargin([k k+1])=[];
-    case 'pctaxis',
+    case 'pctaxis'
       PctAxis=varargin{k+1};
       varargin([k k+1])=[];
-    case 'msghandle',
+    case 'msghandle'
       MsgHandle=varargin{k+1};
       varargin([k k+1])=[];
-    case 'vectype',
+    case 'vectype'
       VecType=lower(varargin{k+1});
       if strcmp(VecType,{'arrow','stick'})
          error('Invalid VecType to VECPLOT.')
@@ -143,8 +143,8 @@ while k<length(varargin),
       varargin([k k+1])=[];
     otherwise
       k=k+2;
-  end;
-end;
+  end
+end
 
 if length(varargin)<2
    varargin={};
@@ -183,7 +183,6 @@ if(xr==0||yr==0)
    error('Axes must have been previously set for VECPLOT to work');
 end
 pct10=(PctAxis/100)*xr;   
-
 
 % determine striding, if needed
 [m,n]=size(xin);
@@ -258,13 +257,13 @@ switch VecType
    case 'arrow'
       %Strip out attributes not used in arrow mode.
       k=1;
-      while k<length(varargin),
-	 switch lower(varargin{k}),
-	    case 'dotcolor',
+      while k<length(varargin)
+	 switch lower(varargin{k})
+	    case 'dotcolor'
 	      varargin([k k+1])=[];
-	    case 'dotsize',
+	    case 'dotsize'
 	       varargin([k k+1])=[];
-	    case 'dotstyle',
+	    case 'dotstyle'
 	       varargin([k k+1])=[];
 	    otherwise
 	       k=k+2;
